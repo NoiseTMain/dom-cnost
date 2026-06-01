@@ -201,10 +201,8 @@
 </head>
 <body>
 
-<!-- Toast -->
 <div id="toast" class="toast"></div>
 
-<!-- Auth Screen -->
 <div id="auth-screen">
   <div class="auth-bg">
     <div class="auth-orb orb1"></div>
@@ -224,7 +222,6 @@
       <button onclick="switchAuthTab('register')" id="tab-register" class="btn-ghost" style="flex:1;padding:10px;border-radius:10px;font-size:14px;">Registrace</button>
     </div>
 
-    <!-- Login Form -->
     <div id="form-login">
       <div style="display:flex;flex-direction:column;gap:14px;">
         <div>
@@ -244,7 +241,6 @@
       </div>
     </div>
 
-    <!-- Register Form -->
     <div id="form-register" style="display:none;">
       <div style="display:flex;flex-direction:column;gap:14px;">
         <div>
@@ -265,7 +261,6 @@
       </div>
     </div>
 
-    <!-- Reset Form -->
     <div id="form-reset" style="display:none;">
       <div style="display:flex;flex-direction:column;gap:14px;">
         <p style="color:#888;font-size:14px;text-align:center;">Zadejte e-mail pro obnovu hesla.</p>
@@ -281,12 +276,9 @@
   </div>
 </div>
 
-<!-- Main App -->
 <div id="app" style="display:none;">
-  <!-- Main Content -->
   <div id="main-content">
 
-    <!-- DASHBOARD PAGE -->
     <div id="page-dashboard" class="page active">
       <div class="header-bar">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -304,7 +296,6 @@
         </div>
       </div>
 
-      <!-- Balance Card -->
       <div style="background:linear-gradient(135deg,#1a1500,#2a2000,#1a1500);border:1px solid rgba(212,175,55,0.3);border-radius:24px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 8px 40px rgba(212,175,55,0.1);">
         <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,0.15),transparent);pointer-events:none;"></div>
         <p style="font-size:12px;color:#a88a20;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Celkový zůstatek</p>
@@ -322,7 +313,6 @@
         </div>
       </div>
 
-      <!-- AI Advisor -->
       <div id="ai-advisor-card" class="card card-gold" style="padding:16px;margin-bottom:20px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
           <div style="width:36px;height:36px;background:linear-gradient(135deg,#a88a20,#d4af37);border-radius:12px;display:flex;align-items:center;justify-content:center;">
@@ -339,7 +329,6 @@
         </div>
       </div>
 
-      <!-- Quick Stats -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;" id="quick-stats">
         <div class="stat-card">
           <p style="font-size:11px;color:#888;margin-bottom:6px;">Členové</p>
@@ -363,7 +352,6 @@
         </div>
       </div>
 
-      <!-- Charts -->
       <div class="section-header">
         <span class="section-title">Přehled financí</span>
         <span id="chart-month" style="font-size:12px;color:#888;"></span>
@@ -376,7 +364,6 @@
         <div class="canvas-container"><canvas id="chart-categories"></canvas></div>
       </div>
 
-      <!-- Recent Transactions -->
       <div class="section-header">
         <span class="section-title">Poslední transakce</span>
         <button onclick="showPage('finance')" style="background:none;border:none;color:#d4af37;font-size:13px;cursor:pointer;">Vše →</button>
@@ -386,7 +373,6 @@
         <div class="shimmer" style="height:64px;border-radius:16px;"></div>
       </div>
 
-      <!-- Household Setup (if no household) -->
       <div id="household-setup" style="display:none;margin-bottom:20px;">
         <div class="card card-gold" style="padding:20px;text-align:center;">
           <i class="fas fa-house-chimney" style="font-size:40px;color:#d4af37;margin-bottom:12px;"></i>
@@ -404,7 +390,6 @@
       </div>
     </div>
 
-    <!-- FINANCE PAGE -->
     <div id="page-finance" class="page">
       <div class="header-bar">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -422,7 +407,6 @@
       <div id="finance-list" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
 
-    <!-- INVENTORY PAGE -->
     <div id="page-inventory" class="page">
       <div class="header-bar">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -439,7 +423,6 @@
       <div id="inventory-list" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
 
-    <!-- RECEIPTS PAGE -->
     <div id="page-receipts" class="page">
       <div class="header-bar">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -452,7 +435,6 @@
       <div id="receipts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
     </div>
 
-    <!-- TASKS PAGE -->
     <div id="page-tasks" class="page">
       <div class="header-bar">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -465,7 +447,6 @@
       <div id="tasks-list" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
 
-    <!-- CHAT PAGE -->
     <div id="page-chat" class="page" style="padding:0;display:none;flex-direction:column;height:calc(100vh - 80px);">
       <div class="header-bar" style="margin:0 0 0 0;">
         <div style="display:flex;justify-content:space-between;align-items:center;padding:0 16px;">
@@ -484,13 +465,11 @@
       </div>
     </div>
 
-    <!-- MORE / PROFILE PAGE -->
     <div id="page-profile" class="page">
       <div class="header-bar">
         <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Profil & Nastavení</h2>
       </div>
 
-      <!-- Profile Card -->
       <div class="card card-gold" style="padding:24px;margin-bottom:20px;text-align:center;">
         <div class="avatar avatar-gold" id="profile-avatar-big" style="width:72px;height:72px;font-size:28px;margin:0 auto 14px;">?</div>
         <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;" id="profile-name">–</p>
@@ -498,7 +477,6 @@
         <p style="font-size:11px;color:#666;margin-top:6px;" id="profile-since">Člen od –</p>
       </div>
 
-      <!-- Household -->
       <div class="section-header"><span class="section-title">Domácnost</span></div>
       <div id="household-card" class="card" style="padding:16px;margin-bottom:20px;">
         <div id="hh-info-content">
@@ -506,14 +484,12 @@
         </div>
       </div>
 
-      <!-- Activity Log -->
       <div class="section-header"><span class="section-title">Historie aktivit</span></div>
       <div id="activity-log" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
         <div class="shimmer" style="height:50px;border-radius:14px;"></div>
         <div class="shimmer" style="height:50px;border-radius:14px;"></div>
       </div>
 
-      <!-- Banking -->
       <div class="section-header"><span class="section-title">Bankovní integrace</span></div>
       <div class="card" style="padding:16px;margin-bottom:20px;">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
@@ -528,13 +504,11 @@
         </button>
       </div>
 
-      <!-- Logout -->
       <button onclick="logout()" style="width:100%;padding:14px;border-radius:14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:30px;">
         <i class="fas fa-sign-out-alt"></i> Odhlásit se
       </button>
     </div>
 
-    <!-- NOTIFICATIONS PAGE -->
     <div id="page-notifications" class="page">
       <div class="header-bar">
         <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Notifikace</h2>
@@ -542,10 +516,7 @@
       <div id="notifications-list" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
 
-  </div><!-- /main-content -->
-
-  <!-- Bottom Navigation -->
-  <div id="bottom-nav">
+  </div><div id="bottom-nav">
     <div style="display:flex;padding:0 8px;">
       <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
         <i class="fas fa-chart-pie nav-icon"></i>
@@ -577,12 +548,7 @@
       </div>
     </div>
   </div>
-</div><!-- /app -->
-
-<!-- ===== MODALS ===== -->
-
-<!-- Create Household -->
-<div id="modal-create-household" class="modal-overlay">
+</div><div id="modal-create-household" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div style="padding:0 20px 28px;">
@@ -598,7 +564,6 @@
   </div>
 </div>
 
-<!-- Join Household -->
 <div id="modal-join-household" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -615,13 +580,11 @@
   </div>
 </div>
 
-<!-- Add Transaction -->
 <div id="modal-add-transaction" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div style="padding:0 20px 28px;">
       <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Přidat transakci</h3>
-      <!-- Type toggle -->
       <div style="display:flex;gap:8px;margin-bottom:18px;background:#1a1a1a;border-radius:14px;padding:4px;" id="trx-type-toggle">
         <button onclick="setTrxType('income')" id="trx-btn-income" class="btn-gold" style="flex:1;padding:10px;border-radius:10px;font-size:13px;">Příjem</button>
         <button onclick="setTrxType('expense')" id="trx-btn-expense" class="btn-ghost" style="flex:1;padding:10px;border-radius:10px;font-size:13px;">Výdaj</button>
@@ -663,7 +626,6 @@
   </div>
 </div>
 
-<!-- Add Inventory Item -->
 <div id="modal-add-item" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -710,7 +672,6 @@
   </div>
 </div>
 
-<!-- Add Receipt -->
 <div id="modal-add-receipt" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -749,7 +710,6 @@
   </div>
 </div>
 
-<!-- Add Task -->
 <div id="modal-add-task" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -776,7 +736,6 @@
   </div>
 </div>
 
-<!-- Item Detail Modal -->
 <div id="modal-item-detail" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -784,7 +743,6 @@
   </div>
 </div>
 
-<!-- Receipt Detail Modal -->
 <div id="modal-receipt-detail" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -797,9 +755,15 @@
 const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNia2lxY3RqZmF0b3pxbml4aGFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMzM2NjIsImV4cCI6MjA5NTkwOTY2Mn0.4-uDF2b7Pv2CfTL1NpwRPdtuN1u0KDUxmtHSf8QAUDM";
 
-// ===== INIT =====
+// ===== INIT (Upraveno pro trvalé přihlášení) =====
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
 
 let currentUser = null;
 let currentProfile = null;
@@ -968,8 +932,6 @@ function updateGreeting() {
 
 // ===== SCHEMA (auto-create tables) =====
 async function ensureSchema() {
-  // We use upsert-based approach; tables must be created manually in Supabase
-  // This function just verifies connection
   try {
     await sb.from('profiles').select('id').limit(1);
   } catch(e) { console.log('Schema check:', e.message); }
