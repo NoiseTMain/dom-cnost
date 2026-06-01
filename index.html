@@ -156,15 +156,14 @@
                     </button>
                 </form>
 
-                <div class="mt-6 text-center">
-                    <button id="toggle-auth" class="text-gold text-sm hover:underline">Nemáte účet? Registrovat</button>
-                    <button class="block w-full text-gray-500 text-xs mt-3 hover:text-white">Zapomenuté heslo?</button>
+                <div class="mt-6 text-center space-y-3">
+                    <button type="button" id="toggle-auth" class="text-gold text-sm hover:underline block w-full text-center">Nemáte účet? Registrovat</button>
+                    <button type="button" class="block w-full text-gray-500 text-xs hover:text-white">Zapomenuté heslo?</button>
                 </div>
             </div>
         </div>
 
         <div id="main-view" class="hidden h-full flex-col relative w-full max-w-md mx-auto border-x border-gray-800/30">
-            
             <header class="glass pt-12 pb-4 px-6 flex justify-between items-center sticky top-0 z-40 rounded-b-3xl">
                 <div class="flex items-center gap-3">
                     <div class="h-10 w-10 rounded-full bg-darkgray border border-gold flex items-center justify-center overflow-hidden">
@@ -185,7 +184,6 @@
             </header>
 
             <div class="scrollable-content p-5" id="views-container">
-                
                 <div id="view-dashboard" class="view-section animate-fade-in space-y-6">
                     <div class="glass-gold rounded-3xl p-6 relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-4 opacity-20"><i class="fa-solid fa-wallet text-6xl text-gold"></i></div>
@@ -209,9 +207,7 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-semibold text-gold mb-1">AI Správce Financí</h3>
-                            <p class="text-xs text-gray-300 leading-relaxed" id="ai-suggestion">
-                                Analýza dat...
-                            </p>
+                            <p class="text-xs text-gray-300 leading-relaxed" id="ai-suggestion">Analýza dat...</p>
                         </div>
                     </div>
 
@@ -249,13 +245,10 @@
                         <h2 class="text-xl font-bold">Transakce</h2>
                         <button onclick="openModal('tx-modal')" class="bg-gold/20 text-gold px-4 py-2 rounded-xl text-sm font-medium border border-gold/30"><i class="fa-solid fa-plus mr-2"></i>Přidat</button>
                     </div>
-
                     <div class="glass rounded-3xl p-5">
                         <canvas id="categoryChart" height="200"></canvas>
                     </div>
-
-                    <div class="space-y-3" id="transactions-list">
-                        </div>
+                    <div class="space-y-3" id="transactions-list"></div>
                 </div>
 
                 <div id="view-inventory" class="view-section hidden animate-fade-in space-y-6">
@@ -263,24 +256,20 @@
                         <button onclick="switchInvTab('items')" id="tab-items" class="flex-1 py-2 text-sm font-medium rounded-xl bg-darkgray text-gold transition">Majetek</button>
                         <button onclick="switchInvTab('receipts')" id="tab-receipts" class="flex-1 py-2 text-sm font-medium rounded-xl text-gray-400 transition">Účtenky</button>
                     </div>
-
                     <div id="inv-items" class="space-y-4">
                         <button onclick="openModal('item-modal')" class="w-full glass border-dashed border-gold/50 py-4 rounded-2xl text-gold text-sm"><i class="fa-solid fa-plus mr-2"></i>Přidat majetek</button>
                         <div id="inventory-list" class="grid grid-cols-2 gap-4"></div>
                     </div>
-
                     <div id="inv-receipts" class="hidden space-y-4">
                         <button onclick="document.getElementById('receipt-upload').click()" class="w-full glass border-dashed border-gold/50 py-4 rounded-2xl text-gold text-sm flex flex-col items-center justify-center">
                             <i class="fa-solid fa-cloud-arrow-up text-2xl mb-2"></i>
                             <span>Nahrát účtenku (AI OCR)</span>
                         </button>
                         <input type="file" id="receipt-upload" accept="image/*,.pdf" class="hidden" onchange="handleReceiptUpload(event)">
-                        
                         <div id="ocr-loader" class="hidden glass p-4 rounded-2xl text-center">
                             <div class="loader mx-auto mb-2"></div>
                             <p class="text-xs text-gold">AI analyzuje účtenku...</p>
                         </div>
-
                         <div id="receipts-list" class="space-y-3"></div>
                     </div>
                 </div>
@@ -291,23 +280,16 @@
                             <h2 class="font-bold text-lg">Domácnost: <span id="hh-name" class="text-gold">Nenačteno</span></h2>
                             <button onclick="copyInvite()" class="text-xs bg-darkgray px-3 py-1 rounded-lg border border-gray-700 text-gold"><i class="fa-solid fa-copy mr-1"></i> Kód</button>
                         </div>
-                        <div class="flex -space-x-3 overflow-hidden p-2" id="hh-members-avatars">
-                            </div>
+                        <div class="flex -space-x-3 overflow-hidden p-2" id="hh-members-avatars"></div>
                     </div>
-
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-semibold text-gray-300">Rodinný Chat</h3>
-                    </div>
-                    
+                    <div class="flex justify-between items-center"><h3 class="font-semibold text-gray-300">Rodinný Chat</h3></div>
                     <div class="glass rounded-3xl p-4 h-80 flex flex-col">
-                        <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 pb-2 text-sm pr-2">
-                            </div>
+                        <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 pb-2 text-sm pr-2"></div>
                         <div class="mt-3 flex gap-2">
                             <input type="text" id="chat-input" class="flex-1 bg-darkgray border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-gold text-sm" placeholder="Napište zprávu...">
                             <button onclick="sendChatMessage()" class="bg-gradient-gold text-black w-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
                         </div>
                     </div>
-
                     <div class="mt-6">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-semibold text-gray-300">Úkoly</h3>
@@ -319,7 +301,6 @@
 
                 <div id="view-settings" class="view-section hidden animate-fade-in space-y-6">
                     <h2 class="text-xl font-bold">Nastavení</h2>
-                    
                     <div class="glass rounded-3xl p-5 space-y-4">
                         <div class="flex items-center gap-4 border-b border-gray-800 pb-4">
                             <img id="set-avatar" src="" alt="Avatar" class="h-16 w-16 rounded-full border-2 border-gold">
@@ -328,7 +309,6 @@
                                 <p id="set-email" class="text-xs text-gray-400">Email</p>
                             </div>
                         </div>
-                        
                         <div id="hh-setup-section" class="py-2">
                             <h4 class="text-sm font-semibold text-gold mb-3">Správa domácnosti</h4>
                             <div class="flex gap-2 mb-3">
@@ -340,77 +320,42 @@
                                 <button onclick="joinHousehold()" class="bg-darkgray border border-gold text-gold px-4 rounded-xl text-sm">Připojit</button>
                             </div>
                         </div>
-
-                        <button onclick="logout()" class="w-full py-3 mt-4 bg-red-500/10 text-red-500 border border-red-500/30 rounded-xl text-sm font-semibold">
-                            Odhlásit se
-                        </button>
+                        <button onclick="logout()" class="w-full py-3 mt-4 bg-red-500/10 text-red-500 border border-red-500/30 rounded-xl text-sm font-semibold">Odhlásit se</button>
                     </div>
-
                     <div>
                         <h3 class="text-sm font-semibold mb-3 text-gray-400">Historie aktivit</h3>
-                        <div class="glass rounded-2xl p-4 text-xs space-y-3" id="activity-log">
-                            </div>
+                        <div class="glass rounded-2xl p-4 text-xs space-y-3" id="activity-log"></div>
                     </div>
                 </div>
-
             </div>
 
             <nav class="fixed bottom-0 w-full max-w-md mx-auto glass rounded-t-3xl border-t border-gold/20 pb-safe pt-2 px-6 flex justify-between z-50">
-                <button class="nav-item active flex flex-col items-center p-2 w-16" onclick="switchTab('dashboard', this)">
-                    <i class="fa-solid fa-chart-pie text-xl mb-1"></i>
-                    <span class="text-[10px] font-medium">Přehled</span>
-                </button>
-                <button class="nav-item text-gray-500 flex flex-col items-center p-2 w-16" onclick="switchTab('finance', this)">
-                    <i class="fa-solid fa-money-bill-transfer text-xl mb-1"></i>
-                    <span class="text-[10px] font-medium">Finance</span>
-                </button>
-                <button class="nav-item text-gray-500 flex flex-col items-center p-2 w-16" onclick="switchTab('inventory', this)">
-                    <i class="fa-solid fa-boxes-stacked text-xl mb-1"></i>
-                    <span class="text-[10px] font-medium">Majetek</span>
-                </button>
-                <button class="nav-item text-gray-500 flex flex-col items-center p-2 w-16" onclick="switchTab('household', this)">
-                    <i class="fa-solid fa-house-chimney-user text-xl mb-1"></i>
-                    <span class="text-[10px] font-medium">Domov</span>
-                </button>
-                <button class="nav-item text-gray-500 flex flex-col items-center p-2 w-16" onclick="switchTab('settings', this)">
-                    <i class="fa-solid fa-gear text-xl mb-1"></i>
-                    <span class="text-[10px] font-medium">Profil</span>
-                </button>
+                <button class="nav-item active flex flex-col items-center p-2 w-16" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-pie text-xl mb-1"></i><span class="text-[10px] font-medium">Přehled</span></button>
+                <button class="nav-item text-gray-500 flex flex-col items-center p-2 w-16" onclick="switchTab('finance', this)"><i class="fa-solid fa-money-bill-transfer text-xl mb-1"></i><span class="text-[10px] font-medium">Finance</span></button>
+                <button class="nav-item text-gray-500 flex flex-col items-center p-2 w-16" onclick="switchTab('inventory', this)"><i class="fa-solid fa-boxes-stacked text-xl mb-1"></i><span class="text-[10px] font-medium">Majetek</span></button>
+                <button class="nav-item text-gray-500 flex flex-col items-center p-2 w-16" onclick="switchTab('household', this)"><i class="fa-solid fa-house-chimney-user text-xl mb-1"></i><span class="text-[10px] font-medium">Domov</span></button>
+                <button class="nav-item text-gray-500 flex flex-col items-center p-2 w-16" onclick="switchTab('settings', this)"><i class="fa-solid fa-gear text-xl mb-1"></i><span class="text-[10px] font-medium">Profil</span></button>
             </nav>
         </div>
 
         <div id="tx-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
             <div class="glass w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 h-[85vh] sm:h-auto flex flex-col">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">Nová transakce</h3>
-                    <button onclick="closeModal('tx-modal')" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
+                <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold">Nová transakce</h3><button onclick="closeModal('tx-modal')" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button></div>
                 <div class="space-y-4 flex-1 overflow-y-auto pr-2">
                     <div class="flex gap-2">
                         <button id="btn-tx-expense" onclick="setTxType('expense')" class="flex-1 py-2 bg-red-500/20 text-red-500 border border-red-500/50 rounded-xl text-sm font-medium">Výdaj</button>
                         <button id="btn-tx-income" onclick="setTxType('income')" class="flex-1 py-2 bg-darkgray text-gray-400 border border-gray-700 rounded-xl text-sm font-medium">Příjem</button>
                     </div>
                     <input type="hidden" id="tx-type" value="expense">
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Částka (Kč)</label>
-                        <input type="number" id="tx-amount" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white text-lg font-bold" placeholder="0">
-                    </div>
+                    <div><label class="text-xs text-gray-400 mb-1 block">Částka (Kč)</label><input type="number" id="tx-amount" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white text-lg font-bold" placeholder="0"></div>
                     <div>
                         <label class="text-xs text-gray-400 mb-1 block">Kategorie</label>
                         <select id="tx-category" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white appearance-none">
-                            <option>Nájem</option><option>Hypotéka</option><option>Elektřina</option><option>Voda</option>
-                            <option>Plyn</option><option>Internet</option><option>Telefon</option><option>Potraviny</option>
-                            <option>Doprava</option><option>Domácnost</option><option>Elektronika</option><option>Nábytek</option><option>Ostatní</option>
+                            <option>Nájem</option><option>Hypotéka</option><option>Elektřina</option><option>Voda</option><option>Plyn</option><option>Internet</option><option>Telefon</option><option>Potraviny</option><option>Doprava</option><option>Domácnost</option><option>Elektronika</option><option>Nábytek</option><option>Ostatní</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Poznámka</label>
-                        <input type="text" id="tx-note" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white" placeholder="Za co to bylo?">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Datum</label>
-                        <input type="date" id="tx-date" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white">
-                    </div>
+                    <div><label class="text-xs text-gray-400 mb-1 block">Poznámka</label><input type="text" id="tx-note" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white" placeholder="Za co to bylo?"></div>
+                    <div><label class="text-xs text-gray-400 mb-1 block">Datum</label><input type="date" id="tx-date" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white"></div>
                 </div>
                 <button onclick="saveTransaction()" class="w-full bg-gradient-gold text-black font-bold py-4 rounded-xl mt-4 shadow-lg">Uložit</button>
             </div>
@@ -418,27 +363,12 @@
 
         <div id="item-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
             <div class="glass w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 h-[85vh] sm:h-auto flex flex-col">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">Přidat majetek</h3>
-                    <button onclick="closeModal('item-modal')" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
+                <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold">Přidat majetek</h3><button onclick="closeModal('item-modal')" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button></div>
                 <div class="space-y-4 flex-1 overflow-y-auto pr-2">
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Název (Auto-kategorizace)</label>
-                        <input type="text" id="item-name" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white" placeholder="Např. Lednice Bosch">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Cena (Kč)</label>
-                        <input type="number" id="item-price" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white" placeholder="0">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Datum nákupu</label>
-                        <input type="date" id="item-date" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Záruka (roky)</label>
-                        <input type="number" id="item-warranty" value="2" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white">
-                    </div>
+                    <div><label class="text-xs text-gray-400 mb-1 block">Název (Auto-kategorizace)</label><input type="text" id="item-name" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white" placeholder="Např. Lednice Bosch"></div>
+                    <div><label class="text-xs text-gray-400 mb-1 block">Cena (Kč)</label><input type="number" id="item-price" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white" placeholder="0"></div>
+                    <div><label class="text-xs text-gray-400 mb-1 block">Datum nákupu</label><input type="date" id="item-date" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white"></div>
+                    <div><label class="text-xs text-gray-400 mb-1 block">Záruka (roky)</label><input type="number" id="item-warranty" value="2" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white"></div>
                 </div>
                 <button onclick="saveItem()" class="w-full bg-gradient-gold text-black font-bold py-4 rounded-xl mt-4 shadow-lg">Uložit položku</button>
             </div>
@@ -446,10 +376,7 @@
 
         <div id="task-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
             <div class="glass w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">Nový úkol</h3>
-                    <button onclick="closeModal('task-modal')" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
+                <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold">Nový úkol</h3><button onclick="closeModal('task-modal')" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button></div>
                 <input type="text" id="task-title" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white mb-4" placeholder="Název úkolu">
                 <button onclick="saveTask()" class="w-full bg-gradient-gold text-black font-bold py-3 rounded-xl shadow-lg">Přidat</button>
             </div>
@@ -467,16 +394,16 @@
                 <button onclick="closeModal('bank-modal')" class="mt-6 text-gray-500 hover:text-white">Zavřít</button>
             </div>
         </div>
-
     </div>
 
     <script>
         /* CONFIGURATION */
+        // Pokud chceš testovat bez Supabase, nech tyto dvě proměnné prázdné ("")
         const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNia2lxY3RqZmF0b3pxbml4aGFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMzM2NjIsImV4cCI6MjA5NTkwOTY2Mn0.4-uDF2b7Pv2CfTL1NpwRPdtuN1u0KDUxmtHSf8QAUDM";
         
         let supabase = null;
-        let isMockMode = true; // Použito pokud chybí reálné klíče
+        let isMockMode = true;
 
         if (SUPABASE_URL !== "DOPLNIT_SUPABASE_URL" && SUPABASE_URL !== "") {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -508,19 +435,28 @@
         }
 
         /* INITIALIZATION */
-        let isLogin = true; // Přesunuto do globálního scope, aby k němu měly přístup oba event listenery
+        let isLogin = true;
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tx-date').valueAsDate = new Date();
             document.getElementById('item-date').valueAsDate = new Date();
             
-            // Auth Form Logic
+            // OPRAVA LOGIKY PŘEPÍNÁNÍ: Bezpečné přepínání stavu zobrazení políček
             document.getElementById('toggle-auth').addEventListener('click', (e) => {
-                e.preventDefault();
-                isLogin = !isLogin; // Teď správně mění stav formuláře
-                document.getElementById('register-fields').classList.toggle('hidden');
-                document.getElementById('auth-btn-text').innerText = isLogin ? 'Přihlásit se' : 'Zaregistrovat se';
-                e.target.innerText = isLogin ? 'Nemáte účet? Registrovat' : 'Máte účet? Přihlásit se';
+                isLogin = !isLogin;
+                
+                const registerFields = document.getElementById('register-fields');
+                const authBtnText = document.getElementById('auth-btn-text');
+                
+                if (isLogin) {
+                    registerFields.classList.add('hidden');
+                    authBtnText.innerText = 'Přihlásit se';
+                    e.target.innerText = 'Nemáte účet? Registrovat';
+                } else {
+                    registerFields.classList.remove('hidden');
+                    authBtnText.innerText = 'Zaregistrovat se';
+                    e.target.innerText = 'Máte účet? Přihlásit se';
+                }
             });
 
             document.getElementById('auth-form').addEventListener('submit', async (e) => {
@@ -536,22 +472,17 @@
                 } else {
                     if (isLogin) {
                         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                        if (error) {
-                            alert("Chyba při přihlášení: " + error.message);
-                            return;
-                        }
+                        if (error) return alert("Chyba přihlášení: " + error.message);
                         if(data.user) { await loadUserData(data.user); initApp(); }
                     } else {
+                        // Ochrana před prázdným jménem
+                        if(!name.trim()) return alert("Před registrací prosím vyplňte své Jméno.");
+                        
                         const { data, error } = await supabase.auth.signUp({ email, password });
-                        if (error) {
-                            alert("Chyba při registraci: " + error.message);
-                            return;
-                        }
+                        if (error) return alert("Chyba registrace: " + error.message);
+                        
                         if(data.user) {
-                            const { error: profileError } = await supabase.from('profiles').insert([{ id: data.user.id, name: name || 'Nový Uživatel', email, avatar: `https://ui-avatars.com/api/?name=${name || 'U'}&background=D4AF37&color=000` }]);
-                            if (profileError) {
-                                console.error("Nepodařilo se vytvořit profil:", profileError.message);
-                            }
+                            await supabase.from('profiles').insert([{ id: data.user.id, name, email, avatar: `https://ui-avatars.com/api/?name=${name}&background=D4AF37&color=000` }]);
                             await loadUserData(data.user); initApp();
                         }
                     }
@@ -560,12 +491,8 @@
         });
 
         async function loadUserData(authUser) {
-            const { data, error } = await supabase.from('profiles').select('*').eq('id', authUser.id).single();
-            if (data) {
-                state.user = data;
-            } else {
-                state.user = { id: authUser.id, email: authUser.email, name: authUser.email.split('@')[0], avatar: `https://ui-avatars.com/api/?name=U&background=D4AF37&color=000` };
-            }
+            const { data } = await supabase.from('profiles').select('*').eq('id', authUser.id).single();
+            state.user = data || { id: authUser.id, name: "Uživatel", email: authUser.email, avatar: "https://ui-avatars.com/api/?name=U&background=D4AF37&color=000" };
             const { data: hhData = null } = await supabase.from('household_members').select('household_id, households(*)').eq('user_id', authUser.id).single() || {};
             if(hhData) state.household = hhData.households;
         }
@@ -623,6 +550,7 @@
         }
 
         /* MODALS */
+        // Zjednodušené otevírání modálů
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function toggleBankIntegration() { openModal('bank-modal'); }
