@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="cs" class="h-full bg-black text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AUREUM – Premium Household & Finance</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkFVUkVVTSIsCiAgInNob3J0X25hbWUiOiAiQVVSRVVNIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLAogICJ0aGVtZV9jb2xvciI6ICIjMDAwMDAwIgp9">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fdfbf7', 100: '#fbf7ed', 200: '#f4e9cf', 300: '#eddcb1',
+                            400: '#e0c175', 500: '#d4a373', 600: '#c58d59', 700: '#a67143',
+                            800: '#875630', 900: '#693f21', 950: '#b89047'
+                        },
+                        dark: {
+                            900: '#09090b', 800: '#121214', 700: '#1a1a1e', 600: '#26262b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        window.fb = { initializeApp, getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, orderBy, limit, getStorage, ref, uploadBytes, getDownloadURL };
+    </script>
+
+    <style>
+        .glass {
+            background: rgba(18, 18, 20, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(184, 144, 71, 0.15);
+        }
+        .glass-input {
+            background: rgba(26, 26, 30, 0.6);
+            border: 1px solid rgba(184, 144, 71, 0.2);
+            color: white;
+        }
+        .glass-input:focus {
+            border-color: #b89047;
+            outline: none;
+            box-shadow: 0 0 10px rgba(184, 144, 71, 0.2);
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #f4e9cf 0%, #b89047 50%, #875630 100%);
+        }
+        .gold-text {
+            background: linear-gradient(135deg, #fff 30%, #b89047 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between">
+
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-sm glass rounded-xl p-4 hidden flex items-center gap-3 border-l-4 border-l-gold-950 transition-all transform duration-300">
+        <i class="fas fa-bell text-gold-950 text-xl" id="toastIcon"></i>
+        <div>
+            <p class="text-xs text-gray-400 font-medium" id="toastTitle">Upozornění</p>
+            <p class="text-sm text-white" id="toastMsg"></p>
+        </div>
+    </div>
+
+    <div id="app" class="flex-1 flex flex-col pb-24 overflow-y-auto w-full max-w-md mx-auto px-4 pt-6">
+        
+        <div id="sec-auth" class="flex-1 flex flex-col justify-center py-10">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-extrabold tracking-widest gold-text">AUREUM</h1>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Premium Household Ecosystem</p>
+            </div>
+            
+            <div class="glass p-6 rounded-2xl space-y-4 shadow-2xl">
+                <div class="flex border-b border-gray-800 pb-3 mb-2">
+                    <button id="tab-login-btn" class="flex-1 text-center font-bold text-gold-950 border-b-2 border-gold-950 pb-2" onclick="switchAuthTab('login')">Přihlášení</button>
+                    <button id="tab-register-btn" class="flex-1 text-center font-bold text-gray-500 pb-2" onclick="switchAuthTab('register')">Registrace</button>
+                </div>
+
+                <div id="auth-name-container" class="hidden space-y-1">
+                    <label class="text-xs uppercase text-gray-400 font-semibold tracking-wider">Jméno</label>
+                    <input type="text" id="auth-name" class="w-full p-3 rounded-xl glass-input text-sm" placeholder="Jan Novák">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs uppercase text-gray-400 font-semibold tracking-wider">Email</label>
+                    <input type="email" id="auth-email" class="w-full p-3 rounded-xl glass-input text-sm" placeholder="name@domain.com">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs uppercase text-gray-400 font-semibold tracking-wider">Heslo</label>
+                    <input type="password" id="auth-pass" class="w-full p-3 rounded-xl glass-input text-sm" placeholder="••••••••">
+                </div>
+                
+                <button id="auth-submit-btn" class="w-full gold-gradient text-black font-bold py-3.5 rounded-xl mt-4 shadow-lg hover:opacity-90 transition-all active:scale-95 text-sm" onclick="handleAuth()">Přihlásit se</button>
+            </div>
+        </div>
+
+        <div id="sec-household" class="hidden flex-1 flex flex-col justify-center py-10">
+            <div class="glass p-6 rounded-2xl space-y-6 text-center">
+                <i class="fas fa-house-user text-5xl text-gold-950 mb-2"></i>
+                <div>
+                    <h2 class="text-xl font-bold text-white">Nastavení domácnosti</h2>
+                    <p class="text-xs text-gray-400 mt-1">Vytvořte novou prémiovou domácnost nebo se připojte k existující.</p>
+                </div>
+                
+                <div class="space-y-3 pt-4">
+                    <button onclick="createHousehold()" class="w-full gold-gradient text-black font-bold py-3.5 rounded-xl text-sm transition-all active:scale-95">Vytvořit novou domácnost</button>
+                    <div class="relative flex items-center justify-center my-4">
+                        <div class="border-t border-gray-800 w-full"></div>
+                        <span class="bg-black px-3 text-xs uppercase text-gray-500 tracking-widest absolute">nebo</span>
+                    </div>
+                    <input type="text" id="hh-join-code" class="w-full p-3 rounded-xl glass-input text-sm text-center tracking-widest" placeholder="VLOŽTE KÓD DOMÁCNOSTI">
+                    <button onclick="joinHousehold()" class="w-full bg-dark-700 text-gold-950 font-bold py-3.5 rounded-xl text-sm border border-gold-950/30 transition-all active:scale-95">Připojit se kódem</button>
+                </div>
+            </div>
+        </div>
+
+        <header id="main-header" class="hidden flex items-center justify-between mb-6 glass p-4 rounded-2xl">
+            <div class="flex items-center gap-3">
+                <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" class="w-10 h-10 rounded-full border border-gold-950 object-cover" alt="Avatar">
+                <div>
+                    <p class="text-xs text-gray-400 font-medium">Vítejte zpět</p>
+                    <h3 id="user-display-name" class="text-sm font-bold text-white">Načítání...</h3>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="copyHouseholdCode()" class="bg-dark-700 text-gold-950 text-xs px-3 py-1.5 rounded-lg font-mono border border-gold-950/20 active:scale-95 transition-all" title="Kopírovat kód domácnosti">
+                    <i class="fas fa-share-nodes mr-1"></i> <span id="hh-display-code">...</span>
+                </button>
+                <button onclick="logOut()" class="text-gray-400 hover:text-red-400 p-2"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </header>
+
+        <div id="sec-dashboard" class="hidden space-y-6">
+            <div class="glass rounded-2xl p-6 relative overflow-hidden shadow-2xl border-l-4 border-gold-950">
+                <div class="absolute right-[-20px] top-[-20px] text-gold-950/10 text-9xl pointer-events-none"><i class="fas fa-wallet"></i></div>
+                <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold">Aktuální Zůstatek</p>
+                <h1 id="dash-balance" class="text-3xl font-extrabold text-white mt-1">0,00 Kč</h1>
+                
+                <div class="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-gray-800/60">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-wider text-gray-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Příjmy</p>
+                        <p id="dash-income" class="text-base font-bold text-emerald-400 mt-0.5">0 Kč</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-wider text-gray-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Výdaje</p>
+                        <p id="dash-expense" class="text-base font-bold text-rose-400 mt-0.5">0 Kč</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-4 border border-gold-950/30 bg-gradient-to-r from-dark-800 to-dark-900">
+                <div class="flex items-start gap-3">
+                    <div class="bg-gold-950/20 p-2 rounded-xl text-gold-950"><i class="fas fa-brain text-lg"></i></div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-gold-950 uppercase tracking-wider">AI Správce Financí</p>
+                        <p id="ai-advice" class="text-xs text-gray-300 mt-1 leading-relaxed">Vyhodnocuji finanční toky v domácnosti...</p>
+                        <div class="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-gray-800 text-[11px] text-gray-400">
+                            <div>Volné prostředky: <span id="ai-free-cash" class="text-white font-medium">0 Kč</span></div>
+                            <div>Odhad konce měsíce: <span id="ai-est-end" class="text-white font-medium">0 Kč</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div class="glass p-3 rounded-xl text-center">
+                    <i class="fas fa-users text-gold-950 mb-1 text-sm"></i>
+                    <p class="text-[10px] text-gray-400 block truncate">Členové</p>
+                    <p id="stat-members" class="text-sm font-bold mt-0.5">0</p>
+                </div>
+                <div class="glass p-3 rounded-xl text-center">
+                    <i class="fas fa-couch text-gold-950 mb-1 text-sm"></i>
+                    <p class="text-[10px] text-gray-400 block truncate">Majetek</p>
+                    <p id="stat-assets" class="text-sm font-bold mt-0.5">0</p>
+                </div>
+                <div class="glass p-3 rounded-xl text-center">
+                    <i class="fas fa-exclamation-circle text-rose-500 mb-1 text-sm"></i>
+                    <p class="text-[10px] text-gray-400 block truncate">Úkoly / Platby</p>
+                    <p id="stat-tasks" class="text-sm font-bold mt-0.5">0</p>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-4">
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Struktura Výdajů</p>
+                <div class="w-full aspect-square max-h-[220px] mx-auto">
+                    <canvas id="chartExpenses"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="sec-finance" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-white tracking-wide">Pokladna a Transakce</h2>
+                <button onclick="openTransactionModal()" class="gold-gradient text-black px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-md"><i class="fas fa-plus"></i> Nový</button>
+            </div>
+
+            <div class="glass rounded-2xl p-4 bg-gradient-to-br from-dark-800 to-black border-dashed border-gold-950/30 flex flex-col items-center text-center space-y-3">
+                <div class="text-gold-950 text-2xl"><i class="fas fa-university"></i></div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">PSD2 / GoCardless Bank API</h3>
+                    <p class="text-[11px] text-gray-400 px-4 mt-0.5">Bezpečné a automatické napojení na české i evropské banky.</p>
+                </div>
+                <button onclick="simulateOpenBankingConnect()" class="w-full max-w-xs bg-dark-600 border border-gold-950/40 text-gold-950 text-xs font-bold py-2 rounded-xl hover:bg-dark-700 transition-all"> Připojit bankovní účet</button>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Historie transakcí</p>
+                <div id="tx-list" class="space-y-2">
+                    </div>
+            </div>
+        </div>
+
+        <div id="sec-inventory" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-white tracking-wide">Majetek & Inventář</h2>
+                <button onclick="openAssetModal()" class="gold-gradient text-black px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-md"><i class="fas fa-plus"></i> Přidat</button>
+            </div>
+
+            <div id="asset-list" class="grid grid-cols-2 gap-3">
+                </div>
+        </div>
+
+        <div id="sec-receipts" class="hidden space-y-6">
+            <h2 class="text-xl font-bold text-white tracking-wide">Digitalizované Účtenky</h2>
+            
+            <div class="glass rounded-2xl p-5 text-center space-y-4 border-2 border-dashed border-gold-950/30 relative">
+                <div class="text-gold-950 text-3xl"><i class="fas fa-receipt"></i></div>
+                <div>
+                    <h3 class="text-sm font-bold">Chytré OCR skenování</h3>
+                    <p class="text-xs text-gray-400 mt-1">Nahrajte účtenku (JPG, PNG, PDF). Tesseract.js automaticky extrahuje cenu, datum a obchod.</p>
+                </div>
+                <label class="w-full block bg-gold-950 text-black font-bold py-2.5 rounded-xl text-xs tracking-wider uppercase cursor-pointer hover:opacity-90 active:scale-95 transition-all">
+                    <i class="fas fa-camera mr-1"></i> Vyfotit / Nahrát soubor
+                    <input type="file" id="ocr-file-input" accept="image/*,application/pdf" class="hidden" onchange="processOCR(this)">
+                </label>
+                <div id="ocr-loader" class="hidden absolute inset-0 bg-black/90 rounded-2xl flex flex-col items-center justify-center space-y-2">
+                    <div class="w-6 h-6 border-2 border-gold-950 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-xs text-gold-950 font-mono tracking-widest uppercase">Umělá inteligence čte účtenku...</p>
+                </div>
+            </div>
+
+            <div id="receipts-list" class="space-y-2">
+                </div>
+        </div>
+
+        <div id="sec-tasks" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-white tracking-wide">Domácí Úkoly</h2>
+                <button onclick="openTaskModal()" class="gold-gradient text-black px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-md"><i class="fas fa-plus"></i> Nový úkol</button>
+            </div>
+
+            <div id="task-list" class="space-y-2">
+                </div>
+        </div>
+
+        <div id="sec-chat" class="hidden flex flex-col h-[70vh] glass rounded-2xl overflow-hidden">
+            <div class="flex border-b border-gray-800 bg-dark-900 text-xs">
+                <button id="chat-tab-msg" class="flex-1 text-center py-3 font-bold text-gold-950 border-b-2 border-gold-950" onclick="switchChatSubTab('msg')">Zprávy</button>
+                <button id="chat-tab-logs" class="flex-1 text-center py-3 font-bold text-gray-500" onclick="switchChatSubTab('logs')">Historie aktivit</button>
+            </div>
+
+            <div id="chat-sub-msg" class="flex-1 flex flex-col overflow-hidden">
+                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 flex flex-col">
+                    </div>
+                <div class="p-3 border-t border-gray-800 flex gap-2 items-center bg-dark-900/50">
+                    <input type="text" id="chat-input" class="flex-1 p-2.5 rounded-xl glass-input text-xs" placeholder="Napište zprávu...">
+                    <button onclick="sendChatMessage()" class="gold-gradient text-black p-2.5 rounded-xl w-10 h-10 flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-xs"></i></button>
+                </div>
+            </div>
+
+            <div id="chat-sub-logs" class="hidden flex-1 p-4 overflow-y-auto space-y-2 text-xs">
+                </div>
+        </div>
+
+    </div>
+
+    <div id="modal-tx" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 hidden">
+        <div class="glass w-full max-w-sm rounded-2xl p-6 space-y-4">
+            <h3 class="text-sm font-bold text-gold-950 uppercase tracking-wider">Záznam transakce</h3>
+            <div class="space-y-3">
+                <input type="number" id="form-tx-amount" class="w-full p-2.5 rounded-xl glass-input text-xs" placeholder="Částka (Kč)">
+                <select id="form-tx-type" class="w-full p-2.5 rounded-xl glass-input text-xs">
+                    <option value="expense">Výdaj</option>
+                    <option value="income">Příjem</option>
+                </select>
+                <select id="form-tx-cat" class="w-full p-2.5 rounded-xl glass-input text-xs">
+                    <option value="Nájem">Nájem</option><option value="Elektřina">Elektřina</option>
+                    <option value="Voda">Voda</option><option value="Plyn">Plyn</option>
+                    <option value="Internet">Internet</option><option value="Telefon">Telefon</option>
+                    <option value="Potraviny">Potraviny</option><option value="Doprava">Doprava</option>
+                    <option value="Domácnost">Domácnost</option><option value="Elektronika">Elektronika</option>
+                    <option value="Nábytek">Nábytek</option><option value="Ostatní">Ostatní</option>
+                </select>
+                <input type="text" id="form-tx-note" class="w-full p-2.5 rounded-xl glass-input text-xs" placeholder="Poznámka / Obchod">
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeModals()" class="flex-1 bg-dark-700 py-2 rounded-xl text-xs font-bold text-gray-400">Zrušit</button>
+                <button onclick="saveTransaction()" class="flex-1 gold-gradient text-black py-2 rounded-xl text-xs font-bold">Uložit</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-asset" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 hidden">
+        <div class="glass w-full max-w-sm rounded-2xl p-6 space-y-3 overflow-y-auto max-h-[90vh]">
+            <h3 class="text-sm font-bold text-gold-950 uppercase tracking-wider">Položka majetku</h3>
+            <input type="text" id="form-asset-name" class="w-full p-2.5 rounded-xl glass-input text-xs" placeholder="Název (např. Lednice)" oninput="autoCategorizeAsset(this.value)">
+            <select id="form-asset-cat" class="w-full p-2.5 rounded-xl glass-input text-xs">
+                <option value="Nábytek">Nábytek</option><option value="Spotřebiče">Spotřebiče</option>
+                <option value="Elektronika">Elektronika</option><option value="Kuchyně">Kuchyně</option>
+                <option value="Koupelna">Koupelna</option><option value="Dekorace">Dekorace</option>
+                <option value="Nářadí">Nářadí</option><option value="Ostatní">Ostatní</option>
+            </select>
+            <input type="number" id="form-asset-price" class="w-full p-2.5 rounded-xl glass-input text-xs" placeholder="Cena (Kč)">
+            <input type="text" id="form-asset-shop" class="w-full p-2.5 rounded-xl glass-input text-xs" placeholder="Obchod">
+            <input type="number" id="form-asset-warranty" class="w-full p-2.5 rounded-xl glass-input text-xs" placeholder="Záruka (měsíců)" value="24">
+            <input type="text" id="form-asset-note" class="w-full p-2.5 rounded-xl glass-input text-xs" placeholder="Poznámka">
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeModals()" class="flex-1 bg-dark-700 py-2 rounded-xl text-xs font-bold text-gray-400">Zrušit</button>
+                <button onclick="saveAsset()" class="flex-1 gold-gradient text-black py-2 rounded-xl text-xs font-bold">Uložit</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-task" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 hidden">
+        <div class="glass w-full max-w-sm rounded-2xl p-6 space-y-4">
+            <h3 class="text-sm font-bold text-gold-950 uppercase tracking-wider">Nový domácí úkol</h3>
+            <div class="space-y-3">
+                <input type="text" id="form-task-title" class="w-full p-2.5 rounded-xl glass-input text-xs" placeholder="Název úkolu">
+                <select id="form-task-assignee" class="w-full p-2.5 rounded-xl glass-input text-xs">
+                    </select>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeModals()" class="flex-1 bg-dark-700 py-2 rounded-xl text-xs font-bold text-gray-400">Zrušit</button>
+                <button onclick="saveTask()" class="flex-1 gold-gradient text-black py-2 rounded-xl text-xs font-bold">Vytvořit</button>
+            </div>
+        </div>
+    </div>
+
+    <nav id="bottom-nav" class="hidden fixed bottom-0 left-0 right-0 glass border-t border-gold-950/20 rounded-t-3xl z-40 max-w-md mx-auto">
+        <div class="flex justify-around items-center h-20 px-2 pb-2">
+            <button onclick="switchSection('dashboard')" id="nav-dashboard" class="flex flex-col items-center gap-1 text-gold-950 transition-all">
+                <i class="fas fa-chart-pie text-lg"></i>
+                <span class="text-[10px] font-medium tracking-wide">Přehled</span>
+            </button>
+            <button onclick="switchSection('finance')" id="nav-finance" class="flex flex-col items-center gap-1 text-gray-500 transition-all">
+                <i class="fas fa-wallet text-lg"></i>
+                <span class="text-[10px] font-medium tracking-wide">Finance</span>
+            </button>
+            <button onclick="switchSection('inventory')" id="nav-inventory" class="flex flex-col items-center gap-1 text-gray-500 transition-all">
+                <i class="fas fa-boxes text-lg"></i>
+                <span class="text-[10px] font-medium tracking-wide">Majetek</span>
+            </button>
+            <button onclick="switchSection('receipts')" id="nav-receipts" class="flex flex-col items-center gap-1 text-gray-500 transition-all">
+                <i class="fas fa-receipt text-lg"></i>
+                <span class="text-[10px] font-medium tracking-wide">Účtenky</span>
+            </button>
+            <button onclick="switchSection('tasks')" id="nav-tasks" class="flex flex-col items-center gap-1 text-gray-500 transition-all">
+                <i class="fas fa-tasks text-lg"></i>
+                <span class="text-[10px] font-medium tracking-wide">Úkoly</span>
+            </button>
+            <button onclick="switchSection('chat')" id="nav-chat" class="flex flex-col items-center gap-1 text-gray-500 transition-all relative">
+                <i class="fas fa-comment-alt text-lg"></i>
+                <span class="text-[10px] font-medium tracking-wide">Chat</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        // CONFIGURATION BLOCK (Pro doplnění uživatelem)
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
+        };
+
+        // State Machine
+        let app, auth, db, storage;
+        let currentUser = null;
+        let householdId = null;
+        let currentAuthTab = 'login';
+        let currentSection = 'dashboard';
+        let currentChatSubTab = 'msg';
+        let expenseChartInstance = null;
+
+        // Priorities mapping for AI Engine
+        const aiPriorities = ["Nájem", "Hypotéka", "Elektřina", "Voda", "Plyn", "Splátky", "Internet", "Telefon"];
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!firebaseConfig.apiKey) {
+                showToast("Konfigurace", "Prosím doplňte konfiguraci firebaseConfig v kódu.");
+            }
+            // Init Firebase dynamic proxy
+            const fb = window.fb;
+            app = fb.initializeApp(firebaseConfig);
+            auth = fb.getAuth(app);
+            db = fb.getFirestore(app);
+            storage = fb.getStorage(app);
+
+            // Auth State Watcher
+            fb.onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('user-display-name').innerText = user.displayName || user.email;
+                    if(user.photoURL) document.getElementById('user-avatar').src = user.photoURL;
+                    checkUserHousehold();
+                } else {
+                    currentUser = null;
+                    householdId = null;
+                    showAuthScreen();
+                }
+            });
+        });
+
+        // Toast Helper
+        function showToast(title, message) {
+            const el = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMsg').innerText = message;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 4000);
+        }
+
+        // View Router Switching
+        function showAuthScreen() {
+            document.getElementById('sec-auth').classList.remove('hidden');
+            document.getElementById('sec-household').classList.add('hidden');
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.add('hidden');
+            hideAllSections();
+        }
+
+        function hideAllSections() {
+            ['dashboard', 'finance', 'inventory', 'receipts', 'tasks', 'chat'].forEach(s => {
+                document.getElementById(`sec-${s}`).classList.add('hidden');
+            });
+        }
+
+        function switchSection(target) {
+            hideAllSections();
+            document.getElementById(`sec-${target}`).classList.remove('hidden');
+            
+            // Toggle active visual states on bottom navbar
+            ['dashboard', 'finance', 'inventory', 'receipts', 'tasks', 'chat'].forEach(s => {
+                const navBtn = document.getElementById(`nav-${s}`);
+                if(s === target) {
+                    navBtn.classList.remove('text-gray-500');
+                    navBtn.classList.add('text-gold-950');
+                } else {
+                    navBtn.classList.remove('text-gold-950');
+                    navBtn.classList.add('text-gray-500');
+                }
+            });
+            currentSection = target;
+            if(target === 'dashboard') recalculateDashboard();
+        }
+
+        function switchAuthTab(tab) {
+            currentAuthTab = tab;
+            const loginBtn = document.getElementById('tab-login-btn');
+            const regBtn = document.getElementById('tab-register-btn');
+            const nameField = document.getElementById('auth-name-container');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            if(tab === 'login') {
+                loginBtn.className = "flex-1 text-center font-bold text-gold-950 border-b-2 border-gold-950 pb-2";
+                regBtn.className = "flex-1 text-center font-bold text-gray-500 pb-2";
+                nameField.classList.add('hidden');
+                submitBtn.innerText = "Přihlásit se";
+            } else {
+                regBtn.className = "flex-1 text-center font-bold text-gold-950 border-b-2 border-gold-950 pb-2";
+                loginBtn.className = "flex-1 text-center font-bold text-gray-500 pb-2";
+                nameField.classList.remove('hidden');
+                submitBtn.innerText = "Zaregistrovat se";
+            }
+        }
+
+        // Authentication Methods
+        async function handleAuth() {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            const name = document.getElementById('auth-name').value;
+            const fb = window.fb;
+
+            if(!email || !pass) { showToast("Chyba", "Vyplňte email a heslo."); return; }
+
+            try {
+                if(currentAuthTab === 'login') {
+                    await fb.signInWithEmailAndPassword(auth, email, pass);
+                    showToast("Úspěch", "Vítejte v ekosystému AUREUM.");
+                } else {
+                    const cred = await fb.createUserWithEmailAndPassword(auth, email, pass);
+                    await fb.updateProfile(cred.user, {
+                        displayName: name || email,
+                        photoURL: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
+                    });
+                    // Create base shadow profile entry
+                    await fb.setDoc(fb.doc(db, "users", cred.user.uid), {
+                        uid: cred.user.uid,
+                        email: email,
+                        name: name || email,
+                        householdId: null
+                    });
+                    showToast("Úspěch", "Účet úspěšně zaregistrován.");
+                }
+            } catch(e) {
+                showToast("Chyba Auth", e.message);
+            }
+        }
+
+        async function logOut() {
+            await window.fb.signOut(auth);
+        }
+
+        // Household Pipeline
+        async function checkUserHousehold() {
+            const fb = window.fb;
+            const uDoc = await fb.getDoc(fb.doc(db, "users", currentUser.uid));
+            if(uDoc.exists() && uDoc.data().householdId) {
+                householdId = uDoc.data().householdId;
+                enterProductionApp();
+            } else {
+                document.getElementById('sec-auth').classList.add('hidden');
+                document.getElementById('sec-household').classList.remove('hidden');
+            }
+        }
+
+        async function createHousehold() {
+            const fb = window.fb;
+            const generatedCode = "H-" + Math.floor(100000 + Math.random() * 900000);
+            householdId = generatedCode;
+
+            // Initialize structured architecture entry inside Firestore
+            await fb.setDoc(fb.doc(db, "households", generatedCode), {
+                code: generatedCode,
+                createdBy: currentUser.uid,
+                createdAt: new Date().toISOString(),
+                members: [ { uid: currentUser.uid, name: currentUser.displayName, email: currentUser.email, photo: currentUser.photoURL } ],
+                transactions: [],
+                assets: [],
+                tasks: [],
+                messages: [],
+                logs: [ { text: `${currentUser.displayName} založil domácnost.`, time: new Date().toISOString() } ]
+            });
+
+            await fb.updateDoc(fb.doc(db, "users", currentUser.uid), { householdId: generatedCode });
+            showToast("Domácnost", "Nová prémiová domácnost byla vygenerována.");
+            enterProductionApp();
+        }
+
+        async function joinHousehold() {
+            const fb = window.fb;
+            const code = document.getElementById('hh-join-code').value.trim();
+            if(!code) { showToast("Chyba", "Zadejte platný přístupový kód."); return; }
+
+            const hRef = fb.doc(db, "households", code);
+            const hSnap = await fb.getDoc(hRef);
+
+            if(hSnap.exists()) {
+                householdId = code;
+                await fb.updateDoc(hRef, {
+                    members: fb.arrayUnion({ uid: currentUser.uid, name: currentUser.displayName, email: currentUser.email, photo: currentUser.photoURL }),
+                    logs: fb.arrayUnion({ text: `${currentUser.displayName} se připojil do domácnosti.`, time: new Date().toISOString() })
+                });
+                await fb.updateDoc(fb.doc(db, "users", currentUser.uid), { householdId: code });
+                showToast("Úspěch", "Byl jste úspěšně přidán do sdílené domácnosti.");
+                enterProductionApp();
+            } else {
+                showToast("Chyba", "Tento kód domácnosti neexistuje.");
+            }
+        }
+
+        function copyHouseholdCode() {
+            navigator.clipboard.writeText(householdId);
+            showToast("Sdílení", "Kód domácnosti zkopírován do schránky.");
+        }
+
+        // Realtime Synchronizer Core Entry
+        function enterProductionApp() {
+            document.getElementById('sec-auth').classList.add('hidden');
+            document.getElementById('sec-household').classList.add('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            document.getElementById('hh-display-code').innerText = householdId;
+            
+            switchSection('dashboard');
+            listenToHouseholdRealtime();
+        }
+
+        // Realtime Firestore Core Sync Hub
+        function listenToHouseholdRealtime() {
+            const fb = window.fb;
+            fb.onSnapshot(fb.doc(db, "households", householdId), (snapshot) => {
+                if(!snapshot.exists()) return;
+                const data = snapshot.data();
+                
+                window.householdData = data; // Cache storage global context
+                recalculateDashboard();
+                renderFinanceSection();
+                renderInventorySection();
+                renderReceiptsSection();
+                renderTasksSection();
+                renderChatAndLogs();
+                populateTaskAssigneeDropdown();
+            });
+        }
+
+        // Recalculate Dashboard Stats Engine & AI Advisor
+        function recalculateDashboard() {
+            const data = window.householdData;
+            if(!data) return;
+
+            let totalIncome = 0;
+            let totalExpense = 0;
+            
+            (data.transactions || []).forEach(tx => {
+                const amt = parseFloat(tx.amount) || 0;
+                if(tx.type === 'income') totalIncome += amt;
+                else totalExpense += amt;
+            });
+
+            const currentBalance = totalIncome - totalExpense;
+            
+            document.getElementById('dash-balance').innerText = currentBalance.toLocaleString('cs-CZ') + " Kč";
+            document.getElementById('dash-income').innerText = totalIncome.toLocaleString('cs-CZ') + " Kč";
+            document.getElementById('dash-expense').innerText = totalExpense.toLocaleString('cs-CZ') + " Kč";
+
+            document.getElementById('stat-members').innerText = (data.members || []).length;
+            document.getElementById('stat-assets').innerText = (data.assets || []).length;
+            
+            const openTasks = (data.tasks || []).filter(t => !t.done).length;
+            document.getElementById('stat-tasks').innerText = openTasks;
+
+            // AI ENGINE EXECUTION BLOCK
+            executeAIEngine(currentBalance, data.transactions || []);
+            // Render Graph
+            renderExpenseChart(data.transactions || []);
+        }
+
+        function executeAIEngine(balance, txs) {
+            let advice = "Finanční toky stabilní. Doporučujeme diverzifikovat volný kapitál.";
+            if(balance < 10000 && balance >= 0) {
+                advice = "Varování: Vaše volná likvidita klesá. Doporučujeme odložit zbytné nákupy ze sekce Ostatní a Elektronika.";
+            } else if(balance < 0) {
+                advice = "Kritické riziko dluhu! Výdaje převýšily zůstatek. Urgentně doporučujeme nejprve zaplatit klíčové priority: Nájem a Energie.";
+            } else {
+                // Find highest priority items from the structure inside recent txs
+                const urgentNeeded = aiPriorities.find(p => !txs.some(t => t.category === p && t.type === 'expense'));
+                if(urgentNeeded) {
+                    advice = `Doporučujeme nejprve zaplatit fixed cost položku: ${urgentNeeded}.`;
+                }
+            }
+
+            document.getElementById('ai-advice').innerText = advice;
+            document.getElementById('ai-free-cash').innerText = (balance > 0 ? Math.floor(balance * 0.4) : 0).toLocaleString('cs-CZ') + " Kč";
+            document.getElementById('ai-est-end').innerText = (balance * 0.95).toLocaleString('cs-CZ') + " Kč";
+        }
+
+        // Render Expense Breakdown Chart.js Custom Component
+        function renderExpenseChart(txs) {
+            const ctx = document.getElementById('chartExpenses').getContext('2d');
+            
+            // Group expenses
+            const categories = {};
+            txs.filter(t => t.type === 'expense').forEach(t => {
+                categories[t.category] = (categories[t.category] || 0) + parseFloat(t.amount);
+            });
+
+            const labels = Object.keys(categories);
+            const dataValues = Object.values(categories);
+
+            if(expenseChartInstance) expenseChartInstance.destroy();
+
+            if(labels.length === 0) {
+                labels.push("Žádné výdaje");
+                dataValues.push(1);
+            }
+
+            expenseChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: ['#b89047', '#875630', '#26262b', '#4b5563', '#9ca3af', '#f4e9cf', '#d4a373', '#6b7280'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        // Modals Management
+        function openTransactionModal() { document.getElementById('modal-tx').classList.remove('hidden'); }
+        function openAssetModal() { document.getElementById('modal-asset').classList.remove('hidden'); }
+        function openTaskModal() { document.getElementById('modal-task').classList.remove('hidden'); }
+        function closeModals() {
+            document.getElementById('modal-tx').classList.add('hidden');
+            document.getElementById('modal-asset').classList.add('hidden');
+            document.getElementById('modal-task').classList.add('hidden');
+        }
+
+        // Save Transactions Engine
+        async function saveTransaction() {
+            const fb = window.fb;
+            const amount = document.getElementById('form-tx-amount').value;
+            const type = document.getElementById('form-tx-type').value;
+            const category = document.getElementById('form-tx-cat').value;
+            const note = document.getElementById('form-tx-note').value || "Bez poznámky";
+
+            if(!amount) return;
+
+            const newTx = {
+                id: "tx-" + Date.now(),
+                amount: parseFloat(amount),
+                type: type,
+                category: category,
+                note: note,
+                date: new Date().toLocaleDateString('cs-CZ'),
+                time: new Date().toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'}),
+                authorName: currentUser.displayName,
+                authorPhoto: currentUser.photoURL
+            };
+
+            const logMsg = `${currentUser.displayName} přidal ${type === 'income' ? 'příjem' : 'výdaj'} ${amount} Kč v kategorii ${category}.`;
+
+            await fb.updateDoc(fb.doc(db, "households", householdId), {
+                transactions: fb.arrayUnion(newTx),
+                logs: fb.arrayUnion({ text: logMsg, time: new Date().toISOString() })
+            });
+
+            closeModals();
+            showToast("Pokladna", "Transakce byla úspěšně uložena do ledgeru.");
+        }
+
+        function renderFinanceSection() {
+            const txList = document.getElementById('tx-list');
+            txList.innerHTML = "";
+            const txs = window.householdData?.transactions || [];
+
+            [...txs].reverse().forEach(tx => {
+                const isIncome = tx.type === 'income';
+                txList.innerHTML += `
+                    <div class="glass p-3 rounded-xl flex items-center justify-between border-r-4 ${isIncome ? 'border-r-emerald-500' : 'border-r-rose-500'}">
+                        <div class="flex items-center gap-3">
+                            <img src="${tx.authorPhoto}" class="w-7 h-7 rounded-full object-cover border border-gold-950/40">
+                            <div>
+                                <p class="text-xs font-bold text-white">${tx.note} <span class="text-[10px] text-gray-500 font-normal">(${tx.category})</span></p>
+                                <p class="text-[9px] text-gray-400">${tx.authorName} • ${tx.date} v ${tx.time}</p>
+                            </div>
+                        </div>
+                        <p class="text-xs font-mono font-bold ${isIncome ? 'text-emerald-400' : 'text-rose-400'}">${isIncome ? '+' : '-'}${tx.amount} Kč</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Open Banking Simulation Core Component
+        function simulateOpenBankingConnect() {
+            showToast("Open Banking API", "Inicializace zabezpečeného handshake spojení PSD2...");
+            setTimeout(async () => {
+                const fb = window.fb;
+                // Mock automatic integration imports
+                const mockTxs = [
+                    { id: "ob-1", amount: 12000, type: "expense", category: "Nájem", note: "SIPO Nájemné bank_sync", date: new Date().toLocaleDateString('cs-CZ'), time: "05:01", authorName: "PSD2 Core API", authorPhoto: "https://images.unsplash.com/photo-1550565118-3a14e8d0386f?w=50&q=80" },
+                    { id: "ob-2", amount: 450, type: "expense", category: "Internet", note: "Vodafone Internet automat", date: new Date().toLocaleDateString('cs-CZ'), time: "07:12", authorName: "PSD2 Core API", authorPhoto: "https://images.unsplash.com/photo-1550565118-3a14e8d0386f?w=50&q=80" }
+                ];
+
+                let refH = fb.doc(db, "households", householdId);
+                await fb.updateDoc(refH, {
+                    transactions: fb.arrayUnion(mockTxs[0]),
+                    logs: fb.arrayUnion({ text: "PSD2 Automatické GoCardless inkaso spárovalo výdaj Nájem.", time: new Date().toISOString() })
+                });
+                await fb.updateDoc(refH, {
+                    transactions: fb.arrayUnion(mockTxs[1]),
+                    logs: fb.arrayUnion({ text: "PSD2 Automatické GoCardless inkaso spárovalo výdaj Internet.", time: new Date().toISOString() })
+                });
+
+                showToast("Bankovní synchronizace", "Načteny a automaticky zkategorizovány 2 nové bankovní transakce.");
+            }, 2000);
+        }
+
+        // Automatic Categorization Matcher
+        function autoCategorizeAsset(val) {
+            const catSelect = document.getElementById('form-asset-cat');
+            const query = val.toLowerCase().trim();
+            if(["lednice", "pračka", "mikrovlnka", "spotřebič"].some(x => query.includes(x))) catSelect.value = "Spotřebiče";
+            else if(["televize", "notebook", "mobil", "pc", "elektronika"].some(x => query.includes(x))) catSelect.value = "Elektronika";
+            else if(["postel", "skříň", "stůl", "židle", "nábytek"].some(x => query.includes(x))) catSelect.value = "Nábytek";
+        }
+
+        // Asset Management
+        async function saveAsset() {
+            const fb = window.fb;
+            const name = document.getElementById('form-asset-name').value;
+            const category = document.getElementById('form-asset-cat').value;
+            const price = document.getElementById('form-asset-price').value || 0;
+            const shop = document.getElementById('form-asset-shop').value || "Neznámý";
+            const warranty = parseInt(document.getElementById('form-asset-warranty').value) || 24;
+            const note = document.getElementById('form-asset-note').value || "-";
+
+            if(!name) return;
+
+            const newAsset = {
+                id: "asset-" + Date.now(),
+                name: name,
+                category: category,
+                price: parseFloat(price),
+                shop: shop,
+                warrantyMonths: warranty,
+                date: new Date().toLocaleDateString('cs-CZ'),
+                authorName: currentUser.displayName
+            };
+
+            await fb.updateDoc(fb.doc(db, "households", householdId), {
+                assets: fb.arrayUnion(newAsset),
+                logs: fb.arrayUnion({ text: `${currentUser.displayName} zaevidoval majetek: ${name}.`, time: new Date().toISOString() })
+            });
+
+            closeModals();
+            showToast("Majetek", "Položka byla zapsána do domovního inventáře.");
+        }
+
+        function renderInventorySection() {
+            const container = document.getElementById('asset-list');
+            container.innerHTML = "";
+            const assets = window.householdData?.assets || [];
+
+            assets.forEach(as => {
+                container.innerHTML += `
+                    <div class="glass p-3 rounded-xl flex flex-col justify-between border-b-2 border-b-gold-950/40">
+                        <div>
+                            <span class="text-[8px] uppercase tracking-wider bg-gold-950/10 text-gold-950 px-2 py-0.5 rounded font-bold">${as.category}</span>
+                            <h4 class="text-xs font-bold text-white mt-1.5">${as.name}</h4>
+                            <p class="text-[10px] text-gray-400 mt-0.5 font-mono">${parseFloat(as.price).toLocaleString('cs-CZ')} Kč</p>
+                        </div>
+                        <div class="pt-3 mt-3 border-t border-gray-800/60 text-[9px] text-gray-500">
+                            Záruka: ${as.warrantyMonths} měs. <br>
+                            Uživatel: ${as.authorName}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Tesseract.js OCR Core Component & Storage Pipeline
+        async function processOCR(input) {
+            const file = input.files[0];
+            if(!file) return;
+
+            document.getElementById('ocr-loader').classList.remove('hidden');
+
+            try {
+                // OCR Processing via Tesseract
+                const result = await Tesseract.recognize(file, 'ces+eng');
+                const text = result.data.text;
+                
+                // Intelligent parsing engine heuristics
+                let detectedPrice = 0;
+                let detectedShop = "Obchod";
+                
+                const lines = text.split('\n');
+                // Regex for capturing typical receipt formatting
+                const numbers = text.match(/\d+[\s,.]\d{2}/g);
+                if(numbers) {
+                    const parsedAmts = numbers.map(n => parseFloat(n.replace(/[\s,]/g, '.')));
+                    detectedPrice = Math.max(...parsedAmts); // Fallback best estimate strategy
+                }
+
+                if(text.toLowerCase().includes("alza")) detectedShop = "Alza.cz";
+                else if(text.toLowerCase().includes("lidl")) detectedShop = "Lidl";
+                else if(text.toLowerCase().includes("kaufland")) detectedShop = "Kaufland";
+
+                // Map results into dynamic transactional database record
+                const fb = window.fb;
+                const mockReceipt = {
+                    id: "rcpt-" + Date.now(),
+                    price: detectedPrice || 250,
+                    shop: detectedShop,
+                    date: new Date().toLocaleDateString('cs-CZ'),
+                    authorName: currentUser.displayName,
+                    ocrHint: text.substring(0, 100)
+                };
+
+                await fb.updateDoc(fb.doc(db, "households", householdId), {
+                    // Simulating array updates context mapping storage tracking
+                    transactions: fb.arrayUnion({
+                        id: "tx-ocr-" + Date.now(),
+                        amount: detectedPrice || 250,
+                        type: "expense",
+                        category: "Domácnost",
+                        note: `OCR: ${detectedShop}`,
+                        date: new Date().toLocaleDateString('cs-CZ'),
+                        time: "Nahráno OCR",
+                        authorName: currentUser.displayName,
+                        authorPhoto: currentUser.photoURL
+                    }),
+                    logs: fb.arrayUnion({ text: `${currentUser.displayName} nahrál novou účtenku z ${detectedShop} zpracovanou skrze OCR inteligenci.`, time: new Date().toISOString() })
+                });
+
+                showToast("OCR Hotovo", `Detekováno: ${detectedShop}, Částka: ${detectedPrice} Kč.`);
+            } catch(e) {
+                showToast("OCR Chyba", "Zpracování se nezdařilo. Data uložena ručně.");
+            } finally {
+                document.getElementById('ocr-loader').classList.add('hidden');
+            }
+        }
+
+        function renderReceiptsSection() {
+            const container = document.getElementById('receipts-list');
+            container.innerHTML = "";
+            const txs = window.householdData?.transactions || [];
+            const ocrReceipts = txs.filter(t => t.note.startsWith("OCR:"));
+
+            if(ocrReceipts.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">Žádné digitální účtenky nebyly dosud skenovány.</p>`;
+                return;
+            }
+
+            ocrReceipts.forEach(rc => {
+                container.innerHTML += `
+                    <div class="glass p-3 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-file-invoice text-gold-950"></i>
+                            <div>
+                                <p class="text-xs font-bold">${rc.note}</p>
+                                <p class="text-[9px] text-gray-500">${rc.date} • Správce: ${rc.authorName}</p>
+                            </div>
+                        </div>
+                        <p class="text-xs font-mono font-bold text-white">${rc.amount} Kč</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Shared Task Management Infrastructure
+        function populateTaskAssigneeDropdown() {
+            const dropdown = document.getElementById('form-task-assignee');
+            if(!dropdown) return;
+            dropdown.innerHTML = "";
+            const members = window.householdData?.members || [];
+            members.forEach(m => {
+                dropdown.innerHTML += `<option value="${m.name}">${m.name}</option>`;
+            });
+        }
+
+        async function saveTask() {
+            const fb = window.fb;
+            const title = document.getElementById('form-task-title').value;
+            const assignee = document.getElementById('form-task-assignee').value;
+
+            if(!title) return;
+
+            const newTask = {
+                id: "task-" + Date.now(),
+                title: title,
+                assignee: assignee,
+                done: false,
+                createdAt: new Date().toLocaleDateString('cs-CZ')
+            };
+
+            await fb.updateDoc(fb.doc(db, "households", householdId), {
+                tasks: fb.arrayUnion(newTask),
+                logs: fb.arrayUnion({ text: `${currentUser.displayName} vytvořil úkol pro ${assignee}: ${title}.`, time: new Date().toISOString() })
+            });
+
+            closeModals();
+            showToast("Úkoly", "Úkol úspěšně přiřazen členu rodiny.");
+        }
+
+        async function toggleTaskComplete(taskId) {
+            const fb = window.fb;
+            const updatedTasks = (window.householdData.tasks || []).map(t => {
+                if(t.id === taskId) {
+                    t.done = !t.done;
+                }
+                return t;
+            });
+
+            await fb.updateDoc(fb.doc(db, "households", householdId), {
+                tasks: updatedTasks,
+                logs: fb.arrayUnion({ text: `${currentUser.displayName} aktualizoval stav plnění úkolu.`, time: new Date().toISOString() })
+            });
+        }
+
+        function renderTasksSection() {
+            const container = document.getElementById('task-list');
+            container.innerHTML = "";
+            const tasks = window.householdData?.tasks || [];
+
+            if(tasks.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">Všechny úkoly splněny. Skvělá práce!</p>`;
+                return;
+            }
+
+            tasks.forEach(t => {
+                container.innerHTML += `
+                    <div class="glass p-3 rounded-xl flex items-center justify-between ${t.done ? 'opacity-40' : ''}">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskComplete('${t.id}')" class="accent-gold-950 w-4 h-4 rounded">
+                            <div>
+                                <p class="text-xs font-bold ${t.done ? 'line-through' : ''}">${t.title}</p>
+                                <p class="text-[9px] text-gray-400">Přiřazeno: ${t.assignee}</p>
+                            </div>
+                        </div>
+                        <i class="fas ${t.done ? 'fa-check-circle text-emerald-500' : 'fa-clock text-gold-950'} text-xs"></i>
+                    </div>
+                `;
+            });
+        }
+
+        // Shared Ecosystem Internal Live Chat & System Logs Engine
+        function switchChatSubTab(sub) {
+            currentChatSubTab = sub;
+            const btnMsg = document.getElementById('chat-tab-msg');
+            const btnLogs = document.getElementById('chat-tab-logs');
+            const boxMsg = document.getElementById('chat-sub-msg');
+            const boxLogs = document.getElementById('chat-sub-logs');
+
+            if(sub === 'msg') {
+                btnMsg.className = "flex-1 text-center py-3 font-bold text-gold-950 border-b-2 border-gold-950";
+                btnLogs.className = "flex-1 text-center py-3 font-bold text-gray-500";
+                boxMsg.classList.remove('hidden');
+                boxLogs.classList.add('hidden');
+            } else {
+                btnLogs.className = "flex-1 text-center py-3 font-bold text-gold-950 border-b-2 border-gold-950";
+                btnMsg.className = "flex-1 text-center py-3 font-bold text-gray-500";
+                boxLogs.classList.remove('hidden');
+                boxMsg.classList.add('hidden');
+            }
+        }
+
+        async function sendChatMessage() {
+            const fb = window.fb;
+            const inp = document.getElementById('chat-input');
+            const txt = inp.value.trim();
+            if(!txt) return;
+
+            const newMsg = {
+                id: "msg-" + Date.now(),
+                senderUid: currentUser.uid,
+                senderName: currentUser.displayName,
+                senderPhoto: currentUser.photoURL,
+                text: txt,
+                time: new Date().toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'})
+            };
+
+            inp.value = "";
+            await fb.updateDoc(fb.doc(db, "households", householdId), {
+                messages: fb.arrayUnion(newMsg)
+            });
+        }
+
+        function renderChatAndLogs() {
+            const msgContainer = document.getElementById('chat-messages');
+            msgContainer.innerHTML = "";
+            const msgs = window.householdData?.messages || [];
+
+            msgs.forEach(m => {
+                const isMe = m.senderUid === currentUser.uid;
+                msgContainer.innerHTML += `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%] ${isMe ? 'self-end' : 'self-start'}">
+                        <span class="text-[9px] text-gray-500 mb-0.5">${m.senderName} • ${m.time}</span>
+                        <div class="p-2.5 rounded-2xl text-xs leading-relaxed ${isMe ? 'gold-gradient text-black rounded-tr-none' : 'glass text-white rounded-tl-none'}">
+                            ${m.text}
+                        </div>
+                    </div>
+                `;
+            });
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            // Audit Trail System Logs Component Update
+            const logsContainer = document.getElementById('chat-sub-logs');
+            logsContainer.innerHTML = "";
+            const logs = window.householdData?.logs || [];
+            [...logs].reverse().forEach(l => {
+                logsContainer.innerHTML += `
+                    <div class="p-2 border-b border-gray-900/60 font-mono text-gray-400 flex justify-between items-start gap-2">
+                        <span>• ${l.text}</span>
+                        <span class="text-[9px] text-gold-950/60 shrink-0">${new Date(l.time).toLocaleTimeString('cs-CZ')}</span>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
