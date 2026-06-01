@@ -473,7 +473,7 @@
     <script>
         /* CONFIGURATION */
         const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
-        const SUPABASE_ANON_KEY = "Sb_publishable_m3be36_XXe5sxlbXF4ObBQ_VXtSDhnz";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNia2lxY3RqZmF0b3pxbml4aGFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMzM2NjIsImV4cCI6MjA5NTkwOTY2Mn0.4-uDF2b7Pv2CfTL1NpwRPdtuN1u0KDUxmtHSf8QAUDM";
         
         let supabase = null;
         let isMockMode = true; // Použito pokud chybí reálné klíče
@@ -564,7 +564,7 @@
         async function loadUserData(authUser) {
             const { data } = await supabase.from('profiles').select('*').eq('id', authUser.id).single();
             state.user = data;
-            const { data: hhData } = await supabase.from('household_members').select('household_id, households(*)').eq('user_id', authUser.id).single();
+            const { data: hhData = null } = await supabase.from('household_members').select('household_id, households(*)').eq('user_id', authUser.id).single() || {};
             if(hhData) state.household = hhData.households;
             // Zde by bylo načtení reálných dat z DB ...
         }
