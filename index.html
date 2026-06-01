@@ -33,7 +33,7 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
         
         body {
             background-color: #0A0A0A;
@@ -93,7 +93,6 @@
             text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
         }
 
-        /* Animations */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
 
@@ -107,7 +106,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Ambient background glow */
         .ambient-glow {
             position: fixed;
             border-radius: 50%;
@@ -127,6 +125,7 @@
 
     <div id="app" class="app-container relative">
         
+        <!-- PŘIHLASOVACÍ OBRAZOVKA -->
         <div id="auth-view" class="h-full w-full flex flex-col justify-center px-6 animate-fade-in z-50 absolute inset-0 bg-black">
             <div class="text-center mb-10">
                 <i class="fa-solid fa-gem text-5xl text-gold mb-4"></i>
@@ -136,38 +135,30 @@
 
             <div class="glass p-6 rounded-3xl w-full max-w-md mx-auto">
                 <form id="auth-form" class="space-y-5">
-                    <div id="register-fields" class="hidden space-y-5">
-                        <div>
-                            <label class="block text-xs text-gray-400 ml-1 mb-1">Jméno</label>
-                            <input type="text" id="auth-name" class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors" placeholder="Vaše jméno">
-                        </div>
-                    </div>
                     <div>
                         <label class="block text-xs text-gray-400 ml-1 mb-1">E-mail</label>
-                        <input type="email" id="auth-email" required class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors" placeholder="email@domena.cz">
+                        <!-- PŘEDVYPLNĚNÝ EMAIL -->
+                        <input type="email" id="auth-email" value="adamhorvath07@icloud.com" required class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-400 ml-1 mb-1">Heslo</label>
-                        <input type="password" id="auth-password" required class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors" placeholder="••••••••">
+                        <!-- PŘEDVYPLNĚNÉ HESLO -->
+                        <input type="password" id="auth-password" value="Domacnost1" required class="w-full bg-darkgray border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors">
                     </div>
                     
                     <button type="submit" class="w-full bg-gradient-gold text-black font-semibold rounded-xl py-3 mt-4 hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(212,175,55,0.4)]">
-                        <span id="auth-btn-text">Přihlásit se</span>
+                        <span>Přihlásit se</span>
                     </button>
                 </form>
-
-                <div class="mt-6 text-center space-y-3">
-                    <button type="button" id="toggle-auth" class="text-gold text-sm hover:underline block w-full text-center">Nemáte účet? Registrovat</button>
-                    <button type="button" class="block w-full text-gray-500 text-xs hover:text-white">Zapomenuté heslo?</button>
-                </div>
             </div>
         </div>
 
+        <!-- HLAVNÍ ROZHRANÍ APLIKACE -->
         <div id="main-view" class="hidden h-full flex-col relative w-full max-w-md mx-auto border-x border-gray-800/30">
             <header class="glass pt-12 pb-4 px-6 flex justify-between items-center sticky top-0 z-40 rounded-b-3xl">
                 <div class="flex items-center gap-3">
                     <div class="h-10 w-10 rounded-full bg-darkgray border border-gold flex items-center justify-center overflow-hidden">
-                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000" alt="Avatar" class="h-full w-full object-cover">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=Adam&background=D4AF37&color=000" alt="Avatar" class="h-full w-full object-cover">
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Dobrý den,</p>
@@ -338,6 +329,7 @@
             </nav>
         </div>
 
+        <!-- MODALY -->
         <div id="tx-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
             <div class="glass w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 h-[85vh] sm:h-auto flex flex-col">
                 <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold">Nová transakce</h3><button onclick="closeModal('tx-modal')" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button></div>
@@ -398,14 +390,13 @@
 
     <script>
         /* CONFIGURATION */
-        // Pokud chceš testovat bez Supabase, nech tyto dvě proměnné prázdné ("")
         const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNia2lxY3RqZmF0b3pxbml4aGFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMzM2NjIsImV4cCI6MjA5NTkwOTY2Mn0.4-uDF2b7Pv2CfTL1NpwRPdtuN1u0KDUxmtHSf8QAUDM";
         
         let supabase = null;
         let isMockMode = true;
 
-        if (SUPABASE_URL !== "DOPLNIT_SUPABASE_URL" && SUPABASE_URL !== "") {
+        if (SUPABASE_URL !== "") {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             isMockMode = false;
         }
@@ -424,75 +415,31 @@
             charts: { budget: null, category: null }
         };
 
-        /* PWA SETUP */
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', (e) => { e.waitUntil(caches.open('aura-v1').then((c) => c.addAll(['/']))); });
-                self.addEventListener('fetch', (e) => { e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request))); });
-            `;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(console.error);
-        }
-
         /* INITIALIZATION */
-        let isLogin = true;
-
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tx-date').valueAsDate = new Date();
             document.getElementById('item-date').valueAsDate = new Date();
             
-            // OPRAVA LOGIKY PŘEPÍNÁNÍ: Bezpečné přepínání stavu zobrazení políček
-            document.getElementById('toggle-auth').addEventListener('click', (e) => {
-                isLogin = !isLogin;
-                
-                const registerFields = document.getElementById('register-fields');
-                const authBtnText = document.getElementById('auth-btn-text');
-                
-                if (isLogin) {
-                    registerFields.classList.add('hidden');
-                    authBtnText.innerText = 'Přihlásit se';
-                    e.target.innerText = 'Nemáte účet? Registrovat';
-                } else {
-                    registerFields.classList.remove('hidden');
-                    authBtnText.innerText = 'Zaregistrovat se';
-                    e.target.innerText = 'Máte účet? Přihlásit se';
-                }
-            });
-
             document.getElementById('auth-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = document.getElementById('auth-email').value;
                 const password = document.getElementById('auth-password').value;
-                const name = document.getElementById('auth-name').value;
                 
                 if (isMockMode) {
-                    state.user = { id: 'usr1', email, name: name || 'Uživatel', avatar: `https://ui-avatars.com/api/?name=${name||'U'}&background=D4AF37&color=000` };
+                    state.user = { id: 'usr1', email, name: 'Adam', avatar: `https://ui-avatars.com/api/?name=Adam&background=D4AF37&color=000` };
                     generateMockData();
                     initApp();
                 } else {
-                    if (isLogin) {
-                        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                        if (error) return alert("Chyba přihlášení: " + error.message);
-                        if(data.user) { await loadUserData(data.user); initApp(); }
-                    } else {
-                        // Ochrana před prázdným jménem
-                        if(!name.trim()) return alert("Před registrací prosím vyplňte své Jméno.");
-                        
-                        const { data, error } = await supabase.auth.signUp({ email, password });
-                        if (error) return alert("Chyba registrace: " + error.message);
-                        
-                        if(data.user) {
-                            await supabase.from('profiles').insert([{ id: data.user.id, name, email, avatar: `https://ui-avatars.com/api/?name=${name}&background=D4AF37&color=000` }]);
-                            await loadUserData(data.user); initApp();
-                        }
-                    }
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) return alert("Chyba přihlášení: " + error.message);
+                    if(data.user) { await loadUserData(data.user); initApp(); }
                 }
             });
         });
 
         async function loadUserData(authUser) {
             const { data } = await supabase.from('profiles').select('*').eq('id', authUser.id).single();
-            state.user = data || { id: authUser.id, name: "Uživatel", email: authUser.email, avatar: "https://ui-avatars.com/api/?name=U&background=D4AF37&color=000" };
+            state.user = data || { id: authUser.id, name: "Adam", email: authUser.email, avatar: "https://ui-avatars.com/api/?name=Adam&background=D4AF37&color=000" };
             const { data: hhData = null } = await supabase.from('household_members').select('household_id, households(*)').eq('user_id', authUser.id).single() || {};
             if(hhData) state.household = hhData.households;
         }
@@ -517,8 +464,6 @@
             renderInventory();
             renderHousehold();
             logActivity(`Přihlášení úspěšné`);
-
-            if(isMockMode) setInterval(simulateRealtime, 30000);
         }
 
         /* NAVIGATION */
@@ -549,13 +494,11 @@
             document.getElementById(`tab-${tab}`).classList.remove('text-gray-400');
         }
 
-        /* MODALS */
-        // Zjednodušené otevírání modálů
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function toggleBankIntegration() { openModal('bank-modal'); }
 
-        /* FINANCE & AI LOGIC */
+        /* FINANCE ENGINE */
         function setTxType(type) {
             document.getElementById('tx-type').value = type;
             const btnExp = document.getElementById('btn-tx-expense');
@@ -604,18 +547,12 @@
             document.getElementById('dash-expense').innerText = `-${expense.toLocaleString('cs-CZ')} Kč`;
 
             let aiText = "Finance jsou stabilní.";
-            const priorities = ["Nájem", "Hypotéka", "Elektřina", "Voda", "Plyn", "Splátky", "Internet", "Telefon"];
+            const priorities = ["Nájem", "Hypotéka", "Elektřina", "Voda", "Plyn", "Internet"];
             const paidThisMonth = state.transactions.filter(t => t.type === 'expense' && new Date(t.date).getMonth() === currMonth).map(t => t.category);
-            
             let missingPriority = priorities.find(p => !paidThisMonth.includes(p));
             
-            if (balance < 0) {
-                aiText = "Upozornění: Zůstatek je záporný. Riziko dluhu!";
-            } else if (missingPriority) {
-                aiText = `Doporučujeme nejprve zaplatit: <b>${missingPriority}</b>.`;
-            } else if (balance > income * 0.2) {
-                aiText = "Všechny hlavní účty jsou zaplaceny. Zvažte přesun části zůstatku na spoření.";
-            }
+            if (balance < 0) aiText = "Upozornění: Zůstatek je záporný!";
+            else if (missingPriority) aiText = `Doporučujeme nejprve zaplatit: <b>${missingPriority}</b>.`;
 
             document.getElementById('ai-suggestion').innerHTML = aiText;
             return { balance, income, expense };
@@ -645,9 +582,8 @@
         /* INVENTORY & OCR */
         function autoCategorize(name) {
             const n = name.toLowerCase();
-            if (n.includes('lednice') || n.includes('pračka') || n.includes('mikrovlnka')) return 'Spotřebiče';
-            if (n.includes('televize') || n.includes('notebook') || n.includes('telefon')) return 'Elektronika';
-            if (n.includes('postel') || n.includes('skříň') || n.includes('stůl')) return 'Nábytek';
+            if (n.includes('lednice') || n.includes('pračka')) return 'Spotřebiče';
+            if (n.includes('televize') || n.includes('notebook')) return 'Elektronika';
             return 'Ostatní';
         }
 
@@ -659,8 +595,7 @@
             if(!name || !price) return;
 
             const category = autoCategorize(name);
-            const item = { id: Date.now(), name, price, date, warranty, category };
-            state.inventory.unshift(item);
+            state.inventory.unshift({ id: Date.now(), name, price, date, warranty, category });
             logActivity(`Přidán majetek: ${name}`);
             
             closeModal('item-modal');
@@ -674,118 +609,79 @@
         async function handleReceiptUpload(e) {
             const file = e.target.files[0];
             if(!file) return;
-
             document.getElementById('ocr-loader').classList.remove('hidden');
-            
             try {
                 const worker = await Tesseract.createWorker('ces');
                 const ret = await worker.recognize(file);
                 const text = ret.data.text;
                 await worker.terminate();
 
-                let total = 0;
-                let store = "Neznámý obchod";
-                
+                let total = 0; let store = "Obchod";
                 const priceMatch = text.match(/\d+[.,]\d{2}/);
                 if (priceMatch) total = parseFloat(priceMatch[0].replace(',','.'));
                 
-                const lines = text.split('\n').filter(l => l.trim().length > 3);
-                if (lines.length > 0) store = lines[0].trim();
-
-                const receipt = { 
-                    id: Date.now(), 
-                    store, 
-                    total, 
-                    date: new Date().toISOString().split('T')[0],
-                    author: state.user.name 
-                };
-                state.receipts.unshift(receipt);
-                logActivity(`Nahrána účtenka: ${store}`);
+                state.receipts.unshift({ id: Date.now(), store, total, date: new Date().toISOString().split('T')[0], author: state.user.name });
+                state.transactions.unshift({ id: Date.now(), type: 'expense', amount: total, category: 'Ostatní', note: `Účtenka: ${store}`, date: new Date().toISOString().split('T')[0], author: state.user.name });
                 
-                state.transactions.unshift({ id: Date.now(), type: 'expense', amount: total, category: 'Ostatní', note: `Účtenka: ${store}`, date: receipt.date, author: state.user.name });
-                
-                renderInventory();
-                renderFinance();
-                renderDashboard();
+                renderInventory(); renderFinance(); renderDashboard();
             } catch(err) {
-                console.error("OCR Error", err);
-                alert("Nepodařilo se analyzovat účtenku.");
+                alert("Chyba zpracování účtenky.");
             } finally {
                 document.getElementById('ocr-loader').classList.add('hidden');
             }
         }
 
         function renderInventory() {
-            document.getElementById('inventory-list').innerHTML = state.inventory.map(i => {
-                let icon = 'fa-box';
-                if(i.category === 'Spotřebiče') icon = 'fa-blender';
-                if(i.category === 'Elektronika') icon = 'fa-laptop';
-                if(i.category === 'Nábytek') icon = 'fa-couch';
-                
-                return `
+            document.getElementById('inventory-list').innerHTML = state.inventory.map(i => `
                 <div class="glass p-4 rounded-2xl relative overflow-hidden">
-                    <i class="fa-solid ${icon} absolute -bottom-2 -right-2 text-5xl text-white/5"></i>
                     <p class="text-[10px] text-gold mb-1">${i.category}</p>
                     <h4 class="font-bold text-sm mb-2 truncate">${i.name}</h4>
                     <p class="text-xs text-gray-300">${i.price.toLocaleString()} Kč</p>
-                    <p class="text-[9px] text-gray-500 mt-2">Záruka do: ${new Date(new Date(i.date).setFullYear(new Date(i.date).getFullYear() + i.warranty)).toLocaleDateString('cs-CZ')}</p>
                 </div>
-            `}).join('');
+            `).join('');
 
             document.getElementById('receipts-list').innerHTML = state.receipts.map(r => `
                 <div class="glass p-3 rounded-xl flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-darkgray p-2 rounded-lg text-gold"><i class="fa-solid fa-receipt"></i></div>
-                        <div>
-                            <h4 class="font-semibold text-sm">${r.store}</h4>
-                            <p class="text-[10px] text-gray-400">${new Date(r.date).toLocaleDateString('cs-CZ')} • nahrál(a) ${r.author}</p>
-                        </div>
+                    <div>
+                        <h4 class="font-semibold text-sm">${r.store}</h4>
+                        <p class="text-[10px] text-gray-400">${r.author}</p>
                     </div>
                     <p class="font-bold text-sm">${r.total.toLocaleString()} Kč</p>
                 </div>
             `).join('');
         }
 
-        /* HOUSEHOLD (Chat, Tasks, Activities) */
+        /* HOUSEHOLD ENGINE */
         function renderHousehold() {
             document.getElementById('chat-messages').innerHTML = state.messages.map(m => `
                 <div class="${m.author === state.user.name ? 'text-right' : 'text-left'} mb-3">
-                    <p class="text-[10px] text-gray-500 mb-0.5">${m.author} • ${m.time}</p>
-                    <div class="inline-block px-3 py-2 rounded-xl text-sm ${m.author === state.user.name ? 'bg-gold/20 border border-gold/30 text-white' : 'bg-darkgray border border-gray-700 text-gray-200'}">
+                    <p class="text-[10px] text-gray-500 mb-0.5">${m.author}</p>
+                    <div class="inline-block px-3 py-2 rounded-xl text-sm ${m.author === state.user.name ? 'bg-gold/20 text-white' : 'bg-darkgray text-gray-200'}">
                         ${m.content}
                     </div>
                 </div>
             `).join('');
-            
-            const chatBox = document.getElementById('chat-messages');
-            chatBox.scrollTop = chatBox.scrollHeight;
 
             document.getElementById('tasks-list').innerHTML = state.tasks.map((t, idx) => `
                 <div class="glass p-3 rounded-xl flex items-center gap-3" onclick="toggleTask(${idx})">
                     <div class="w-5 h-5 rounded-full border border-gold flex items-center justify-center ${t.done ? 'bg-gold text-black' : ''}">
-                        ${t.done ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                        ${t.done ? '✓' : ''}
                     </div>
                     <p class="text-sm ${t.done ? 'line-through text-gray-500' : 'text-white'}">${t.title}</p>
                 </div>
             `).join('');
 
             document.getElementById('activity-log').innerHTML = state.logs.map(l => `
-                <div class="flex items-center gap-2 border-b border-gray-800 pb-2">
-                    <i class="fa-solid fa-circle-dot text-[8px] text-gold"></i>
+                <div class="flex gap-2 border-b border-gray-800 pb-2 text-xs">
                     <p class="text-gray-300 flex-1">${l.text}</p>
-                    <span class="text-[10px] text-gray-500">${l.time}</span>
                 </div>
-            `).join('');
-
-            document.getElementById('hh-members-avatars').innerHTML = state.members.map(m => `
-                <img src="${m.avatar}" class="w-8 h-8 rounded-full border-2 border-black inline-block relative z-10" alt="${m.name}">
             `).join('');
         }
 
         function sendChatMessage() {
             const input = document.getElementById('chat-input');
             if(!input.value.trim()) return;
-            state.messages.push({ author: state.user.name, content: input.value, time: new Date().toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'}) });
+            state.messages.push({ author: state.user.name, content: input.value });
             input.value = '';
             renderHousehold();
         }
@@ -794,54 +690,24 @@
             const title = document.getElementById('task-title').value;
             if(!title) return;
             state.tasks.push({ title, done: false });
-            logActivity(`Přidán úkol: ${title}`);
             closeModal('task-modal');
             document.getElementById('task-title').value = '';
-            renderHousehold();
-            renderDashboard();
+            renderHousehold(); renderDashboard();
         }
 
         function toggleTask(idx) {
             state.tasks[idx].done = !state.tasks[idx].done;
-            renderHousehold();
-            renderDashboard();
+            renderHousehold(); renderDashboard();
         }
 
         function logActivity(text) {
-            state.logs.unshift({ text: `${state.user.name}: ${text}`, time: new Date().toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'}) });
-            if(state.logs.length > 20) state.logs.pop();
+            state.logs.unshift({ text: `${state.user.name}: ${text}` });
             renderHousehold();
         }
 
-        function copyInvite() {
-            navigator.clipboard.writeText(state.household.inviteCode);
-            alert("Kód zkopírován: " + state.household.inviteCode);
-        }
+        function logout() { window.location.reload(); }
 
-        function createHousehold() {
-            const name = document.getElementById('new-hh-name').value;
-            if(!name) return;
-            state.household = { id: Date.now().toString(), name, inviteCode: 'NEW' + Math.floor(Math.random()*10000) };
-            document.getElementById('hh-name').innerText = name;
-            document.getElementById('hh-setup-section').classList.add('hidden');
-            logActivity(`Založena domácnost ${name}`);
-        }
-
-        function joinHousehold() {
-            const code = document.getElementById('join-hh-code').value;
-            if(!code) return;
-            state.household = { id: 'joined-id', name: 'Připojená Domácnost', inviteCode: code };
-            document.getElementById('hh-name').innerText = state.household.name;
-            document.getElementById('hh-setup-section').classList.add('hidden');
-            logActivity(`Připojení k domácnosti úspěšné`);
-        }
-
-        function logout() {
-            if(!isMockMode) supabase.auth.signOut();
-            window.location.reload();
-        }
-
-        /* CHARTS & DASHBOARD UPDATE */
+        /* CHARTS ENGINE */
         function renderDashboard() {
             analyzeFinances();
             document.getElementById('dash-members').innerText = state.members.length;
@@ -852,9 +718,6 @@
         }
 
         function updateCharts() {
-            Chart.defaults.color = '#9CA3AF';
-            Chart.defaults.font.family = 'Inter';
-
             const ctxBudget = document.getElementById('budgetChart');
             if (ctxBudget) {
                 if (state.charts.budget) state.charts.budget.destroy();
@@ -863,15 +726,12 @@
                     data: {
                         labels: ['Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer'],
                         datasets: [{
-                            label: 'Zůstatek',
                             data: [15000, 18000, 14000, 22000, 21000, analyzeFinances().balance],
                             borderColor: '#D4AF37',
-                            backgroundColor: 'rgba(212, 175, 55, 0.1)',
-                            fill: true,
                             tension: 0.4
                         }]
                     },
-                    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+                    options: { responsive: true, plugins: { legend: { display: false } } }
                 });
             }
         }
@@ -879,7 +739,6 @@
         function updateCategoryChart() {
             const ctxCat = document.getElementById('categoryChart');
             if (!ctxCat) return;
-            
             const expenses = state.transactions.filter(t => t.type === 'expense');
             const catTotals = {};
             expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + e.amount; });
@@ -889,52 +748,19 @@
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(catTotals),
-                    datasets: [{
-                        data: Object.values(catTotals),
-                        backgroundColor: ['#D4AF37', '#AA8C2C', '#F3E5AB', '#ffffff', '#333333', '#666666'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, cutout: '75%', plugins: { legend: { position: 'right', labels: { boxWidth: 10, color: '#fff' } } } }
+                    datasets: [{ data: Object.values(catTotals), backgroundColor: ['#D4AF37', '#AA8C2C', '#F3E5AB'] }]
+                }
             });
         }
 
-        /* MOCK DATA GENERATOR */
         function generateMockData() {
-            state.members = [ state.user, { name: 'Jana Nováková', avatar: 'https://ui-avatars.com/api/?name=Jana+N&background=1A1A1A&color=D4AF37' } ];
-            
-            const d = new Date();
-            const dStr = d.toISOString().split('T')[0];
-            
+            state.members = [ state.user, { name: 'Jana Nováková', avatar: 'https://ui-avatars.com/api/?name=Jana&background=1A1A1A&color=D4AF37' } ];
             state.transactions = [
-                { id: 1, type: 'expense', amount: 15000, category: 'Nájem', note: 'Červen', date: dStr, author: state.user.name },
-                { id: 2, type: 'income', amount: 45000, category: 'Výplata', note: 'Výplata', date: dStr, author: state.user.name },
-                { id: 3, type: 'expense', amount: 1200, category: 'Potraviny', note: 'Kaufland', date: dStr, author: 'Jana Nováková' }
+                { id: 1, type: 'expense', amount: 15000, category: 'Nájem', note: 'Červen', date: new Date().toISOString().split('T')[0], author: 'Adam' },
+                { id: 2, type: 'income', amount: 45000, category: 'Výplata', note: 'Fix', date: new Date().toISOString().split('T')[0], author: 'Adam' }
             ];
-
-            state.inventory = [
-                { id: 1, name: 'Samsung TV 55"', category: 'Elektronika', price: 12000, date: '2025-01-15', warranty: 2 },
-                { id: 2, name: 'Pohovka', category: 'Nábytek', price: 25000, date: '2024-11-20', warranty: 2 }
-            ];
-
-            state.tasks = [
-                { title: 'Zaplatit elektřinu', done: false },
-                { title: 'Koupit čisticí prostředky', done: true }
-            ];
-
-            state.messages = [
-                { author: 'Jana Nováková', content: 'Ahoj, koupila jsem ty potraviny.', time: '14:30' }
-            ];
-
-            state.logs = [
-                { text: 'Jana Nováková založila výdaj 1200 Kč', time: '14:35' }
-            ];
-        }
-
-        function simulateRealtime() {
-            if (Math.random() > 0.7 && state.household.id !== 'mock-hh-id') {
-                const msg = "Nová aktivita v domácnosti.";
-            }
+            state.tasks = [{ title: 'Zaplatit elektřinu', done: false }];
+            state.messages = [{ author: 'Jana Nováková', content: 'Ahoj, všechno je zařízeno.' }];
         }
     </script>
 </body>
