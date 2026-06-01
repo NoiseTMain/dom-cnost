@@ -478,23 +478,10 @@
         let supabase = null;
         let isMockMode = true; // Použito pokud chybí reálné klíče
 
-        if (SUPABASE_URL !== "DOPLNIT_SUPABASE_URL") {
+        if (SUPABASE_URL !== "DOPLNIT_SUPABASE_URL" && SUPABASE_URL !== "") {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             isMockMode = false;
         }
-
-        /* SQL SCHEMA REQUIREMENT:
-        create table profiles (id uuid references auth.users primary key, name text, email text, avatar text, created_at timestamp with time zone default timezone('utc'::text, now()));
-        create table households (id uuid primary key default uuid_generate_v4(), name text, invite_code text unique, created_at timestamp default now());
-        create table household_members (household_id uuid references households(id), user_id uuid references profiles(id), role text, primary key (household_id, user_id));
-        create table transactions (id uuid primary key default uuid_generate_v4(), household_id uuid references households, user_id uuid references profiles, type text, amount numeric, category text, note text, date date, created_at timestamp default now());
-        create table inventory (id uuid primary key default uuid_generate_v4(), household_id uuid, user_id uuid, name text, category text, price numeric, purchase_date date, warranty_years int, created_at timestamp default now());
-        create table receipts (id uuid primary key default uuid_generate_v4(), household_id uuid, file_url text, store text, total numeric, date date, uploaded_by uuid references profiles, created_at timestamp default now());
-        create table tasks (id uuid primary key default uuid_generate_v4(), household_id uuid, title text, completed boolean default false, created_by uuid, created_at timestamp default now());
-        create table messages (id uuid primary key default uuid_generate_v4(), household_id uuid, user_id uuid references profiles, content text, created_at timestamp default now());
-        create table activity_logs (id uuid primary key default uuid_generate_v4(), household_id uuid, user_id uuid references profiles, action text, created_at timestamp default now());
-        -- RLS Policies: create policy "Users can view own household data" on transactions for select using (household_id in (select household_id from household_members where user_id = auth.uid()));
-        */
 
         /* STATE */
         let state = {
@@ -521,15 +508,16 @@
         }
 
         /* INITIALIZATION */
+        let isLogin = true; // Přesunuto do globálního scope, aby k němu měly přístup oba event listenery
+
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tx-date').valueAsDate = new Date();
             document.getElementById('item-date').valueAsDate = new Date();
             
             // Auth Form Logic
-            let isLogin = true;
             document.getElementById('toggle-auth').addEventListener('click', (e) => {
                 e.preventDefault();
-                isLogin = !isLogin;
+                isLogin = !isLogin; // Teď správně mění stav formuláře
                 document.getElementById('register-fields').classList.toggle('hidden');
                 document.getElementById('auth-btn-text').innerText = isLogin ? 'Přihlásit se' : 'Zaregistrovat se';
                 e.target.innerText = isLogin ? 'Nemáte účet? Registrovat' : 'Máte účet? Přihlásit se';
@@ -541,7 +529,6 @@
                 const password = document.getElementById('auth-password').value;
                 const name = document.getElementById('auth-name').value;
                 
-                // MOCK AUTH pro ukázku (pokud není supabase)
                 if (isMockMode) {
                     state.user = { id: 'usr1', email, name: name || 'Uživatel', avatar: `https://ui-avatars.com/api/?name=${name||'U'}&background=D4AF37&color=000` };
                     generateMockData();
@@ -549,11 +536,22 @@
                 } else {
                     if (isLogin) {
                         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                        if (error) {
+                            alert("Chyba při přihlášení: " + error.message);
+                            return;
+                        }
                         if(data.user) { await loadUserData(data.user); initApp(); }
                     } else {
                         const { data, error } = await supabase.auth.signUp({ email, password });
+                        if (error) {
+                            alert("Chyba při registraci: " + error.message);
+                            return;
+                        }
                         if(data.user) {
-                            await supabase.from('profiles').insert([{ id: data.user.id, name, email, avatar: `https://ui-avatars.com/api/?name=${name}&background=D4AF37&color=000` }]);
+                            const { error: profileError } = await supabase.from('profiles').insert([{ id: data.user.id, name: name || 'Nový Uživatel', email, avatar: `https://ui-avatars.com/api/?name=${name || 'U'}&background=D4AF37&color=000` }]);
+                            if (profileError) {
+                                console.error("Nepodařilo se vytvořit profil:", profileError.message);
+                            }
                             await loadUserData(data.user); initApp();
                         }
                     }
@@ -562,11 +560,14 @@
         });
 
         async function loadUserData(authUser) {
-            const { data } = await supabase.from('profiles').select('*').eq('id', authUser.id).single();
-            state.user = data;
+            const { data, error } = await supabase.from('profiles').select('*').eq('id', authUser.id).single();
+            if (data) {
+                state.user = data;
+            } else {
+                state.user = { id: authUser.id, email: authUser.email, name: authUser.email.split('@')[0], avatar: `https://ui-avatars.com/api/?name=U&background=D4AF37&color=000` };
+            }
             const { data: hhData = null } = await supabase.from('household_members').select('household_id, households(*)').eq('user_id', authUser.id).single() || {};
             if(hhData) state.household = hhData.households;
-            // Zde by bylo načtení reálných dat z DB ...
         }
 
         function initApp() {
@@ -590,7 +591,6 @@
             renderHousehold();
             logActivity(`Přihlášení úspěšné`);
 
-            // Setup Realtime mock
             if(isMockMode) setInterval(simulateRealtime, 30000);
         }
 
@@ -675,7 +675,6 @@
             document.getElementById('dash-income').innerText = `+${income.toLocaleString('cs-CZ')} Kč`;
             document.getElementById('dash-expense').innerText = `-${expense.toLocaleString('cs-CZ')} Kč`;
 
-            // AI Priority Logic
             let aiText = "Finance jsou stabilní.";
             const priorities = ["Nájem", "Hypotéka", "Elektřina", "Voda", "Plyn", "Splátky", "Internet", "Telefon"];
             const paidThisMonth = state.transactions.filter(t => t.type === 'expense' && new Date(t.date).getMonth() === currMonth).map(t => t.category);
@@ -751,13 +750,11 @@
             document.getElementById('ocr-loader').classList.remove('hidden');
             
             try {
-                // Tesseract OCR
                 const worker = await Tesseract.createWorker('ces');
                 const ret = await worker.recognize(file);
                 const text = ret.data.text;
                 await worker.terminate();
 
-                // Simple Regex parsing for mock
                 let total = 0;
                 let store = "Neznámý obchod";
                 
@@ -777,7 +774,6 @@
                 state.receipts.unshift(receipt);
                 logActivity(`Nahrána účtenka: ${store}`);
                 
-                // Přidat automaticky do transakcí
                 state.transactions.unshift({ id: Date.now(), type: 'expense', amount: total, category: 'Ostatní', note: `Účtenka: ${store}`, date: receipt.date, author: state.user.name });
                 
                 renderInventory();
@@ -792,7 +788,6 @@
         }
 
         function renderInventory() {
-            // Items
             document.getElementById('inventory-list').innerHTML = state.inventory.map(i => {
                 let icon = 'fa-box';
                 if(i.category === 'Spotřebiče') icon = 'fa-blender';
@@ -809,7 +804,6 @@
                 </div>
             `}).join('');
 
-            // Receipts
             document.getElementById('receipts-list').innerHTML = state.receipts.map(r => `
                 <div class="glass p-3 rounded-xl flex justify-between items-center">
                     <div class="flex items-center gap-3">
@@ -855,7 +849,6 @@
                 </div>
             `).join('');
 
-            // Avatars
             document.getElementById('hh-members-avatars').innerHTML = state.members.map(m => `
                 <img src="${m.avatar}" class="w-8 h-8 rounded-full border-2 border-black inline-block relative z-10" alt="${m.name}">
             `).join('');
@@ -934,7 +927,6 @@
             Chart.defaults.color = '#9CA3AF';
             Chart.defaults.font.family = 'Inter';
 
-            // Budget Chart
             const ctxBudget = document.getElementById('budgetChart');
             if (ctxBudget) {
                 if (state.charts.budget) state.charts.budget.destroy();
@@ -1007,15 +999,13 @@
             ];
 
             state.logs = [
-                { text: 'Jana Nováková bragging výdaj 1200 Kč', time: '14:35' }
+                { text: 'Jana Nováková založila výdaj 1200 Kč', time: '14:35' }
             ];
         }
 
         function simulateRealtime() {
-            // Simulace příchozí zprávy nebo události z Realtime DB
             if (Math.random() > 0.7 && state.household.id !== 'mock-hh-id') {
                 const msg = "Nová aktivita v domácnosti.";
-                // v reálu supabase.channel('room1').on('postgres_changes', ...)
             }
         }
     </script>
