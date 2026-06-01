@@ -456,7 +456,7 @@
         </div>
 
         <div id="bank-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div class="glass w-full max-w-sm rounded-3xl p-6 text-center">
+            <div class="glass w-full max-sm rounded-3xl p-6 text-center">
                 <i class="fa-solid fa-building-columns text-4xl text-gold mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">Open Banking</h3>
                 <p class="text-sm text-gray-400 mb-6">Připojení k bance přes PSD2 / GoCardless bude dostupné brzy.</p>
@@ -472,8 +472,8 @@
 
     <script>
         /* CONFIGURATION */
-        const SUPABASE_URL = "DOPLNIT_SUPABASE_URL";
-        const SUPABASE_ANON_KEY = "DOPLNIT_SUPABASE_ANON_KEY";
+        const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
+        const SUPABASE_ANON_KEY = "Sb_publishable_m3be36_XXe5sxlbXF4ObBQ_VXtSDhnz";
         
         let supabase = null;
         let isMockMode = true; // Použito pokud chybí reálné klíče
@@ -1007,7 +1007,7 @@
             ];
 
             state.logs = [
-                { text: 'Jana Nováková přidala výdaj 1200 Kč', time: '14:35' }
+                { text: 'Jana Nováková bragging výdaj 1200 Kč', time: '14:35' }
             ];
         }
 
