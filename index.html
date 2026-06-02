@@ -783,7 +783,6 @@
                 await sb.removeChannel(state.realtimeChannel);
             }
 
-            // OPRAVA: Opraven formát realtime předplatného rozdělením do konkrétních tabulek s filtry
             state.realtimeChannel = sb.channel('realtime-household-sync')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `household_id=eq.${state.household.id}` }, () => {
                     synchronizeHouseholdOperationalData();
@@ -805,7 +804,6 @@
         }
 
         async function logActivity(householdId, action) {
-            // OPRAVA: Ošetření chyb uvnitř logu, aby případný výpadek tabulky activity_logs neshodil celou aplikaci
             try {
                 const userName = state.profile?.name || state.user?.email || 'Člen';
                 await sb.from('activity_logs').insert([{ household_id: householdId, action: `${userName}: ${action}` }]);
@@ -862,7 +860,6 @@
             const now = new Date();
 
             state.transactions.forEach(t => {
-                // OPRAVA: Zajištění fallbacku na 0 pro případ chybných nebo chybějících hodnot z DB
                 const amt = parseFloat(t.amount) || 0;
                 const tDate = t.created_at ? new Date(t.created_at) : new Date();
                 const isCurrentMonth = tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
@@ -983,7 +980,7 @@
             const amt = document.getElementById('txAmount').value;
             const type = document.getElementById('txType').value;
             const cat = document.getElementById('txCategory').value;
-            const note = document.getElementById('txNote').value;
+            const note = document.getElementById('txNote').value; // OPRAVENO: Přejmenováno z txNote na note
 
             try {
                 const payload = {
