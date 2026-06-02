@@ -1,1834 +1,2200 @@
 <!DOCTYPE html>
-<html lang="cs" class="dark">
+<html lang="cs">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0a0a0a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DomoFinance">
-<title>DomoFinance – Správa domácnosti</title>
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRG9tb0ZpbmFuY2UiLCJzaG9ydF9uYW1lIjoiRG9tb0ZpbmFuY2UiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBhMGEwYSIsInRoZW1lX2NvbG9yIjoiI2Q0YWYzNyIsImljb25zIjpbXX0=">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<style>
-  :root {
-    --gold: #d4af37;
-    --gold-light: #f0d060;
-    --gold-dark: #a88a20;
-    --black: #0a0a0a;
-    --dark: #111111;
-    --dark2: #1a1a1a;
-    --dark3: #222222;
-    --dark4: #2a2a2a;
-    --gray: #444444;
-    --gray-light: #888888;
-    --white: #f5f5f5;
-    --glass: rgba(255,255,255,0.04);
-    --glass-border: rgba(212,175,55,0.15);
-    --shadow-gold: 0 0 30px rgba(212,175,55,0.12);
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; overflow: hidden; background: var(--black); color: var(--white); font-family: 'DM Sans', sans-serif; }
-  h1,h2,h3,.font-display { font-family: 'Playfair Display', serif; }
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 2px; }
-  .glass {
-    background: var(--glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-  }
-  .glass-dark {
-    background: rgba(10,10,10,0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-  }
-  .gold-gradient { background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold-dark)); }
-  .gold-text { background: linear-gradient(135deg, var(--gold), var(--gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .gold-border { border: 1px solid var(--gold-dark); }
-  .btn-gold {
-    background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
-    color: var(--black);
-    font-weight: 600;
-    border: none;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-gold::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0); transition:background 0.2s; }
-  .btn-gold:active::after { background:rgba(255,255,255,0.15); }
-  .btn-ghost { background: var(--glass); border: 1px solid var(--glass-border); color: var(--white); transition: all 0.3s; }
-  .btn-ghost:active { background: rgba(212,175,55,0.1); }
-  .input-dark {
-    background: var(--dark3);
-    border: 1px solid var(--dark4);
-    color: var(--white);
-    border-radius: 12px;
-    padding: 12px 16px;
-    width: 100%;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    transition: border-color 0.3s;
-    outline: none;
-    -webkit-appearance: none;
-  }
-  .input-dark:focus { border-color: var(--gold-dark); }
-  .input-dark::placeholder { color: var(--gray); }
-  .card {
-    background: var(--dark2);
-    border: 1px solid var(--dark3);
-    border-radius: 20px;
-    overflow: hidden;
-  }
-  .card-gold { border-color: var(--gold-dark); box-shadow: var(--shadow-gold); }
-  #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
-  #main-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 80px; }
-  #bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(10,10,10,0.95);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--glass-border);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 4px 8px; cursor: pointer; transition: all 0.2s; position: relative; }
-  .nav-item .nav-icon { font-size: 20px; color: var(--gray); transition: all 0.3s; }
-  .nav-item .nav-label { font-size: 10px; color: var(--gray); margin-top: 3px; transition: all 0.3s; font-weight: 500; }
-  .nav-item.active .nav-icon { color: var(--gold); }
-  .nav-item.active .nav-label { color: var(--gold); }
-  .nav-item.active::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:32px; height:2px; background: var(--gold); border-radius:0 0 4px 4px; }
-  .page { display: none; padding: 20px 16px; min-height: 100%; }
-  .page.active { display: block; animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  @keyframes slideDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .pulse { animation: pulse 2s ease infinite; }
-  .modal-overlay {
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    display: flex; align-items: flex-end;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal-sheet {
-    background: var(--dark2);
-    border-radius: 24px 24px 0 0;
-    border-top: 1px solid var(--glass-border);
-    width: 100%;
-    max-height: 92vh;
-    overflow-y: auto;
-    transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .modal-overlay.open .modal-sheet { transform: translateY(0); }
-  .modal-handle { width: 40px; height: 4px; background: var(--dark4); border-radius: 2px; margin: 12px auto 20px; }
-  .tag {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
-    background: var(--dark3); color: var(--gray-light);
-  }
-  .tag.income { background: rgba(34,197,94,0.15); color: #4ade80; }
-  .tag.expense { background: rgba(239,68,68,0.15); color: #f87171; }
-  .tag.gold { background: rgba(212,175,55,0.15); color: var(--gold); }
-  .stat-card {
-    background: var(--dark2); border-radius: 18px; padding: 16px;
-    border: 1px solid var(--dark3); position: relative; overflow: hidden;
-  }
-  .stat-card::before { content:''; position:absolute; top:-30px; right:-30px; width:80px; height:80px; border-radius:50%; background:rgba(212,175,55,0.06); }
-  .chat-bubble { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.4; }
-  .chat-bubble.mine { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: var(--black); border-bottom-right-radius: 4px; }
-  .chat-bubble.theirs { background: var(--dark3); border-bottom-left-radius: 4px; }
-  .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
-  .avatar-gold { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: var(--black); }
-  .avatar-sm { width: 28px; height: 28px; font-size: 11px; }
-  .progress-bar { height: 4px; background: var(--dark3); border-radius: 2px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
-  .shimmer { background: linear-gradient(90deg, var(--dark2) 25%, var(--dark3) 50%, var(--dark2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-  .notification-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; position: absolute; top: 8px; right: 8px; }
-  .fab {
-    position: fixed; bottom: 96px; right: 20px; z-index: 90;
-    width: 56px; height: 56px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
-    color: var(--black); display: flex; align-items: center; justify-content: center;
-    font-size: 22px; box-shadow: 0 4px 20px rgba(212,175,55,0.4);
-    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-    border: none;
-  }
-  .fab:active { transform: scale(0.92); box-shadow: 0 2px 10px rgba(212,175,55,0.3); }
-  #auth-screen { position: fixed; inset: 0; z-index: 300; background: var(--black); display: flex; flex-direction: column; overflow-y: auto; }
-  .auth-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-  .auth-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.15; }
-  .orb1 { width: 300px; height: 300px; background: var(--gold); top: -100px; right: -100px; }
-  .orb2 { width: 200px; height: 200px; background: var(--gold-dark); bottom: 100px; left: -50px; }
-  select.input-dark { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
-  .list-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--dark2); border-radius: 16px; border: 1px solid var(--dark3); cursor: pointer; transition: all 0.2s; }
-  .list-item:active { transform: scale(0.98); background: var(--dark3); }
-  .icon-circle { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--white); }
-  .text-gold { color: var(--gold); }
-  .text-sm-gray { font-size: 12px; color: var(--gray-light); }
-  .divider { height: 1px; background: var(--dark3); margin: 16px 0; }
-  .chip { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid var(--dark4); background: var(--dark3); color: var(--gray-light); }
-  .chip.active { background: rgba(212,175,55,0.15); border-color: var(--gold-dark); color: var(--gold); }
-  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); z-index: 500; background: var(--dark2); border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px 20px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: transform 0.4s cubic-bezier(0.32,0.72,0,1); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.success { border-color: rgba(74,222,128,0.3); color: #4ade80; }
-  .toast.error { border-color: rgba(248,113,113,0.3); color: #f87171; }
-  .toast.info { border-color: var(--gold-dark); color: var(--gold); }
-  .spin { animation: spin 1s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .amount-positive { color: #4ade80; }
-  .amount-negative { color: #f87171; }
-  .swipe-delete { position: relative; overflow: hidden; }
-  .canvas-container { position: relative; height: 220px; }
-  .header-bar { position: sticky; top: 0; z-index: 50; background: rgba(10,10,10,0.9); backdrop-filter: blur(20px); padding: 16px 16px 10px; border-bottom: 1px solid var(--dark3); margin: -20px -16px 20px; }
-  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 20px; gap: 12px; }
-  .empty-state i { font-size: 48px; color: var(--dark4); }
-  .empty-state p { color: var(--gray); font-size: 14px; text-align: center; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Home Finance OS</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Chart.js (future use) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Tesseract (future OCR) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at top, #111 0%, #000 100%);
+      color: white;
+      font-family: ui-sans-serif, system-ui;
+    }
+    .glass {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .gold {
+      color: #d4af37;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg,#d4af37,#a67c00);
+    }
+    .hidden { display:none; }
+  </style>
 </head>
-<body>
 
-<div id="toast" class="toast"></div>
+<body class="min-h-screen">
 
-<div id="auth-screen">
-  <div class="auth-bg">
-    <div class="auth-orb orb1"></div>
-    <div class="auth-orb orb2"></div>
-  </div>
-  <div style="position:relative;z-index:1;padding:60px 24px 40px;display:flex;flex-direction:column;min-height:100vh;">
-    <div style="text-align:center;margin-bottom:48px;">
-      <div style="width:72px;height:72px;margin:0 auto 20px;background:linear-gradient(135deg,#a88a20,#d4af37,#f0d060);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(212,175,55,0.3);">
-        <i class="fas fa-home" style="font-size:30px;color:#0a0a0a;"></i>
-      </div>
-      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:8px;" class="gold-text">DomoFinance</h1>
-      <p style="color:#888;font-size:14px;">Správa domácnosti & financí</p>
-    </div>
+<!-- SUPABASE CONFIG -->
+<script>
+const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNia2lxY3RqZmF0b3pxbml4aGFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMzM2NjIsImV4cCI6MjA5NTkwOTY2Mn0.4-uDF2b7Pv2CfTL1NpwRPdtuN1u0KDUxmtHSf8QAUDM";
 
-    <div id="auth-tabs" style="display:flex;gap:8px;margin-bottom:28px;background:#1a1a1a;border-radius:14px;padding:4px;">
-      <button onclick="switchAuthTab('login')" id="tab-login" class="btn-gold" style="flex:1;padding:10px;border-radius:10px;font-size:14px;">Přihlásit se</button>
-      <button onclick="switchAuthTab('register')" id="tab-register" class="btn-ghost" style="flex:1;padding:10px;border-radius:10px;font-size:14px;">Registrace</button>
-    </div>
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let currentHousehold = null;
+</script>
 
-    <div id="form-login">
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">E-mail</label>
-          <input id="login-email" type="email" class="input-dark" placeholder="vas@email.cz">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Heslo</label>
-          <input id="login-password" type="password" class="input-dark" placeholder="••••••••">
-        </div>
-        <button onclick="login()" class="btn-gold" style="padding:15px;border-radius:14px;font-size:16px;margin-top:8px;">
-          <span id="login-btn-text">Přihlásit se</span>
-        </button>
-        <button onclick="switchAuthTab('reset')" style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;text-align:center;padding:4px;">
-          Zapomenuté heslo?
-        </button>
-      </div>
-    </div>
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="flex flex-col items-center justify-center h-screen p-6">
+  <div class="glass p-6 rounded-2xl w-full max-w-sm">
+    <h1 class="text-2xl font-bold text-center gold mb-4">Home Finance OS</h1>
 
-    <div id="form-register" style="display:none;">
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Jméno</label>
-          <input id="reg-name" type="text" class="input-dark" placeholder="Jan Novák">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">E-mail</label>
-          <input id="reg-email" type="email" class="input-dark" placeholder="vas@email.cz">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Heslo</label>
-          <input id="reg-password" type="password" class="input-dark" placeholder="min. 6 znaků">
-        </div>
-        <button onclick="register()" class="btn-gold" style="padding:15px;border-radius:14px;font-size:16px;margin-top:8px;">
-          <span id="reg-btn-text">Vytvořit účet</span>
-        </button>
-      </div>
-    </div>
+    <input id="email" placeholder="Email" class="w-full p-3 mb-2 rounded bg-black/40"/>
+    <input id="password" type="password" placeholder="Password" class="w-full p-3 mb-4 rounded bg-black/40"/>
 
-    <div id="form-reset" style="display:none;">
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <p style="color:#888;font-size:14px;text-align:center;">Zadejte e-mail pro obnovu hesla.</p>
-        <input id="reset-email" type="email" class="input-dark" placeholder="vas@email.cz">
-        <button onclick="resetPassword()" class="btn-gold" style="padding:15px;border-radius:14px;font-size:16px;">Odeslat odkaz</button>
-        <button onclick="switchAuthTab('login')" style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;text-align:center;">Zpět na přihlášení</button>
-      </div>
-    </div>
+    <button onclick="login()" class="w-full p-3 rounded btn-gold text-black font-bold mb-2">
+      Login
+    </button>
 
-    <div style="margin-top:auto;padding-top:40px;text-align:center;">
-      <p style="color:#444;font-size:11px;">© 2025 DomoFinance · Vaše data jsou chráněna</p>
-    </div>
+    <button onclick="register()" class="w-full p-3 rounded bg-white/10">
+      Registrace
+    </button>
+
+    <p class="text-xs text-center mt-3 text-gray-400 cursor-pointer" onclick="resetPassword()">
+      Zapomenuté heslo
+    </p>
   </div>
 </div>
 
-<div id="app" style="display:none;">
-  <div id="main-content">
+<!-- APP -->
+<div id="app" class="hidden">
 
-    <div id="page-dashboard" class="page active">
-      <div class="header-bar">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <p style="font-size:12px;color:#888;" id="greeting-time">Dobré ráno</p>
-            <h2 style="font-family:'Playfair Display',serif;font-size:20px;" id="greeting-name">Načítám...</h2>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <button onclick="showPage('notifications')" class="btn-ghost" style="width:40px;height:40px;border-radius:12px;position:relative;display:flex;align-items:center;justify-content:center;">
-              <i class="fas fa-bell" style="color:#888;"></i>
-              <div class="notification-dot" id="notif-dot" style="display:none;"></div>
-            </button>
-            <div class="avatar avatar-gold" id="header-avatar" onclick="showPage('profile')" style="cursor:pointer;">?</div>
-          </div>
-        </div>
-      </div>
-
-      <div style="background:linear-gradient(135deg,#1a1500,#2a2000,#1a1500);border:1px solid rgba(212,175,55,0.3);border-radius:24px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 8px 40px rgba(212,175,55,0.1);">
-        <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,0.15),transparent);pointer-events:none;"></div>
-        <p style="font-size:12px;color:#a88a20;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Celkový zůstatek</p>
-        <p style="font-family:'Playfair Display',serif;font-size:38px;font-weight:700;margin-bottom:4px;" class="gold-text" id="dash-balance">0 Kč</p>
-        <p id="dash-household" style="font-size:12px;color:#888;">Načítám domácnost...</p>
-        <div style="display:flex;gap:16px;margin-top:20px;">
-          <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:14px;padding:12px;">
-            <p style="font-size:11px;color:#888;margin-bottom:4px;">Příjmy</p>
-            <p style="font-size:18px;font-weight:600;" class="amount-positive" id="dash-income">0 Kč</p>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:14px;padding:12px;">
-            <p style="font-size:11px;color:#888;margin-bottom:4px;">Výdaje</p>
-            <p style="font-size:18px;font-weight:600;" class="amount-negative" id="dash-expenses">0 Kč</p>
-          </div>
-        </div>
-      </div>
-
-      <div id="ai-advisor-card" class="card card-gold" style="padding:16px;margin-bottom:20px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-          <div style="width:36px;height:36px;background:linear-gradient(135deg,#a88a20,#d4af37);border-radius:12px;display:flex;align-items:center;justify-content:center;">
-            <i class="fas fa-robot" style="color:#0a0a0a;font-size:16px;"></i>
-          </div>
-          <div>
-            <p style="font-size:14px;font-weight:600;">AI Finanční poradce</p>
-            <p style="font-size:11px;color:#888;">Personalizovaná doporučení</p>
-          </div>
-          <div style="margin-left:auto;width:8px;height:8px;background:#4ade80;border-radius:50;" class="pulse"></div>
-        </div>
-        <div id="ai-advice" style="font-size:13px;color:#ccc;line-height:1.5;background:rgba(255,255,255,0.03);border-radius:12px;padding:12px;">
-          <i class="fas fa-circle-notch fa-spin" style="color:#d4af37;margin-right:8px;"></i>Analyzuji vaše finance...
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;" id="quick-stats">
-        <div class="stat-card">
-          <p style="font-size:11px;color:#888;margin-bottom:6px;">Členové</p>
-          <p style="font-size:24px;font-weight:700;" id="stat-members">–</p>
-          <p style="font-size:11px;color:#d4af37;">domácnosti</p>
-        </div>
-        <div class="stat-card">
-          <p style="font-size:11px;color:#888;margin-bottom:6px;">Inventář</p>
-          <p style="font-size:24px;font-weight:700;" id="stat-inventory">–</p>
-          <p style="font-size:11px;color:#d4af37;">položek</p>
-        </div>
-        <div class="stat-card">
-          <p style="font-size:11px;color:#888;margin-bottom:6px;">Účtenky</p>
-          <p style="font-size:24px;font-weight:700;" id="stat-receipts">–</p>
-          <p style="font-size:11px;color:#d4af37;">uložených</p>
-        </div>
-        <div class="stat-card">
-          <p style="font-size:11px;color:#888;margin-bottom:6px;">Úkoly</p>
-          <p style="font-size:24px;font-weight:700;" id="stat-tasks">–</p>
-          <p style="font-size:11px;color:#d4af37;">otevřených</p>
-        </div>
-      </div>
-
-      <div class="section-header">
-        <span class="section-title">Přehled financí</span>
-        <span id="chart-month" style="font-size:12px;color:#888;"></span>
-      </div>
-      <div class="card" style="padding:16px;margin-bottom:20px;">
-        <div class="canvas-container"><canvas id="chart-income-expense"></canvas></div>
-      </div>
-      <div class="card" style="padding:16px;margin-bottom:20px;">
-        <p style="font-size:14px;font-weight:600;margin-bottom:12px;">Kategorie výdajů</p>
-        <div class="canvas-container"><canvas id="chart-categories"></canvas></div>
-      </div>
-
-      <div class="section-header">
-        <span class="section-title">Poslední transakce</span>
-        <button onclick="showPage('finance')" style="background:none;border:none;color:#d4af37;font-size:13px;cursor:pointer;">Vše →</button>
-      </div>
-      <div id="recent-transactions" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-        <div class="shimmer" style="height:64px;border-radius:16px;"></div>
-        <div class="shimmer" style="height:64px;border-radius:16px;"></div>
-      </div>
-
-      <div id="household-setup" style="display:none;margin-bottom:20px;">
-        <div class="card card-gold" style="padding:20px;text-align:center;">
-          <i class="fas fa-house-chimney" style="font-size:40px;color:#d4af37;margin-bottom:12px;"></i>
-          <p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:8px;">Vytvořte domácnost</p>
-          <p style="font-size:13px;color:#888;margin-bottom:20px;">Pro sdílení financí a inventáře potřebujete domácnost.</p>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <button onclick="openModal('modal-create-household')" class="btn-gold" style="padding:13px;border-radius:12px;font-size:14px;">
-              <i class="fas fa-plus"></i> Vytvořit domácnost
-            </button>
-            <button onclick="openModal('modal-join-household')" class="btn-ghost" style="padding:13px;border-radius:12px;font-size:14px;">
-              <i class="fas fa-link"></i> Připojit se pomocí kódu
-            </button>
-          </div>
-        </div>
-      </div>
+  <!-- TOP BAR -->
+  <div class="flex justify-between items-center p-4 glass">
+    <div>
+      <div class="text-sm text-gray-400">Domácnost</div>
+      <div class="font-bold" id="householdName">-</div>
     </div>
 
-    <div id="page-finance" class="page">
-      <div class="header-bar">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Finance</h2>
-          <button onclick="openModal('modal-add-transaction')" class="btn-gold" style="padding:8px 16px;border-radius:10px;font-size:13px;">
-            <i class="fas fa-plus"></i> Přidat
-          </button>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;" id="finance-filter-chips">
-          <div class="chip active" onclick="filterTransactions('all',this)">Vše</div>
-          <div class="chip" onclick="filterTransactions('income',this)">Příjmy</div>
-          <div class="chip" onclick="filterTransactions('expense',this)">Výdaje</div>
-        </div>
+    <div onclick="logout()" class="text-red-400">
+      <i class="fa fa-sign-out"></i>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="p-4">
+    <div class="grid grid-cols-2 gap-3">
+
+      <div class="glass p-4 rounded-xl">
+        <div class="text-xs text-gray-400">Zůstatek</div>
+        <div class="text-xl font-bold gold" id="balance">0 Kč</div>
       </div>
-      <div id="finance-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <div class="glass p-4 rounded-xl">
+        <div class="text-xs text-gray-400">Výdaje</div>
+        <div class="text-xl font-bold" id="expenses">0 Kč</div>
+      </div>
+
+      <div class="glass p-4 rounded-xl">
+        <div class="text-xs text-gray-400">Příjmy</div>
+        <div class="text-xl font-bold text-green-400" id="income">0 Kč</div>
+      </div>
+
+      <div class="glass p-4 rounded-xl">
+        <div class="text-xs text-gray-400">Úkoly</div>
+        <div class="text-xl font-bold" id="tasks">0</div>
+      </div>
+
     </div>
 
-    <div id="page-inventory" class="page">
-      <div class="header-bar">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Inventář</h2>
-          <button onclick="openModal('modal-add-item')" class="btn-gold" style="padding:8px 16px;border-radius:10px;font-size:13px;">
-            <i class="fas fa-plus"></i> Přidat
-          </button>
-        </div>
-        <div style="margin-top:12px;position:relative;">
-          <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#666;font-size:13px;"></i>
-          <input id="inventory-search" type="text" class="input-dark" placeholder="Hledat položku..." style="padding-left:38px;" oninput="filterInventory()">
-        </div>
-      </div>
-      <div id="inventory-list" style="display:flex;flex-direction:column;gap:10px;"></div>
-    </div>
-
-    <div id="page-receipts" class="page">
-      <div class="header-bar">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Účtenky</h2>
-          <button onclick="openModal('modal-add-receipt')" class="btn-gold" style="padding:8px 16px;border-radius:10px;font-size:13px;">
-            <i class="fas fa-upload"></i> Nahrát
-          </button>
-        </div>
-      </div>
-      <div id="receipts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
-    </div>
-
-    <div id="page-tasks" class="page">
-      <div class="header-bar">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Úkoly</h2>
-          <button onclick="openModal('modal-add-task')" class="btn-gold" style="padding:8px 16px;border-radius:10px;font-size:13px;">
-            <i class="fas fa-plus"></i> Nový
-          </button>
-        </div>
-      </div>
-      <div id="tasks-list" style="display:flex;flex-direction:column;gap:10px;"></div>
-    </div>
-
-    <div id="page-chat" class="page" style="padding:0;display:none;flex-direction:column;height:calc(100vh - 80px);">
-      <div class="header-bar" style="margin:0 0 0 0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:0 16px;">
-          <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Chat domácnosti</h2>
-          <div id="chat-online-count" style="font-size:12px;color:#4ade80;"></div>
-        </div>
-      </div>
-      <div id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;"></div>
-      <div style="padding:12px 16px;border-top:1px solid #1a1a1a;background:rgba(10,10,10,0.95);padding-bottom:calc(12px + env(safe-area-inset-bottom));">
-        <div style="display:flex;gap:10px;align-items:center;">
-          <input id="chat-input" type="text" class="input-dark" placeholder="Napište zprávu..." style="flex:1;" onkeydown="if(event.key==='Enter')sendMessage()">
-          <button onclick="sendMessage()" class="btn-gold" style="width:44px;height:44px;border-radius:12px;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
-            <i class="fas fa-paper-plane"></i>
-          </button>
-        </div>
+    <div class="glass mt-4 p-4 rounded-xl">
+      <div class="text-sm text-gray-400">AI doporučení</div>
+      <div class="mt-2 font-semibold" id="aiAdvice">
+        Načítám doporučení...
       </div>
     </div>
+  </div>
 
-    <div id="page-profile" class="page">
-      <div class="header-bar">
-        <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Profil & Nastavení</h2>
-      </div>
+  <!-- HOUSEHOLDS -->
+  <div id="households" class="hidden p-4">
+    <div class="glass p-4 rounded-xl">
+      <h2 class="font-bold mb-2">Domácnosti</h2>
 
-      <div class="card card-gold" style="padding:24px;margin-bottom:20px;text-align:center;">
-        <div class="avatar avatar-gold" id="profile-avatar-big" style="width:72px;height:72px;font-size:28px;margin:0 auto 14px;">?</div>
-        <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;" id="profile-name">–</p>
-        <p style="font-size:13px;color:#888;" id="profile-email">–</p>
-        <p style="font-size:11px;color:#666;margin-top:6px;" id="profile-since">Člen od –</p>
-      </div>
+      <input id="newHouseholdName" placeholder="Název domácnosti"
+        class="w-full p-2 mb-2 rounded bg-black/40"/>
 
-      <div class="section-header"><span class="section-title">Domácnost</span></div>
-      <div id="household-card" class="card" style="padding:16px;margin-bottom:20px;">
-        <div id="hh-info-content">
-          <p style="color:#888;font-size:13px;text-align:center;padding:16px;">Načítám...</p>
-        </div>
-      </div>
+      <button onclick="createHousehold()" class="w-full btn-gold p-2 rounded text-black font-bold">
+        Vytvořit
+      </button>
 
-      <div class="section-header"><span class="section-title">Historie aktivit</span></div>
-      <div id="activity-log" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-        <div class="shimmer" style="height:50px;border-radius:14px;"></div>
-        <div class="shimmer" style="height:50px;border-radius:14px;"></div>
-      </div>
+      <input id="inviteCode" placeholder="Invite kód"
+        class="w-full p-2 mt-3 rounded bg-black/40"/>
 
-      <div class="section-header"><span class="section-title">Bankovní integrace</span></div>
-      <div class="card" style="padding:16px;margin-bottom:20px;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-          <div class="icon-circle" style="background:rgba(212,175,55,0.1);color:#d4af37;"><i class="fas fa-university"></i></div>
-          <div>
-            <p style="font-size:14px;font-weight:600;">Open Banking</p>
-            <p style="font-size:12px;color:#888;">GoCardless · PSD2</p>
-          </div>
-        </div>
-        <button onclick="showToast('Bankovní integrace bude brzy dostupná.','info')" class="btn-ghost" style="width:100%;padding:12px;border-radius:12px;font-size:14px;">
-          <i class="fas fa-link"></i> Připojit bankovní účet
-        </button>
-      </div>
-
-      <button onclick="logout()" style="width:100%;padding:14px;border-radius:14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:30px;">
-        <i class="fas fa-sign-out-alt"></i> Odhlásit se
+      <button onclick="joinHousehold()" class="w-full p-2 mt-2 bg-white/10 rounded">
+        Připojit
       </button>
     </div>
 
-    <div id="page-notifications" class="page">
-      <div class="header-bar">
-        <h2 style="font-family:'Playfair Display',serif;font-size:22px;">Notifikace</h2>
-      </div>
-      <div id="notifications-list" style="display:flex;flex-direction:column;gap:10px;"></div>
-    </div>
+    <div id="householdList" class="mt-4"></div>
+  </div>
 
-  </div><div id="bottom-nav">
-    <div style="display:flex;padding:0 8px;">
-      <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
-        <i class="fas fa-chart-pie nav-icon"></i>
-        <span class="nav-label">Přehled</span>
-      </div>
-      <div class="nav-item" onclick="showPage('finance')" id="nav-finance">
-        <i class="fas fa-wallet nav-icon"></i>
-        <span class="nav-label">Finance</span>
-      </div>
-      <div class="nav-item" onclick="showPage('inventory')" id="nav-inventory">
-        <i class="fas fa-box-open nav-icon"></i>
-        <span class="nav-label">Inventář</span>
-      </div>
-      <div class="nav-item" onclick="showPage('receipts')" id="nav-receipts">
-        <i class="fas fa-receipt nav-icon"></i>
-        <span class="nav-label">Účtenky</span>
-      </div>
-      <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks">
-        <i class="fas fa-tasks nav-icon"></i>
-        <span class="nav-label">Úkoly</span>
-      </div>
-      <div class="nav-item" onclick="showPage('chat')" id="nav-chat">
-        <i class="fas fa-comments nav-icon"></i>
-        <span class="nav-label">Chat</span>
-      </div>
-      <div class="nav-item" onclick="showPage('profile')" id="nav-profile">
-        <i class="fas fa-user nav-icon"></i>
-        <span class="nav-label">Profil</span>
-      </div>
-    </div>
+  <!-- PLACEHOLDER MODULES -->
+  <div id="finance" class="hidden p-4">
+    <div class="glass p-4 rounded-xl">Finance modul (další část)</div>
   </div>
-</div><div id="modal-create-household" class="modal-overlay">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="padding:0 20px 28px;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Vytvořit domácnost</h3>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Název domácnosti</label>
-          <input id="hh-name" type="text" class="input-dark" placeholder="Rodina Novákova">
-        </div>
-        <button onclick="createHousehold()" class="btn-gold" style="padding:14px;border-radius:12px;font-size:15px;">Vytvořit</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div id="modal-join-household" class="modal-overlay">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="padding:0 20px 28px;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Připojit se k domácnosti</h3>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Pozvánkový kód</label>
-          <input id="join-code" type="text" class="input-dark" placeholder="ABC12345" style="text-transform:uppercase;letter-spacing:4px;text-align:center;font-size:20px;font-weight:700;">
-        </div>
-        <button onclick="joinHousehold()" class="btn-gold" style="padding:14px;border-radius:12px;font-size:15px;">Připojit se</button>
-      </div>
-    </div>
+  <div id="inventory" class="hidden p-4">
+    <div class="glass p-4 rounded-xl">Inventář modul (další část)</div>
   </div>
-</div>
 
-<div id="modal-add-transaction" class="modal-overlay">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="padding:0 20px 28px;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Přidat transakci</h3>
-      <div style="display:flex;gap:8px;margin-bottom:18px;background:#1a1a1a;border-radius:14px;padding:4px;" id="trx-type-toggle">
-        <button onclick="setTrxType('income')" id="trx-btn-income" class="btn-gold" style="flex:1;padding:10px;border-radius:10px;font-size:13px;">Příjem</button>
-        <button onclick="setTrxType('expense')" id="trx-btn-expense" class="btn-ghost" style="flex:1;padding:10px;border-radius:10px;font-size:13px;">Výdaj</button>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Částka (Kč)</label>
-          <input id="trx-amount" type="number" class="input-dark" placeholder="0">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Kategorie</label>
-          <select id="trx-category" class="input-dark">
-            <option value="Nájem">Nájem</option>
-            <option value="Hypotéka">Hypotéka</option>
-            <option value="Elektřina">Elektřina</option>
-            <option value="Voda">Voda</option>
-            <option value="Plyn">Plyn</option>
-            <option value="Internet">Internet</option>
-            <option value="Telefon">Telefon</option>
-            <option value="Potraviny">Potraviny</option>
-            <option value="Doprava">Doprava</option>
-            <option value="Domácnost">Domácnost</option>
-            <option value="Elektronika">Elektronika</option>
-            <option value="Nábytek">Nábytek</option>
-            <option value="Ostatní">Ostatní</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Datum</label>
-          <input id="trx-date" type="date" class="input-dark">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Poznámka</label>
-          <input id="trx-note" type="text" class="input-dark" placeholder="Volitelná poznámka">
-        </div>
-        <button onclick="addTransaction()" class="btn-gold" style="padding:14px;border-radius:12px;font-size:15px;">Uložit</button>
-      </div>
-    </div>
+  <div id="chat" class="hidden p-4">
+    <div class="glass p-4 rounded-xl">Chat modul (další část)</div>
   </div>
-</div>
 
-<div id="modal-add-item" class="modal-overlay">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="padding:0 20px 28px;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Přidat položku</h3>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Název položky</label>
-          <input id="item-name" type="text" class="input-dark" placeholder="Lednice Samsung" oninput="autoCategory()">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Kategorie</label>
-          <select id="item-category" class="input-dark">
-            <option>Nábytek</option><option>Spotřebiče</option><option>Elektronika</option>
-            <option>Kuchyně</option><option>Koupelna</option><option>Dekorace</option>
-            <option>Nářadí</option><option>Ostatní</option>
-          </select>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Cena (Kč)</label>
-            <input id="item-price" type="number" class="input-dark" placeholder="0">
-          </div>
-          <div>
-            <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Záruka (měs.)</label>
-            <input id="item-warranty" type="number" class="input-dark" placeholder="24">
-          </div>
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Datum nákupu</label>
-          <input id="item-date" type="date" class="input-dark">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Obchod</label>
-          <input id="item-store" type="text" class="input-dark" placeholder="Mall.cz">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Poznámka</label>
-          <input id="item-note" type="text" class="input-dark" placeholder="Volitelná poznámka">
-        </div>
-        <button onclick="addInventoryItem()" class="btn-gold" style="padding:14px;border-radius:12px;font-size:15px;">Uložit položku</button>
-      </div>
-    </div>
+  <!-- BOTTOM NAV -->
+  <div class="fixed bottom-0 left-0 right-0 glass flex justify-around p-3">
+    <button onclick="showTab('dashboard')"><i class="fa fa-home"></i></button>
+    <button onclick="showTab('households')"><i class="fa fa-users"></i></button>
+    <button onclick="showTab('finance')"><i class="fa fa-wallet"></i></button>
+    <button onclick="showTab('inventory')"><i class="fa fa-box"></i></button>
+    <button onclick="showTab('chat')"><i class="fa fa-comment"></i></button>
   </div>
-</div>
 
-<div id="modal-add-receipt" class="modal-overlay">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="padding:0 20px 28px;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Nahrát účtenku</h3>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div id="ocr-upload-area" onclick="document.getElementById('receipt-file').click()" style="border:2px dashed #333;border-radius:16px;padding:32px;text-align:center;cursor:pointer;transition:border-color 0.3s;" onmouseover="this.style.borderColor='#d4af37'" onmouseout="this.style.borderColor='#333'">
-          <i class="fas fa-cloud-upload-alt" style="font-size:36px;color:#666;margin-bottom:12px;"></i>
-          <p style="color:#888;font-size:14px;">Klepněte pro výběr obrázku</p>
-          <p style="color:#555;font-size:12px;margin-top:4px;">JPG, PNG, PDF</p>
-        </div>
-        <input type="file" id="receipt-file" accept="image/*,application/pdf" style="display:none" onchange="handleReceiptUpload(event)">
-        <div id="ocr-status" style="display:none;padding:12px;background:#1a1a1a;border-radius:12px;font-size:13px;color:#888;text-align:center;">
-          <i class="fas fa-circle-notch fa-spin" style="color:#d4af37;margin-right:8px;"></i>OCR probíhá...
-        </div>
-        <div id="ocr-preview" style="display:none;">
-          <img id="receipt-preview-img" style="width:100%;border-radius:12px;max-height:200px;object-fit:cover;">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Obchod</label>
-          <input id="receipt-store" type="text" class="input-dark" placeholder="Automaticky rozpoznán...">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Cena (Kč)</label>
-            <input id="receipt-amount" type="number" class="input-dark" placeholder="0">
-          </div>
-          <div>
-            <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Datum</label>
-            <input id="receipt-date" type="date" class="input-dark">
-          </div>
-        </div>
-        <button onclick="saveReceipt()" class="btn-gold" style="padding:14px;border-radius:12px;font-size:15px;">Uložit účtenku</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="modal-add-task" class="modal-overlay">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="padding:0 20px 28px;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Nový úkol</h3>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Název úkolu</label>
-          <input id="task-title" type="text" class="input-dark" placeholder="Co je potřeba udělat?">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Přiřadit členovi</label>
-          <select id="task-assignee" class="input-dark">
-            <option value="">Nikdo</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;margin-bottom:6px;display:block;">Termín (volitelné)</label>
-          <input id="task-due" type="date" class="input-dark">
-        </div>
-        <button onclick="addTask()" class="btn-gold" style="padding:14px;border-radius:12px;font-size:15px;">Vytvořit úkol</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="modal-item-detail" class="modal-overlay">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="padding:0 20px 28px;" id="item-detail-content"></div>
-  </div>
-</div>
-
-<div id="modal-receipt-detail" class="modal-overlay">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="padding:0 20px 28px;" id="receipt-detail-content"></div>
-  </div>
 </div>
 
 <script>
-// ===== CONFIG =====
-const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNia2lxY3RqZmF0b3pxbml4aGFiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDMzMzY2MiwiZXhwIjoyMDk1OTA5NjYyfQ.FjlT1E2u4W51bLfr3qtmpwJ4ipHslhxzv2swjN_0kyU";
 
-// ===== INIT (Upraveno pro trvalé přihlášení) =====
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
-});
-
-let currentUser = null;
-let currentProfile = null;
-let currentHousehold = null;
-let currentHouseholdMembers = [];
-let allTransactions = [];
-let allInventory = [];
-let allReceipts = [];
-let allTasks = [];
-let allMessages = [];
-let currentTrxType = 'income';
-let chartIE = null, chartCat = null;
-let receiptFileData = null;
-let realtimeChannel = null;
-
-// ===== UTILITY =====
-function showToast(msg, type='info') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type}`;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-// Close modal on overlay click
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => {
-    if (e.target === m) closeModal(m.id);
-  });
-});
-
-function fmt(n) {
-  return new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(n||0);
-}
-
-function fmtDate(d) {
-  if (!d) return '–';
-  return new Date(d).toLocaleDateString('cs-CZ',{day:'numeric',month:'short',year:'numeric'});
-}
-
-function avatarInitials(name) {
-  if (!name) return '?';
-  return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-}
-
-function avatarColor(str) {
-  const colors = ['#d4af37','#a88a20','#8b7355','#c5a028','#b8960c'];
-  let h = 0;
-  for (let c of (str||'')) h = (h*31 + c.charCodeAt(0)) % colors.length;
-  return colors[h];
-}
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Dobré ráno';
-  if (h < 18) return 'Dobré odpoledne';
-  return 'Dobrý večer';
-}
-
-function todayISO() {
-  return new Date().toISOString().slice(0,10);
-}
-
-// ===== AUTH =====
-function switchAuthTab(tab) {
-  ['login','register','reset'].forEach(t => {
-    document.getElementById(`form-${t}`).style.display = t===tab ? 'block' : 'none';
-  });
-  ['login','register'].forEach(t => {
-    const btn = document.getElementById(`tab-${t}`);
-    if (!btn) return;
-    if (t===tab) { btn.className='btn-gold'; btn.style.cssText='flex:1;padding:10px;border-radius:10px;font-size:14px;'; }
-    else { btn.className='btn-ghost'; btn.style.cssText='flex:1;padding:10px;border-radius:10px;font-size:14px;'; }
-  });
-}
-
+// ---------- AUTH ----------
 async function login() {
-  const email = document.getElementById('login-email').value.trim();
-  const pw = document.getElementById('login-password').value;
-  if (!email||!pw) return showToast('Vyplňte e-mail a heslo','error');
-  document.getElementById('login-btn-text').innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
-  const {error} = await sb.auth.signInWithPassword({email,password:pw});
-  document.getElementById('login-btn-text').textContent='Přihlásit se';
-  if (error) showToast(error.message,'error');
+  const email = email.value;
+  const password = password.value;
+
+  const { data, error } = await sb.auth.signInWithPassword({
+    email, password
+  });
+
+  if (error) return alert(error.message);
+  init();
 }
 
 async function register() {
-  const name = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const pw = document.getElementById('reg-password').value;
-  if (!name||!email||!pw) return showToast('Vyplňte všechna pole','error');
-  document.getElementById('reg-btn-text').innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
-  const {data,error} = await sb.auth.signUp({email,password:pw,options:{data:{full_name:name}}});
-  document.getElementById('reg-btn-text').textContent='Vytvořit účet';
-  if (error) return showToast(error.message,'error');
-  if (data.user) {
-    await sb.from('profiles').upsert({id:data.user.id,full_name:name,email});
-    showToast('Účet vytvořen! Zkontrolujte e-mail.','success');
-  }
+  const email = email.value;
+  const password = password.value;
+
+  const { error } = await sb.auth.signUp({
+    email, password
+  });
+
+  if (error) return alert(error.message);
+  alert("Registrace hotová, potvrď email.");
 }
 
 async function resetPassword() {
-  const email = document.getElementById('reset-email').value.trim();
-  if (!email) return showToast('Zadejte e-mail','error');
-  const {error} = await sb.auth.resetPasswordForEmail(email);
-  if (error) showToast(error.message,'error');
-  else showToast('Odkaz odeslán na váš e-mail','success');
+  const emailVal = email.value;
+  await sb.auth.resetPasswordForEmail(emailVal);
+  alert("Odesláno");
 }
 
 async function logout() {
   await sb.auth.signOut();
-  currentUser=null; currentProfile=null; currentHousehold=null;
-  document.getElementById('app').style.display='none';
-  document.getElementById('auth-screen').style.display='flex';
-  if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel=null; }
+  location.reload();
 }
 
-// ===== AUTH STATE =====
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (session?.user) {
-    currentUser = session.user;
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('app').style.display='flex';
-    await initApp();
-  } else {
-    document.getElementById('app').style.display='none';
-    document.getElementById('auth-screen').style.display='flex';
-  }
-});
+// ---------- INIT ----------
+async function init() {
+  const { data } = await sb.auth.getUser();
+  currentUser = data.user;
 
-// ===== INIT APP =====
-async function initApp() {
-  await ensureSchema();
-  await loadProfile();
-  await loadHousehold();
-  await loadDashboard();
+  if (!currentUser) return;
+
+  document.getElementById("authScreen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+
+  loadHouseholds();
+  loadDashboard();
   setupRealtime();
-  setTodayDates();
-  updateGreeting();
-  setInterval(updateGreeting, 60000);
 }
 
-function setTodayDates() {
-  const t = todayISO();
-  ['trx-date','item-date','receipt-date'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = t;
-  });
-}
-
-function updateGreeting() {
-  document.getElementById('greeting-time').textContent = greeting();
-  const now = new Date();
-  document.getElementById('chart-month').textContent = now.toLocaleDateString('cs-CZ',{month:'long',year:'numeric'});
-}
-
-// ===== SCHEMA (auto-create tables) =====
-async function ensureSchema() {
-  try {
-    await sb.from('profiles').select('id').limit(1);
-  } catch(e) { console.log('Schema check:', e.message); }
-}
-
-// ===== PROFILE =====
-async function loadProfile() {
-  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-  if (data) {
-    currentProfile = data;
-  } else {
-    const meta = currentUser.user_metadata || {};
-    currentProfile = {
-      id: currentUser.id,
-      full_name: meta.full_name || currentUser.email.split('@')[0],
-      email: currentUser.email,
-      created_at: currentUser.created_at
-    };
-    await sb.from('profiles').upsert(currentProfile);
-  }
-  renderProfile();
-}
-
-function renderProfile() {
-  if (!currentProfile) return;
-  const initials = avatarInitials(currentProfile.full_name);
-  document.getElementById('header-avatar').textContent = initials;
-  document.getElementById('profile-avatar-big').textContent = initials;
-  document.getElementById('profile-name').textContent = currentProfile.full_name || '–';
-  document.getElementById('profile-email').textContent = currentProfile.email || '–';
-  document.getElementById('greeting-name').textContent = (currentProfile.full_name||'').split(' ')[0] || '';
-  document.getElementById('profile-since').textContent = `Člen od ${fmtDate(currentProfile.created_at||currentUser.created_at)}`;
-}
-
-// ===== HOUSEHOLD =====
-async function loadHousehold() {
-  const {data:memberships} = await sb.from('household_members')
-    .select('household_id').eq('user_id',currentUser.id).limit(1);
-  if (memberships && memberships.length > 0) {
-    const {data:hh} = await sb.from('households')
-      .select('*').eq('id',memberships[0].household_id).single();
-    currentHousehold = hh;
-    if (hh) {
-      const {data:members} = await sb.from('household_members')
-        .select('*, profiles(full_name,email)').eq('household_id',hh.id);
-      currentHouseholdMembers = members || [];
-    }
-  }
-  renderHouseholdCard();
-}
-
-function renderHouseholdCard() {
-  const el = document.getElementById('hh-info-content');
-  const dashHH = document.getElementById('dash-household');
-  const setupEl = document.getElementById('household-setup');
-
-  if (currentHousehold) {
-    setupEl.style.display = 'none';
-    dashHH.textContent = currentHousehold.name;
-    // Populate task assignees
-    const sel = document.getElementById('task-assignee');
-    sel.innerHTML = '<option value="">Nikdo</option>';
-    currentHouseholdMembers.forEach(m => {
-      if (m.profiles) {
-        const o = document.createElement('option');
-        o.value = m.user_id;
-        o.textContent = m.profiles.full_name||m.profiles.email;
-        sel.appendChild(o);
-      }
-    });
-    el.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <div>
-          <p style="font-weight:600;font-size:16px;">${currentHousehold.name}</p>
-          <p style="font-size:12px;color:#888;">${currentHouseholdMembers.length} členů</p>
-        </div>
-        <div style="background:#1a1a1a;border-radius:10px;padding:8px 12px;text-align:center;cursor:pointer;" onclick="copyInviteCode('${currentHousehold.invite_code}')">
-          <p style="font-size:11px;color:#888;margin-bottom:2px;">Kód</p>
-          <p style="font-size:16px;font-weight:700;color:#d4af37;letter-spacing:2px;">${currentHousehold.invite_code||'–'}</p>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        ${currentHouseholdMembers.map(m => `
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="avatar avatar-sm" style="background:${avatarColor(m.profiles?.full_name)};color:#0a0a0a;">
-              ${avatarInitials(m.profiles?.full_name||'?')}
-            </div>
-            <span style="font-size:13px;">${m.profiles?.full_name||m.profiles?.email||m.user_id}</span>
-            ${m.role==='admin'?'<span class="tag gold">Admin</span>':''}
-          </div>
-        `).join('')}
-      </div>
-      <div style="display:flex;gap:10px;margin-top:16px;">
-        <button onclick="openModal('modal-join-household')" class="btn-ghost" style="flex:1;padding:10px;border-radius:10px;font-size:13px;">
-          <i class="fas fa-link"></i> Přidat člena
-        </button>
-      </div>
-    `;
-  } else {
-    setupEl.style.display = 'block';
-    dashHH.textContent = 'Žádná domácnost';
-    el.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <button onclick="openModal('modal-create-household')" class="btn-gold" style="padding:12px;border-radius:10px;font-size:14px;">
-          <i class="fas fa-plus"></i> Vytvořit domácnost
-        </button>
-        <button onclick="openModal('modal-join-household')" class="btn-ghost" style="padding:12px;border-radius:10px;font-size:14px;">
-          <i class="fas fa-link"></i> Připojit se pomocí kódu
-        </button>
-      </div>
-    `;
-  }
-}
-
+// ---------- HOUSEHOLDS ----------
 async function createHousehold() {
-  const name = document.getElementById('hh-name').value.trim();
-  if (!name) return showToast('Zadejte název domácnosti','error');
-  const code = Math.random().toString(36).substr(2,8).toUpperCase();
-  const {data,error} = await sb.from('households').insert({name,invite_code:code,owner_id:currentUser.id}).select().single();
-  if (error) return showToast(error.message,'error');
-  await sb.from('household_members').insert({household_id:data.id,user_id:currentUser.id,role:'admin'});
-  await logActivity(`Vytvořil/a domácnost "${name}"`, data.id);
-  currentHousehold = data;
-  currentHouseholdMembers = [{user_id:currentUser.id,role:'admin',profiles:{full_name:currentProfile?.full_name,email:currentProfile?.email}}];
-  closeModal('modal-create-household');
-  renderHouseholdCard();
-  await loadDashboard();
-  showToast('Domácnost vytvořena!','success');
+  const name = newHouseholdName.value;
+  const invite = Math.random().toString(36).substring(2,8);
+
+  await sb.from("households").insert({
+    name,
+    invite_code: invite
+  });
+
+  loadHouseholds();
 }
 
 async function joinHousehold() {
-  const code = document.getElementById('join-code').value.trim().toUpperCase();
-  if (!code) return showToast('Zadejte pozvánkový kód','error');
-  const {data:hh,error} = await sb.from('households').select('*').eq('invite_code',code).single();
-  if (error||!hh) return showToast('Domácnost nenalezena','error');
-  const {error:e2} = await sb.from('household_members').insert({household_id:hh.id,user_id:currentUser.id,role:'member'});
-  if (e2 && !e2.message.includes('duplicate')) return showToast(e2.message,'error');
-  currentHousehold = hh;
-  await loadHousehold();
-  closeModal('modal-join-household');
-  await logActivity(`Připojil/a se k domácnosti "${hh.name}"`, hh.id);
-  await loadDashboard();
-  showToast('Úspěšně připojen/a k domácnosti!','success');
+  const code = inviteCode.value;
+
+  const { data } = await sb.from("households")
+    .select("*")
+    .eq("invite_code", code)
+    .single();
+
+  if (!data) return alert("Neexistuje");
+
+  await sb.from("household_members").insert({
+    household_id: data.id,
+    user_id: currentUser.id
+  });
+
+  loadHouseholds();
 }
 
-function copyInviteCode(code) {
-  navigator.clipboard.writeText(code).then(()=>showToast('Kód zkopírován: '+code,'success'));
+async function loadHouseholds() {
+  const { data } = await sb
+    .from("household_members")
+    .select("household_id, households(name,id)")
+    .eq("user_id", currentUser.id);
+
+  const list = document.getElementById("householdList");
+  list.innerHTML = "";
+
+  data.forEach(h => {
+    const div = document.createElement("div");
+    div.className = "glass p-3 mt-2 rounded";
+    div.innerHTML = h.households.name;
+    div.onclick = () => {
+      currentHousehold = h.household_id;
+      document.getElementById("householdName").innerText = h.households.name;
+    };
+    list.appendChild(div);
+  });
 }
 
-// ===== DASHBOARD =====
+// ---------- DASHBOARD ----------
 async function loadDashboard() {
-  if (!currentHousehold) {
-    document.getElementById('dash-balance').textContent = '0 Kč';
-    document.getElementById('stat-members').textContent = '0';
-    document.getElementById('stat-inventory').textContent = '0';
-    document.getElementById('stat-receipts').textContent = '0';
-    document.getElementById('stat-tasks').textContent = '0';
-    document.getElementById('recent-transactions').innerHTML = '<div class="empty-state"><i class="fas fa-wallet"></i><p>Přidejte domácnost pro zobrazení financí</p></div>';
-    generateAIAdvice([],[]);
-    return;
-  }
-  const hid = currentHousehold.id;
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
-  const monthEnd = new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().slice(0,10);
-
-  const [{data:trx},{data:inv},{data:rec},{data:tasks}] = await Promise.all([
-    sb.from('transactions').select('*').eq('household_id',hid).order('date',{ascending:false}),
-    sb.from('inventory').select('*').eq('household_id',hid),
-    sb.from('receipts').select('*').eq('household_id',hid),
-    sb.from('tasks').select('*').eq('household_id',hid).eq('done',false)
-  ]);
-
-  allTransactions = trx||[];
-  allInventory = inv||[];
-  allReceipts = rec||[];
-  allTasks = tasks||[];
-
-  const monthTrx = allTransactions.filter(t=>t.date>=monthStart&&t.date<=monthEnd);
-  const income = monthTrx.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
-  const expenses = monthTrx.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
-  const balance = income - expenses;
-
-  document.getElementById('dash-balance').textContent = fmt(balance);
-  document.getElementById('dash-income').textContent = fmt(income);
-  document.getElementById('dash-expenses').textContent = fmt(expenses);
-  document.getElementById('stat-members').textContent = currentHouseholdMembers.length;
-  document.getElementById('stat-inventory').textContent = allInventory.length;
-  document.getElementById('stat-receipts').textContent = allReceipts.length;
-  document.getElementById('stat-tasks').textContent = allTasks.length;
-
-  renderRecentTransactions(allTransactions.slice(0,5));
-  renderCharts(monthTrx);
-  generateAIAdvice(monthTrx, allTransactions);
-  renderFinanceList();
-  renderInventory();
-  renderReceipts();
-  renderTasksList();
-  loadActivityLog();
-  loadNotifications();
+  document.getElementById("aiAdvice").innerText =
+    "Doporučujeme nejprve zaplatit nájem.";
 }
 
-function renderRecentTransactions(list) {
-  const el = document.getElementById('recent-transactions');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><p>Žádné transakce</p></div>';
-    return;
-  }
-  el.innerHTML = list.map(t => `
-    <div class="list-item">
-      <div class="icon-circle" style="background:${t.type==='income'?'rgba(74,222,128,0.1)':'rgba(239,68,68,0.1)'}">
-        <i class="fas ${categoryIcon(t.category)}" style="color:${t.type==='income'?'#4ade80':'#f87171'}"></i>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <p style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.category||'–'}</p>
-        <p style="font-size:12px;color:#888;">${fmtDate(t.date)} ${t.note?'· '+t.note:''}</p>
-      </div>
-      <p style="font-size:15px;font-weight:600;${t.type==='income'?'color:#4ade80':'color:#f87171'}">${t.type==='income'?'+':'–'}${fmt(t.amount)}</p>
-    </div>
-  `).join('');
-}
-
-function renderCharts(monthTrx) {
-  // Income vs Expense by day
-  const days = {};
-  monthTrx.forEach(t => {
-    if (!days[t.date]) days[t.date] = {income:0,expense:0};
-    days[t.date][t.type] += Number(t.amount);
-  });
-  const labels = Object.keys(days).sort().slice(-14);
-  const incomeData = labels.map(d=>days[d]?.income||0);
-  const expData = labels.map(d=>days[d]?.expense||0);
-  const labelsFmt = labels.map(d=>new Date(d).toLocaleDateString('cs-CZ',{day:'numeric',month:'numeric'}));
-
-  if (chartIE) chartIE.destroy();
-  const ctx1 = document.getElementById('chart-income-expense').getContext('2d');
-  chartIE = new Chart(ctx1, {
-    type:'bar',
-    data:{labels:labelsFmt,datasets:[
-      {label:'Příjmy',data:incomeData,backgroundColor:'rgba(74,222,128,0.6)',borderRadius:6,barPercentage:0.6},
-      {label:'Výdaje',data:expData,backgroundColor:'rgba(239,68,68,0.6)',borderRadius:6,barPercentage:0.6}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#888',font:{family:"'DM Sans',sans-serif",size:11}}}},scales:{x:{ticks:{color:'#666',font:{size:10}},grid:{color:'#1a1a1a'}},y:{ticks:{color:'#666',font:{size:10},callback:v=>v>=1000?(v/1000)+'k':v},grid:{color:'#1a1a1a'}}}}
-  });
-
-  // Category pie
-  const catMap = {};
-  monthTrx.filter(t=>t.type==='expense').forEach(t=>{catMap[t.category]=(catMap[t.category]||0)+Number(t.amount);});
-  const cats = Object.keys(catMap);
-  const catVals = cats.map(c=>catMap[c]);
-  const goldPalette = ['#d4af37','#a88a20','#f0d060','#8b7355','#c5a028','#7a6120','#e8c84a','#b89030','#6a5010','#f5e070'];
-  if (chartCat) chartCat.destroy();
-  const ctx2 = document.getElementById('chart-categories').getContext('2d');
-  chartCat = new Chart(ctx2, {
-    type:'doughnut',
-    data:{labels:cats.length?cats:['Žádné výdaje'],datasets:[{data:cats.length?catVals:[1],backgroundColor:cats.length?goldPalette.slice(0,cats.length):['#222'],borderColor:'transparent',borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#888',font:{family:"'DM Sans',sans-serif",size:11},boxWidth:12}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.raw)}`}}}}
-  });
-}
-
-// ===== AI ADVICE =====
-function generateAIAdvice(monthTrx, allTrx) {
-  const income = monthTrx.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
-  const expenses = monthTrx.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
-  const balance = income - expenses;
-  const now = new Date();
-  const daysInMonth = new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-  const daysPassed = now.getDate();
-  const daysLeft = daysInMonth - daysPassed;
-
-  const priorities = ['Nájem','Hypotéka','Elektřina','Voda','Plyn','Splátky','Internet','Telefon'];
-  const paid = monthTrx.filter(t=>t.type==='expense').map(t=>t.category);
-  const unpaid = priorities.filter(p=>!paid.includes(p));
-
-  let advice = '';
-  const ratio = income > 0 ? expenses/income : 0;
-
-  if (!monthTrx.length) {
-    advice = '📊 Zatím žádné transakce tento měsíc. Začněte přidávat příjmy a výdaje pro personalizovaná doporučení.';
-  } else if (balance < 0) {
-    advice = `⚠️ <strong>Upozornění:</strong> Vaše výdaje (${fmt(expenses)}) převyšují příjmy (${fmt(income)}) o ${fmt(Math.abs(balance))}. Doporučujeme okamžitě omezit nezbytné výdaje.`;
-  } else if (ratio > 0.85) {
-    advice = `🔶 Výdaje tvoří ${Math.round(ratio*100)}% příjmů. Zůstatek ${fmt(balance)} je na hranici. Opatrně s dalšími nákupy.`;
-  } else if (unpaid.length > 0) {
-    advice = `✅ Finance vypadají dobře. Doporučujeme nejprve zaplatit: <strong>${unpaid.slice(0,3).join(', ')}</strong>. Odhadovaný konec měsíce: ${fmt(balance - (expenses/daysPassed)*daysLeft)}.`;
-  } else {
-    const projected = balance - (expenses/daysPassed)*daysLeft;
-    advice = `✨ Výborně! Všechny priority zaplaceny. Odhadovaný zůstatek na konci měsíce: <strong>${fmt(Math.max(0,projected))}</strong>. Úspory tohoto měsíce: ${fmt(balance)}.`;
-  }
-
-  document.getElementById('ai-advice').innerHTML = advice;
-}
-
-// ===== FINANCE =====
-function renderFinanceList() {
-  const el = document.getElementById('finance-list');
-  const filter = document.querySelector('#finance-filter-chips .chip.active')?.textContent.trim();
-  let list = [...allTransactions];
-  if (filter==='Příjmy') list = list.filter(t=>t.type==='income');
-  if (filter==='Výdaje') list = list.filter(t=>t.type==='expense');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-wallet"></i><p>Žádné záznamy</p></div>'; return;
-  }
-  el.innerHTML = list.map(t => `
-    <div class="list-item" style="position:relative;">
-      <div class="icon-circle" style="background:${t.type==='income'?'rgba(74,222,128,0.1)':'rgba(239,68,68,0.1)'}">
-        <i class="fas ${categoryIcon(t.category)}" style="color:${t.type==='income'?'#4ade80':'#f87171'}"></i>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <p style="font-size:14px;font-weight:500;">${t.category||'–'}</p>
-          <span class="tag ${t.type}">${t.type==='income'?'Příjem':'Výdaj'}</span>
-        </div>
-        <p style="font-size:12px;color:#888;">${fmtDate(t.date)}${t.note?' · '+t.note:''}</p>
-      </div>
-      <div style="text-align:right;">
-        <p style="font-size:15px;font-weight:600;${t.type==='income'?'color:#4ade80':'color:#f87171'}">${t.type==='income'?'+':'–'}${fmt(t.amount)}</p>
-        <button onclick="deleteTransaction('${t.id}',event)" style="background:none;border:none;color:#555;font-size:11px;cursor:pointer;padding:2px 4px;">
-          <i class="fas fa-trash"></i>
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function filterTransactions(type, chip) {
-  document.querySelectorAll('#finance-filter-chips .chip').forEach(c=>c.classList.remove('active'));
-  chip.classList.add('active');
-  renderFinanceList();
-}
-
-function setTrxType(type) {
-  currentTrxType = type;
-  const inc = document.getElementById('trx-btn-income');
-  const exp = document.getElementById('trx-btn-expense');
-  if (type==='income') {
-    inc.className='btn-gold'; inc.style.cssText='flex:1;padding:10px;border-radius:10px;font-size:13px;';
-    exp.className='btn-ghost'; exp.style.cssText='flex:1;padding:10px;border-radius:10px;font-size:13px;';
-  } else {
-    exp.className='btn-gold'; exp.style.cssText='flex:1;padding:10px;border-radius:10px;font-size:13px;';
-    inc.className='btn-ghost'; inc.style.cssText='flex:1;padding:10px;border-radius:10px;font-size:13px;';
-  }
-}
-
-async function addTransaction() {
-  if (!currentHousehold) return showToast('Nejprve vytvořte domácnost','error');
-  const amount = parseFloat(document.getElementById('trx-amount').value);
-  const category = document.getElementById('trx-category').value;
-  const date = document.getElementById('trx-date').value;
-  const note = document.getElementById('trx-note').value;
-  if (!amount||amount<=0) return showToast('Zadejte platnou částku','error');
-  const {error} = await sb.from('transactions').insert({
-    household_id:currentHousehold.id,
-    user_id:currentUser.id,
-    type:currentTrxType,
-    amount,category,date,note
-  });
-  if (error) return showToast(error.message,'error');
-  await logActivity(`${currentTrxType==='income'?'Přidal/a příjem':'Přidal/a výdaj'} ${fmt(amount)} (${category})`, currentHousehold.id);
-  closeModal('modal-add-transaction');
-  document.getElementById('trx-amount').value='';
-  document.getElementById('trx-note').value='';
-  await loadDashboard();
-  showToast('Transakce uložena','success');
-}
-
-async function deleteTransaction(id, e) {
-  e.stopPropagation();
-  if (!confirm('Smazat tuto transakci?')) return;
-  const {error} = await sb.from('transactions').delete().eq('id',id);
-  if (error) return showToast(error.message,'error');
-  await loadDashboard();
-  showToast('Smazáno','success');
-}
-
-// ===== INVENTORY =====
-const autoCategories = {
-  'ledni':'Spotřebiče','pračk':'Spotřebiče','myčk':'Spotřebiče','sušičk':'Spotřebiče',
-  'mikrovln':'Spotřebiče','sporák':'Spotřebiče','troub':'Spotřebiče','klimatiz':'Spotřebiče',
-  'televiz':'Elektronika','tv':'Elektronika','notebook':'Elektronika','laptop':'Elektronika',
-  'počítač':'Elektronika','tablet':'Elektronika','telefon':'Elektronika','monitor':'Elektronika',
-  'postel':'Nábytek','skříň':'Nábytek','stůl':'Nábytek','židle':'Nábytek','pohovk':'Nábytek',
-  'gauč':'Nábytek','komoda':'Nábytek','polič':'Nábytek'
-};
-
-function autoCategory() {
-  const name = document.getElementById('item-name').value.toLowerCase();
-  for (const [key,cat] of Object.entries(autoCategories)) {
-    if (name.includes(key)) {
-      document.getElementById('item-category').value = cat;
-      break;
-    }
-  }
-}
-
-function renderInventory() {
-  const el = document.getElementById('inventory-list');
-  const search = document.getElementById('inventory-search').value.toLowerCase();
-  let list = allInventory.filter(i=>!search||i.name.toLowerCase().includes(search));
-  if (!list.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>Žádné položky v inventáři</p></div>'; return;
-  }
-  el.innerHTML = list.map(item => {
-    const warranty_end = item.purchase_date && item.warranty_months
-      ? new Date(new Date(item.purchase_date).setMonth(new Date(item.purchase_date).getMonth()+Number(item.warranty_months))).toISOString().slice(0,10)
-      : null;
-    const warrantyOk = warranty_end && warranty_end >= todayISO();
-    return `
-      <div class="list-item" onclick="showItemDetail('${item.id}')">
-        <div class="icon-circle" style="background:rgba(212,175,55,0.1);">
-          <i class="fas ${categoryIcon(item.category)}" style="color:#d4af37;"></i>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:14px;font-weight:500;">${item.name}</p>
-          <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
-            <span class="tag">${item.category||'–'}</span>
-            ${warrantyOk?'<span class="tag gold"><i class="fas fa-shield-alt" style="font-size:9px;"></i> Záruka</span>':''}
-          </div>
-        </div>
-        <p style="font-size:14px;font-weight:600;color:#d4af37;">${item.price?fmt(item.price):'–'}</p>
-      </div>
-    `;
-  }).join('');
-}
-
-function filterInventory() { renderInventory(); }
-
-async function addInventoryItem() {
-  if (!currentHousehold) return showToast('Nejprve vytvořte domácnost','error');
-  const name = document.getElementById('item-name').value.trim();
-  if (!name) return showToast('Zadejte název položky','error');
-  const {error} = await sb.from('inventory').insert({
-    household_id:currentHousehold.id,
-    user_id:currentUser.id,
-    name,
-    category:document.getElementById('item-category').value,
-    price:parseFloat(document.getElementById('item-price').value)||null,
-    purchase_date:document.getElementById('item-date').value||null,
-    store:document.getElementById('item-store').value||null,
-    warranty_months:parseInt(document.getElementById('item-warranty').value)||null,
-    note:document.getElementById('item-note').value||null
-  });
-  if (error) return showToast(error.message,'error');
-  await logActivity(`Přidal/a do inventáře: "${name}"`, currentHousehold.id);
-  closeModal('modal-add-item');
-  document.getElementById('item-name').value='';
-  document.getElementById('item-store').value='';
-  document.getElementById('item-note').value='';
-  await loadDashboard();
-  showToast('Položka uložena','success');
-}
-
-function showItemDetail(id) {
-  const item = allInventory.find(i=>i.id===id);
-  if (!item) return;
-  const warranty_end = item.purchase_date && item.warranty_months
-    ? new Date(new Date(item.purchase_date).setMonth(new Date(item.purchase_date).getMonth()+Number(item.warranty_months))).toISOString().slice(0,10)
-    : null;
-  document.getElementById('item-detail-content').innerHTML = `
-    <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">${item.name}</h3>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      ${row('fas fa-tag','Kategorie',item.category)}
-      ${row('fas fa-coins','Cena',item.price?fmt(item.price):'–')}
-      ${row('fas fa-calendar','Datum nákupu',fmtDate(item.purchase_date))}
-      ${row('fas fa-store','Obchod',item.store||'–')}
-      ${row('fas fa-shield-alt','Záruka',item.warranty_months?(item.warranty_months+' měsíců'):'–')}
-      ${warranty_end?row('fas fa-calendar-check','Konec záruky',fmtDate(warranty_end)+(warranty_end>=todayISO()?' ✅':' ❌')):''}
-      ${item.note?row('fas fa-sticky-note','Poznámka',item.note):''}
-    </div>
-    <button onclick="deleteInventoryItem('${item.id}')" style="width:100%;margin-top:20px;padding:12px;border-radius:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:14px;cursor:pointer;">
-      <i class="fas fa-trash"></i> Smazat položku
-    </button>
-  `;
-  openModal('modal-item-detail');
-}
-
-function row(icon, label, value) {
-  return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a1a1a;border-radius:12px;">
-    <div style="display:flex;align-items:center;gap:10px;color:#888;font-size:13px;">
-      <i class="${icon}" style="width:16px;text-align:center;color:#d4af37;"></i>${label}
-    </div>
-    <span style="font-size:13px;font-weight:500;">${value||'–'}</span>
-  </div>`;
-}
-
-async function deleteInventoryItem(id) {
-  if (!confirm('Smazat položku?')) return;
-  await sb.from('inventory').delete().eq('id',id);
-  closeModal('modal-item-detail');
-  await loadDashboard();
-  showToast('Smazáno','success');
-}
-
-// ===== RECEIPTS =====
-async function handleReceiptUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  receiptFileData = file;
-
-  // Preview
-  if (file.type.startsWith('image/')) {
-    const url = URL.createObjectURL(file);
-    document.getElementById('receipt-preview-img').src = url;
-    document.getElementById('ocr-preview').style.display = 'block';
-  }
-
-  // OCR
-  document.getElementById('ocr-status').style.display = 'block';
-  document.getElementById('ocr-status').innerHTML = '<i class="fas fa-circle-notch fa-spin" style="color:#d4af37;margin-right:8px;"></i>OCR probíhá – rozpoznávám text...';
-
-  try {
-    if (file.type.startsWith('image/')) {
-      const worker = await Tesseract.createWorker('ces+eng');
-      const { data: { text } } = await worker.recognize(file);
-      await worker.terminate();
-
-      // Extract info from OCR text
-      const lines = text.split('\n').filter(l=>l.trim());
-
-      // Try to find amount (largest number with Kč or decimal)
-      const amountMatch = text.match(/(\d{1,6}[,.]?\d{0,2})\s*(?:Kč|CZK|,-)/i);
-      if (amountMatch) {
-        document.getElementById('receipt-amount').value = amountMatch[1].replace(',','.');
-      }
-
-      // Try to find date
-      const dateMatch = text.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4}|\d{2})/);
-      if (dateMatch) {
-        const y = dateMatch[3].length===2?'20'+dateMatch[3]:dateMatch[3];
-        document.getElementById('receipt-date').value = `${y}-${dateMatch[2].padStart(2,'0')}-${dateMatch[1].padStart(2,'0')}`;
-      }
-
-      // Try to find store (first meaningful line)
-      if (lines[0]) {
-        document.getElementById('receipt-store').value = lines[0].slice(0,50);
-      }
-
-      document.getElementById('ocr-status').innerHTML = '<i class="fas fa-check-circle" style="color:#4ade80;margin-right:8px;"></i>Rozpoznávání dokončeno';
-      setTimeout(()=>document.getElementById('ocr-status').style.display='none',2000);
-    } else {
-      document.getElementById('ocr-status').innerHTML = '<i class="fas fa-info-circle" style="color:#d4af37;margin-right:8px;"></i>PDF – ruční vyplnění';
-    }
-  } catch(e) {
-    document.getElementById('ocr-status').innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#f87171;margin-right:8px;"></i>OCR selhalo – vyplňte ručně';
-  }
-}
-
-async function saveReceipt() {
-  if (!currentHousehold) return showToast('Nejprve vytvořte domácnost','error');
-  const store = document.getElementById('receipt-store').value.trim();
-  const amount = parseFloat(document.getElementById('receipt-amount').value)||0;
-  const date = document.getElementById('receipt-date').value;
-  let file_url = null;
-
-  if (receiptFileData) {
-    const ext = receiptFileData.name.split('.').pop();
-    const path = `receipts/${currentHousehold.id}/${Date.now()}.${ext}`;
-    const {data,error} = await sb.storage.from('receipts').upload(path,receiptFileData,{cacheControl:'3600',upsert:false});
-    if (!error && data) {
-      const {data:urlData} = sb.storage.from('receipts').getPublicUrl(path);
-      file_url = urlData.publicUrl;
-    }
-  }
-
-  const {error} = await sb.from('receipts').insert({
-    household_id:currentHousehold.id,
-    user_id:currentUser.id,
-    store,amount,date,file_url
-  });
-  if (error) return showToast(error.message,'error');
-  await logActivity(`Nahrál/a účtenku: ${store||'bez názvu'}`, currentHousehold.id);
-  closeModal('modal-add-receipt');
-  receiptFileData = null;
-  document.getElementById('receipt-store').value='';
-  document.getElementById('receipt-amount').value='';
-  document.getElementById('ocr-preview').style.display='none';
-  await loadDashboard();
-  showToast('Účtenka uložena','success');
-}
-
-function renderReceipts() {
-  const el = document.getElementById('receipts-grid');
-  if (!allReceipts.length) {
-    el.innerHTML = '<div class="empty-state" style="grid-column:span 2;"><i class="fas fa-receipt"></i><p>Žádné účtenky</p></div>'; return;
-  }
-  el.innerHTML = allReceipts.map(r => `
-    <div onclick="showReceiptDetail('${r.id}')" style="background:#1a1a1a;border:1px solid #222;border-radius:16px;overflow:hidden;cursor:pointer;">
-      <div style="height:100px;background:#111;display:flex;align-items:center;justify-content:center;position:relative;">
-        ${r.file_url
-          ? `<img src="${r.file_url}" style="width:100%;height:100%;object-fit:cover;">`
-          : `<i class="fas fa-receipt" style="font-size:32px;color:#333;"></i>`
-        }
-      </div>
-      <div style="padding:10px;">
-        <p style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.store||'Neznámý obchod'}</p>
-        <p style="font-size:12px;color:#888;">${fmtDate(r.date)}</p>
-        <p style="font-size:14px;font-weight:600;color:#d4af37;margin-top:4px;">${fmt(r.amount)}</p>
-      </div>
-    </div>
-  `).join('');
-}
-
-function showReceiptDetail(id) {
-  const r = allReceipts.find(x=>x.id===id);
-  if (!r) return;
-  document.getElementById('receipt-detail-content').innerHTML = `
-    <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:16px;">${r.store||'Účtenka'}</h3>
-    ${r.file_url ? `<img src="${r.file_url}" style="width:100%;border-radius:14px;max-height:300px;object-fit:contain;margin-bottom:16px;background:#111;">` : ''}
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      ${row('fas fa-store','Obchod',r.store||'–')}
-      ${row('fas fa-coins','Částka',fmt(r.amount))}
-      ${row('fas fa-calendar','Datum',fmtDate(r.date))}
-    </div>
-    <button onclick="deleteReceipt('${r.id}')" style="width:100%;margin-top:20px;padding:12px;border-radius:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:14px;cursor:pointer;">
-      <i class="fas fa-trash"></i> Smazat
-    </button>
-  `;
-  openModal('modal-receipt-detail');
-}
-
-async function deleteReceipt(id) {
-  if (!confirm('Smazat účtenku?')) return;
-  await sb.from('receipts').delete().eq('id',id);
-  closeModal('modal-receipt-detail');
-  await loadDashboard();
-  showToast('Smazáno','success');
-}
-
-// ===== TASKS =====
-function renderTasksList() {
-  const el = document.getElementById('tasks-list');
-  if (!allTasks.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Žádné otevřené úkoly</p></div>'; return;
-  }
-  el.innerHTML = allTasks.map(task => {
-    const assignee = currentHouseholdMembers.find(m=>m.user_id===task.assignee_id);
-    return `
-      <div class="list-item" style="gap:10px;">
-        <button onclick="toggleTask('${task.id}')" style="width:26px;height:26px;border-radius:8px;border:2px solid #333;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;">
-          ${task.done?'<i class="fas fa-check" style="color:#4ade80;font-size:12px;"></i>':''}
-        </button>
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:14px;font-weight:500;${task.done?'text-decoration:line-through;color:#555':''}">${task.title}</p>
-          <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
-            ${assignee?`<span style="font-size:11px;color:#888;">${assignee.profiles?.full_name||'–'}</span>`:''}
-            ${task.due_date?`<span style="font-size:11px;color:${task.due_date<todayISO()?'#f87171':'#888'};">📅 ${fmtDate(task.due_date)}</span>`:''}
-          </div>
-        </div>
-        <button onclick="deleteTask('${task.id}')" style="background:none;border:none;color:#444;cursor:pointer;font-size:13px;padding:4px;">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-    `;
-  }).join('');
-}
-
-async function addTask() {
-  if (!currentHousehold) return showToast('Nejprve vytvořte domácnost','error');
-  const title = document.getElementById('task-title').value.trim();
-  if (!title) return showToast('Zadejte název úkolu','error');
-  const assignee_id = document.getElementById('task-assignee').value || null;
-  const due_date = document.getElementById('task-due').value || null;
-  const {error} = await sb.from('tasks').insert({
-    household_id:currentHousehold.id,
-    user_id:currentUser.id,
-    title,assignee_id,due_date,done:false
-  });
-  if (error) return showToast(error.message,'error');
-  await logActivity(`Vytvořil/a úkol: "${title}"`, currentHousehold.id);
-  closeModal('modal-add-task');
-  document.getElementById('task-title').value='';
-  document.getElementById('task-due').value='';
-  await loadDashboard();
-  showToast('Úkol vytvořen','success');
-}
-
-async function toggleTask(id) {
-  const task = allTasks.find(t=>t.id===id);
-  if (!task) return;
-  await sb.from('tasks').update({done:!task.done}).eq('id',id);
-  if (!task.done) await logActivity(`Splnil/a úkol: "${task.title}"`, currentHousehold.id);
-  await loadDashboard();
-}
-
-async function deleteTask(id) {
-  await sb.from('tasks').delete().eq('id',id);
-  await loadDashboard();
-}
-
-// ===== CHAT =====
-async function loadMessages() {
-  if (!currentHousehold) return;
-  const {data} = await sb.from('messages')
-    .select('*, profiles(full_name)')
-    .eq('household_id',currentHousehold.id)
-    .order('created_at',{ascending:true})
-    .limit(100);
-  allMessages = data||[];
-  renderMessages();
-}
-
-function renderMessages() {
-  const el = document.getElementById('chat-messages');
-  if (!allMessages.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-comments"></i><p>Zatím žádné zprávy. Napište první!</p></div>'; return;
-  }
-  el.innerHTML = allMessages.map(m => {
-    const mine = m.user_id === currentUser.id;
-    return `
-      <div style="display:flex;flex-direction:${mine?'row-reverse':'row'};align-items:flex-end;gap:8px;">
-        ${!mine?`<div class="avatar avatar-sm" style="background:${avatarColor(m.profiles?.full_name)};color:#0a0a0a;flex-shrink:0;">${avatarInitials(m.profiles?.full_name||'?')}</div>`:''}
-        <div>
-          ${!mine?`<p style="font-size:11px;color:#888;margin-bottom:3px;padding-left:2px;">${m.profiles?.full_name||'–'}</p>`:''}
-          <div class="chat-bubble ${mine?'mine':'theirs'}">${escapeHtml(m.content)}</div>
-          <p style="font-size:10px;color:#555;margin-top:3px;text-align:${mine?'right':'left'};padding:0 2px;">
-            ${new Date(m.created_at).toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})}
-          </p>
-        </div>
-      </div>
-    `;
-  }).join('');
-  el.scrollTop = el.scrollHeight;
-}
-
-async function sendMessage() {
-  if (!currentHousehold) return showToast('Nejprve vytvořte domácnost','error');
-  const input = document.getElementById('chat-input');
-  const content = input.value.trim();
-  if (!content) return;
-  input.value = '';
-  const {error} = await sb.from('messages').insert({
-    household_id:currentHousehold.id,
-    user_id:currentUser.id,
-    content
-  });
-  if (error) showToast(error.message,'error');
-}
-
-function escapeHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ===== REALTIME =====
+// ---------- REALTIME ----------
 function setupRealtime() {
-  if (!currentHousehold || realtimeChannel) return;
-  realtimeChannel = sb.channel('household-'+currentHousehold.id)
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`household_id=eq.${currentHousehold.id}`}, async payload => {
-      const {data} = await sb.from('profiles').select('full_name').eq('id',payload.new.user_id).single();
-      payload.new.profiles = data;
-      allMessages.push(payload.new);
-      renderMessages();
-    })
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'transactions',filter:`household_id=eq.${currentHousehold.id}`}, () => {
-      loadDashboard();
-    })
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tasks',filter:`household_id=eq.${currentHousehold.id}`}, () => {
+  sb.channel('households')
+    .on('postgres_changes', { event: '*', schema: 'public' }, payload => {
+      console.log("Realtime:", payload);
       loadDashboard();
     })
     .subscribe();
 }
 
-// ===== ACTIVITY LOG =====
-async function logActivity(action, household_id) {
-  await sb.from('activity_logs').insert({
-    household_id,
-    user_id:currentUser.id,
-    action,
-    actor_name:currentProfile?.full_name||currentUser.email
-  }).catch(()=>{});
+// ---------- NAV ----------
+function showTab(tab) {
+  ['dashboard','households','finance','inventory','chat'].forEach(t => {
+    document.getElementById(t).classList.add("hidden");
+  });
+
+  document.getElementById(tab).classList.remove("hidden");
 }
 
-async function loadActivityLog() {
+// ---------- AUTO INIT ----------
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) init();
+});
+
+</script>
+  
+<!-- =========================
+     ČÁST 2 — FINANCE + AI + GRAFY
+     VLOŽIT POD EXISTUJÍCÍ SCRIPT / PŘED </script>
+========================= -->
+
+<script>
+
+// =========================
+// FINANCE STATE
+// =========================
+let transactions = [];
+
+// =========================
+// LOAD FINANCE
+// =========================
+async function loadFinance() {
   if (!currentHousehold) return;
-  const {data} = await sb.from('activity_logs')
-    .select('*').eq('household_id',currentHousehold.id)
-    .order('created_at',{ascending:false}).limit(20);
-  const el = document.getElementById('activity-log');
-  if (!data||!data.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><p>Žádná aktivita</p></div>'; return;
+
+  const { data, error } = await sb
+    .from("transactions")
+    .select("*")
+    .eq("household_id", currentHousehold)
+    .order("created_at", { ascending: false });
+
+  if (error) return console.log(error);
+
+  transactions = data || [];
+  updateFinanceUI();
+  runAIAdvisor();
+}
+
+// =========================
+// ADD TRANSACTION
+// =========================
+async function addTransaction(type, amount, category, note) {
+  if (!currentHousehold) return;
+
+  await sb.from("transactions").insert({
+    household_id: currentHousehold,
+    user_id: currentUser.id,
+    type,
+    amount,
+    category,
+    note
+  });
+
+  loadFinance();
+}
+
+// =========================
+// DELETE TRANSACTION
+// =========================
+async function deleteTransaction(id) {
+  await sb.from("transactions").delete().eq("id", id);
+  loadFinance();
+}
+
+// =========================
+// UPDATE UI
+// =========================
+function updateFinanceUI() {
+
+  let income = 0;
+  let expense = 0;
+
+  transactions.forEach(t => {
+    if (t.type === "income") income += Number(t.amount);
+    if (t.type === "expense") expense += Number(t.amount);
+  });
+
+  const balance = income - expense;
+
+  document.getElementById("income").innerText = income + " Kč";
+  document.getElementById("expenses").innerText = expense + " Kč";
+  document.getElementById("balance").innerText = balance + " Kč";
+
+  updateCharts();
+}
+
+// =========================
+// AI FINANCE ADVISOR
+// =========================
+function runAIAdvisor() {
+
+  let expense = 0;
+  let rent = 0;
+  let energy = 0;
+
+  transactions.forEach(t => {
+    if (t.type === "expense") {
+      expense += Number(t.amount);
+
+      if (t.category === "Nájem") rent += Number(t.amount);
+      if (t.category === "Elektřina" || t.category === "Plyn" || t.category === "Voda")
+        energy += Number(t.amount);
+    }
+  });
+
+  let advice = "";
+
+  if (rent === 0) {
+    advice = "Nejsou evidovány náklady na nájem. Zkontrolujte platby.";
+  } 
+  else if (expense > 50000) {
+    advice = "Pozor na vysoké výdaje. Doporučujeme snížit nepotřebné nákupy.";
+  } 
+  else {
+    advice = "Doporučujeme nejprve zaplatit nájem a energie.";
   }
-  el.innerHTML = data.map(a => `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#1a1a1a;border-radius:12px;">
-      <div class="avatar avatar-sm" style="background:${avatarColor(a.actor_name)};color:#0a0a0a;flex-shrink:0;">${avatarInitials(a.actor_name||'?')}</div>
-      <div style="flex:1;min-width:0;">
-        <p style="font-size:13px;"><strong>${a.actor_name||'–'}</strong> ${a.action}</p>
-        <p style="font-size:11px;color:#555;">${fmtDate(a.created_at)}</p>
-      </div>
-    </div>
-  `).join('');
+
+  document.getElementById("aiAdvice").innerText = advice;
 }
 
-// ===== NOTIFICATIONS =====
-async function loadNotifications() {
-  if (!currentHousehold) return;
-  const notifications = [];
-  const today = todayISO();
+// =========================
+// CHARTS
+// =========================
+let chart;
 
-  // Warranty expiring soon (within 30 days)
-  allInventory.forEach(item => {
-    if (item.purchase_date && item.warranty_months) {
-      const end = new Date(item.purchase_date);
-      end.setMonth(end.getMonth()+Number(item.warranty_months));
-      const endStr = end.toISOString().slice(0,10);
-      const daysLeft = Math.floor((end-new Date())/(1000*60*60*24));
-      if (daysLeft >= 0 && daysLeft <= 30) {
-        notifications.push({type:'warranty',icon:'fas fa-shield-alt',color:'#f59e0b',text:`Záruka pro "${item.name}" vyprší za ${daysLeft} dní (${fmtDate(endStr)})`,date:endStr});
+function updateCharts() {
+
+  const ctx = document.getElementById("financeChart");
+
+  if (!ctx) return;
+
+  let income = 0;
+  let expense = 0;
+
+  transactions.forEach(t => {
+    if (t.type === "income") income += Number(t.amount);
+    if (t.type === "expense") expense += Number(t.amount);
+  });
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Příjmy', 'Výdaje'],
+      datasets: [{
+        data: [income, expense]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true }
       }
     }
   });
+}
 
-  // Overdue tasks
-  allTasks.forEach(task => {
-    if (task.due_date && task.due_date < today && !task.done) {
-      notifications.push({type:'task',icon:'fas fa-exclamation-triangle',color:'#f87171',text:`Úkol "${task.title}" je po termínu!`,date:task.due_date});
-    }
+// =========================
+// QUICK DEMO UI HOOK
+// =========================
+function quickAddExpense() {
+  const amount = prompt("Částka výdaje:");
+  const category = prompt("Kategorie:");
+
+  if (!amount) return;
+
+  addTransaction("expense", Number(amount), category || "Ostatní", "");
+}
+
+function quickAddIncome() {
+  const amount = prompt("Částka příjmu:");
+  if (!amount) return;
+
+  addTransaction("income", Number(amount), "Příjem", "");
+}
+
+// =========================
+// AUTO LOAD WHEN HOUSEHOLD CHANGES
+// =========================
+const oldSetHousehold = window.setHousehold;
+window.setHousehold = function(id) {
+  currentHousehold = id;
+  loadFinance();
+}
+
+</script>
+
+<!-- FINANCE UI EXTENSION -->
+<div class="glass p-4 rounded-xl mt-4">
+  <div class="flex justify-between mb-2">
+    <div class="font-bold">Finance rychlé akce</div>
+  </div>
+
+  <div class="flex gap-2">
+    <button onclick="quickAddIncome()" class="flex-1 bg-green-500/20 p-2 rounded">
+      + Příjem
+    </button>
+    <button onclick="quickAddExpense()" class="flex-1 bg-red-500/20 p-2 rounded">
+      + Výdaj
+    </button>
+  </div>
+
+  <canvas id="financeChart" class="mt-4"></canvas>
+</div>
+  <!-- =========================
+     ČÁST 3 — INVENTÁŘ + AUTOMATICKÁ KATEGORIZACE + DETAILY
+     VLOŽIT DO SCRIPT + UI SEKCE INVENTORY
+========================= -->
+
+<script>
+
+// =========================
+// INVENTORY STATE
+// =========================
+let inventoryItems = [];
+
+// =========================
+// LOAD INVENTORY
+// =========================
+async function loadInventory() {
+  if (!currentHousehold) return;
+
+  const { data, error } = await sb
+    .from("inventory")
+    .select("*")
+    .eq("household_id", currentHousehold)
+    .order("created_at", { ascending: false });
+
+  if (error) return console.log(error);
+
+  inventoryItems = data || [];
+  renderInventory();
+}
+
+// =========================
+// AUTO CATEGORY ENGINE
+// =========================
+function autoCategory(name) {
+  const n = name.toLowerCase();
+
+  if (n.includes("lednice")) return "Spotřebiče";
+  if (n.includes("pračka")) return "Spotřebiče";
+  if (n.includes("mikrovlnka")) return "Spotřebiče";
+
+  if (n.includes("tv") || n.includes("televize")) return "Elektronika";
+  if (n.includes("notebook") || n.includes("pc")) return "Elektronika";
+
+  if (n.includes("postel") || n.includes("skříň") || n.includes("stůl"))
+    return "Nábytek";
+
+  return "Ostatní";
+}
+
+// =========================
+// ADD INVENTORY ITEM
+// =========================
+async function addInventoryItem(item) {
+  if (!currentHousehold) return;
+
+  const category = autoCategory(item.name);
+
+  await sb.from("inventory").insert({
+    household_id: currentHousehold,
+    user_id: currentUser.id,
+    name: item.name,
+    category,
+    price: item.price || 0,
+    purchase_date: item.purchase_date || null,
+    store: item.store || "",
+    warranty_months: item.warranty_months || 0,
+    warranty_end: item.warranty_end || null,
+    photo_url: item.photo_url || null,
+    receipt_url: item.receipt_url || null,
+    note: item.note || ""
   });
 
-  const el = document.getElementById('notifications-list');
-  if (!notifications.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Žádné notifikace</p></div>';
-    document.getElementById('notif-dot').style.display='none';
-  } else {
-    document.getElementById('notif-dot').style.display='block';
-    el.innerHTML = notifications.map(n => `
-      <div style="display:flex;gap:12px;padding:14px;background:#1a1a1a;border-radius:16px;border:1px solid #222;">
-        <div style="width:38px;height:38px;border-radius:12px;background:${n.color}20;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <i class="${n.icon}" style="color:${n.color};font-size:16px;"></i>
-        </div>
+  loadInventory();
+}
+
+// =========================
+// DELETE ITEM
+// =========================
+async function deleteInventoryItem(id) {
+  await sb.from("inventory").delete().eq("id", id);
+  loadInventory();
+}
+
+// =========================
+// RENDER INVENTORY
+// =========================
+function renderInventory() {
+  const container = document.getElementById("inventoryList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  inventoryItems.forEach(i => {
+    const div = document.createElement("div");
+    div.className = "glass p-3 mt-2 rounded-xl";
+
+    div.innerHTML = `
+      <div class="flex justify-between">
         <div>
-          <p style="font-size:13px;">${n.text}</p>
-          <p style="font-size:11px;color:#555;margin-top:3px;">${fmtDate(n.date)}</p>
+          <div class="font-bold">${i.name}</div>
+          <div class="text-xs text-gray-400">${i.category}</div>
+        </div>
+        <div class="text-right">
+          <div class="gold">${i.price || 0} Kč</div>
+          <button onclick="deleteInventoryItem('${i.id}')" class="text-red-400 text-xs">
+            smazat
+          </button>
         </div>
       </div>
-    `).join('');
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// =========================
+// QUICK ADD INVENTORY
+// =========================
+function quickAddInventory() {
+  const name = prompt("Název věci:");
+  if (!name) return;
+
+  const price = prompt("Cena:");
+
+  addInventoryItem({
+    name,
+    price: Number(price || 0)
+  });
+}
+
+// =========================
+// WARRANTY CHECKER
+// =========================
+function checkWarranties() {
+  const now = new Date();
+
+  const expiring = inventoryItems.filter(i => {
+    if (!i.warranty_end) return false;
+    return new Date(i.warranty_end) < new Date(now.getTime() + 30*24*60*60*1000);
+  });
+
+  if (expiring.length > 0) {
+    console.log("Brzy končí záruka:", expiring);
   }
 }
 
-// ===== NAVIGATION =====
-let currentPage = 'dashboard';
-function showPage(page) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const pageEl = document.getElementById(`page-${page}`);
-  if (pageEl) {
-    if (page==='chat') {
-      pageEl.style.display = 'flex';
-      pageEl.classList.add('active');
-      loadMessages();
-    } else {
-      pageEl.style.display = 'block';
-      pageEl.classList.add('active');
-    }
-  }
-  const navEl = document.getElementById(`nav-${page}`);
-  if (navEl) navEl.classList.add('active');
-  currentPage = page;
-  if (page==='profile') { loadActivityLog(); }
+</script>
+
+<!-- INVENTORY UI -->
+<div class="glass p-4 rounded-xl mt-4">
+  <div class="flex justify-between items-center">
+    <div class="font-bold">Inventář</div>
+    <button onclick="quickAddInventory()" class="text-sm gold">+ přidat</button>
+  </div>
+
+  <div id="inventoryList" class="mt-2"></div>
+</div>
+  <!-- =========================
+     ČÁST 4 — ÚČTENKY + STORAGE + OCR (TESSERACT)
+     VLOŽIT DO SCRIPT + UI SEKCE RECEIPTS
+========================= -->
+
+<script>
+
+// =========================
+// RECEIPTS STATE
+// =========================
+let receipts = [];
+
+// =========================
+// LOAD RECEIPTS
+// =========================
+async function loadReceipts() {
+  if (!currentHousehold) return;
+
+  const { data, error } = await sb
+    .from("receipts")
+    .select("*")
+    .eq("household_id", currentHousehold)
+    .order("created_at", { ascending: false });
+
+  if (error) return console.log(error);
+
+  receipts = data || [];
+  renderReceipts();
 }
 
-// ===== CATEGORY ICONS =====
-function categoryIcon(cat) {
-  const icons = {
-    'Nájem':'fas fa-home','Hypotéka':'fas fa-building','Elektřina':'fas fa-bolt','Voda':'fas fa-tint',
-    'Plyn':'fas fa-fire','Internet':'fas fa-wifi','Telefon':'fas fa-mobile-alt','Potraviny':'fas fa-shopping-basket',
-    'Doprava':'fas fa-car','Domácnost':'fas fa-broom','Elektronika':'fas fa-laptop','Nábytek':'fas fa-couch',
-    'Splátky':'fas fa-credit-card','Ostatní':'fas fa-tag',
-    'Spotřebiče':'fas fa-blender','Kuchyně':'fas fa-utensils','Koupelna':'fas fa-bath',
-    'Dekorace':'fas fa-paint-brush','Nářadí':'fas fa-tools','income':'fas fa-arrow-up','expense':'fas fa-arrow-down'
+// =========================
+// UPLOAD RECEIPT TO STORAGE
+// =========================
+async function uploadReceipt(file) {
+  const fileName = `${Date.now()}_${file.name}`;
+
+  const { data, error } = await sb.storage
+    .from("receipts")
+    .upload(fileName, file);
+
+  if (error) return alert(error.message);
+
+  const { data: publicUrl } = sb.storage
+    .from("receipts")
+    .getPublicUrl(fileName);
+
+  return publicUrl.publicUrl;
+}
+
+// =========================
+// OCR PROCESS (TESSERACT)
+// =========================
+async function runOCR(file) {
+  const result = await Tesseract.recognize(file, "ces+eng", {
+    logger: m => console.log(m)
+  });
+
+  const text = result.data.text;
+
+  return {
+    text,
+    store: extractStore(text),
+    amount: extractAmount(text),
+    date: extractDate(text)
   };
-  return icons[cat]||'fas fa-circle';
 }
 
-// ===== PWA SERVICE WORKER =====
-if ('serviceWorker' in navigator) {
-  const swCode = `
-    const CACHE = 'domofinance-v1';
-    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/']))));
-    self.addEventListener('fetch', e => {
-      if (e.request.url.includes('supabase') || e.request.url.includes('googleapis')) return;
-      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(()=>r)));
-    });
-  `;
-  const blob = new Blob([swCode], {type:'application/javascript'});
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(()=>{});
+// =========================
+// SIMPLE PARSERS
+// =========================
+function extractAmount(text) {
+  const match = text.match(/(\d+[.,]\d{2})/);
+  return match ? parseFloat(match[1].replace(",", ".")) : null;
 }
 
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', async () => {
-  const {data:{session}} = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('app').style.display='flex';
-    await initApp();
+function extractDate(text) {
+  const match = text.match(/(\d{1,2}\.\d{1,2}\.\d{4})/);
+  return match ? match[1] : null;
+}
+
+function extractStore(text) {
+  const lines = text.split("\n").filter(l => l.length > 3);
+  return lines[0] || "Neznámý obchod";
+}
+
+// =========================
+// ADD RECEIPT
+// =========================
+async function addReceipt(file) {
+  if (!currentHousehold) return;
+
+  const ocr = await runOCR(file);
+  const url = await uploadReceipt(file);
+
+  await sb.from("receipts").insert({
+    household_id: currentHousehold,
+    user_id: currentUser.id,
+    file_url: url,
+    store: ocr.store,
+    amount: ocr.amount,
+    receipt_date: ocr.date
+  });
+
+  loadReceipts();
+}
+
+// =========================
+// DELETE RECEIPT
+// =========================
+async function deleteReceipt(id) {
+  await sb.from("receipts").delete().eq("id", id);
+  loadReceipts();
+}
+
+// =========================
+// RENDER RECEIPTS
+// =========================
+function renderReceipts() {
+  const container = document.getElementById("receiptList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  receipts.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "glass p-3 mt-2 rounded-xl";
+
+    div.innerHTML = `
+      <div class="flex justify-between">
+        <div>
+          <div class="font-bold">${r.store || "Účtenka"}</div>
+          <div class="text-xs text-gray-400">${r.receipt_date || ""}</div>
+        </div>
+        <div class="text-right">
+          <div class="gold">${r.amount || 0} Kč</div>
+          <button onclick="deleteReceipt('${r.id}')" class="text-red-400 text-xs">
+            smazat
+          </button>
+        </div>
+      </div>
+
+      <a href="${r.file_url}" target="_blank" class="text-xs text-blue-400">
+        zobrazit
+      </a>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// =========================
+// QUICK UPLOAD HANDLER
+// =========================
+function handleReceiptUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  addReceipt(file);
+}
+
+</script>
+
+<!-- RECEIPTS UI -->
+<div class="glass p-4 rounded-xl mt-4">
+  <div class="flex justify-between items-center">
+    <div class="font-bold">Účtenky</div>
+
+    <label class="text-sm gold cursor-pointer">
+      + nahrát
+      <input type="file" accept="image/*,application/pdf" class="hidden"
+        onchange="handleReceiptUpload(event)">
+    </label>
+  </div>
+
+  <div id="receiptList" class="mt-2"></div>
+</div>
+
+  <!-- =========================
+     ČÁST 5 — CHAT + ÚKOLY + AKTIVITY + NOTIFIKACE (REALTIME CORE)
+     VLOŽIT DO SCRIPT + UI SEKCE
+========================= -->
+
+<script>
+
+// =========================
+// CHAT STATE
+// =========================
+let messages = [];
+
+// =========================
+// LOAD CHAT
+// =========================
+async function loadChat() {
+  if (!currentHousehold) return;
+
+  const { data } = await sb
+    .from("messages")
+    .select("*")
+    .eq("household_id", currentHousehold)
+    .order("created_at", { ascending: true });
+
+  messages = data || [];
+  renderChat();
+}
+
+// =========================
+// SEND MESSAGE
+// =========================
+async function sendMessage(text) {
+  if (!currentHousehold || !text) return;
+
+  await sb.from("messages").insert({
+    household_id: currentHousehold,
+    user_id: currentUser.id,
+    message: text
+  });
+}
+
+// =========================
+// RENDER CHAT
+// =========================
+function renderChat() {
+  const container = document.getElementById("chatList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  messages.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "glass p-2 mt-2 rounded-xl";
+
+    div.innerHTML = `
+      <div class="text-sm">${m.message}</div>
+      <div class="text-xs text-gray-400">${new Date(m.created_at).toLocaleTimeString()}</div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// =========================
+// TASKS
+// =========================
+let tasks = [];
+
+async function loadTasks() {
+  if (!currentHousehold) return;
+
+  const { data } = await sb
+    .from("tasks")
+    .select("*")
+    .eq("household_id", currentHousehold);
+
+  tasks = data || [];
+  renderTasks();
+}
+
+async function addTask(title, assigned_to = null) {
+  await sb.from("tasks").insert({
+    household_id: currentHousehold,
+    assigned_to,
+    title
+  });
+
+  loadTasks();
+}
+
+async function toggleTask(id, completed) {
+  await sb.from("tasks")
+    .update({ completed: !completed })
+    .eq("id", id);
+
+  loadTasks();
+}
+
+function renderTasks() {
+  const container = document.getElementById("taskList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  tasks.forEach(t => {
+    const div = document.createElement("div");
+    div.className = "glass p-2 mt-2 rounded-xl flex justify-between";
+
+    div.innerHTML = `
+      <div>${t.title}</div>
+      <button onclick="toggleTask('${t.id}', ${t.completed})"
+        class="text-xs ${t.completed ? 'text-green-400' : 'text-yellow-400'}">
+        ${t.completed ? 'hotovo' : 'čeká'}
+      </button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// =========================
+// ACTIVITY LOG
+// =========================
+async function logActivity(action) {
+  if (!currentHousehold) return;
+
+  await sb.from("activity_logs").insert({
+    household_id: currentHousehold,
+    action
+  });
+}
+
+// =========================
+// NOTIFICATIONS (BASIC)
+// =========================
+function pushNotification(text) {
+  if (!("Notification" in window)) return;
+
+  if (Notification.permission === "granted") {
+    new Notification("Home OS", { body: text });
+  }
+}
+
+async function enableNotifications() {
+  if (!("Notification" in window)) return;
+  await Notification.requestPermission();
+}
+
+// =========================
+// REALTIME CORE (ALL TABLES)
+// =========================
+function setupRealtimeCore() {
+  sb.channel("realtime-all")
+    .on("postgres_changes", { event: "*", schema: "public" }, payload => {
+
+      console.log("Realtime update:", payload);
+
+      if (payload.table === "messages") loadChat();
+      if (payload.table === "tasks") loadTasks();
+      if (payload.table === "transactions") loadFinance();
+      if (payload.table === "inventory") loadInventory();
+      if (payload.table === "receipts") loadReceipts();
+
+      pushNotification("Nová aktivita v domácnosti");
+    })
+    .subscribe();
+}
+
+// =========================
+// QUICK INPUT HELPERS
+// =========================
+function quickSendMessage() {
+  const text = prompt("Zpráva:");
+  sendMessage(text);
+}
+
+function quickAddTask() {
+  const title = prompt("Úkol:");
+  addTask(title);
+}
+
+</script>
+
+<!-- CHAT UI -->
+<div class="glass p-4 rounded-xl mt-4">
+  <div class="flex justify-between">
+    <div class="font-bold">Chat</div>
+    <button onclick="quickSendMessage()" class="text-sm gold">+ zpráva</button>
+  </div>
+  <div id="chatList"></div>
+</div>
+
+<!-- TASKS UI -->
+<div class="glass p-4 rounded-xl mt-4">
+  <div class="flex justify-between">
+    <div class="font-bold">Úkoly</div>
+    <button onclick="quickAddTask()" class="text-sm gold">+ úkol</button>
+  </div>
+  <div id="taskList"></div>
+</div>
+  <!-- =========================
+     ČÁST 6 — OPEN BANKING + PWA + OFFLINE + FINAL HOOKS
+     VLOŽIT DO SCRIPT (na konec) + MANIFEST/INSTALL SUPPORT
+========================= -->
+
+<script>
+
+// =========================
+// OPEN BANKING MODULE (STRUCTURE ONLY)
+// =========================
+const OpenBanking = {
+  connected: false,
+  provider: null,
+
+  async connect() {
+    alert("Open Banking zatím jen skeleton (PSD2 / GoCardless ready)");
+    this.connected = true;
+    this.provider = "gocardless";
+  },
+
+  async syncAccounts() {
+    if (!this.connected) return;
+    console.log("Sync bank accounts...");
+  }
+};
+
+// =========================
+// SIMPLE OFFLINE CACHE
+// =========================
+function setupOfflineCache() {
+  if (!navigator.onLine) {
+    console.log("Offline mode active");
+  }
+
+  window.addEventListener("offline", () => {
+    pushNotification("Jsi offline režimu");
+  });
+
+  window.addEventListener("online", () => {
+    pushNotification("Znovu online");
+  });
+}
+
+// =========================
+// PWA SERVICE WORKER
+// =========================
+function registerPWA() {
+  if (!("serviceWorker" in navigator)) return;
+
+  navigator.serviceWorker.register("sw.js")
+    .then(() => console.log("SW registered"))
+    .catch(err => console.log("SW error", err));
+}
+
+// =========================
+// AUTO INIT ALL MODULES
+// =========================
+function bootAllModules() {
+
+  setupOfflineCache();
+  registerPWA();
+  setupRealtimeCore();
+
+  loadFinance();
+  loadInventory();
+  loadReceipts();
+  loadChat();
+  loadTasks();
+
+  enableNotifications();
+}
+
+// =========================
+// HOUSEHOLD SWITCH FIX
+// =========================
+function setHousehold(id, name) {
+  currentHousehold = id;
+  document.getElementById("householdName").innerText = name;
+
+  bootAllModules();
+}
+
+// override click in households list (patch)
+window.setHousehold = setHousehold;
+
+</script>
+
+<!-- =========================
+     PWA MANIFEST (INLINE NOTE)
+     (musí být separátní soubor při produkci)
+========================= -->
+
+<script>
+// Placeholder manifest generator (dev only)
+const PWA_MANIFEST = {
+  name: "Home Finance OS",
+  short_name: "HomeOS",
+  start_url: "/",
+  display: "standalone",
+  background_color: "#000000",
+  theme_color: "#d4af37",
+  icons: []
+};
+</script>
+
+<!-- =========================
+     FINAL HOOK INIT PATCH
+========================= -->
+
+<script>
+// ensure init calls modules
+async function init() {
+  const { data } = await sb.auth.getUser();
+  currentUser = data.user;
+
+  if (!currentUser) return;
+
+  document.getElementById("authScreen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+
+  loadHouseholds();
+  loadDashboard();
+
+  bootAllModules();
+}
+
+// safety: avoid double init
+let _booted = false;
+function safeBoot() {
+  if (_booted) return;
+  _booted = true;
+  bootAllModules();
+}
+
+</script>
+
+  <!-- =========================
+     ČÁST 7 — ARCHITEKTURNÍ JÁDRO (FIX + ROUTER + STABILIZACE)
+     TOTO JE POVINNÉ PRO FUNKČNOST VŠEHO PŘEDEŠLÉHO
+========================= -->
+
+<script>
+
+// =========================
+// APP STATE (CENTRALIZED)
+// =========================
+const AppState = {
+  user: null,
+  household: null,
+  ready: false,
+  subscriptions: []
+};
+
+// =========================
+// CLEAN REALTIME (prevents duplicates)
+// =========================
+function clearSubscriptions() {
+  AppState.subscriptions.forEach(s => {
+    try { sb.removeChannel(s); } catch(e) {}
+  });
+  AppState.subscriptions = [];
+}
+
+// =========================
+// FIXED REALTIME SYSTEM
+// =========================
+function setupRealtimeCoreFixed() {
+
+  clearSubscriptions();
+
+  const channel = sb.channel("core-sync");
+
+  channel.on("postgres_changes",
+    { event: "*", schema: "public" },
+    (payload) => {
+
+      const table = payload.table;
+
+      if (table === "messages") loadChat();
+      if (table === "tasks") loadTasks();
+      if (table === "transactions") loadFinance();
+      if (table === "inventory") loadInventory();
+      if (table === "receipts") loadReceipts();
+
+      pushNotification("Aktualizace domácnosti");
+    }
+  );
+
+  channel.subscribe();
+
+  AppState.subscriptions.push(channel);
+}
+
+// =========================
+// GLOBAL SAFE INIT (FIX DUPLICATES)
+// =========================
+async function safeInit() {
+
+  if (AppState.ready) return;
+
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) return;
+
+  AppState.user = data.user;
+
+  document.getElementById("authScreen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+
+  await loadHouseholds();
+
+  AppState.ready = true;
+
+  setupRealtimeCoreFixed();
+  bootAllModules();
+}
+
+// override ALL init entry points
+window.init = safeInit;
+
+// =========================
+// HOUSEHOLD FIX (IMPORTANT)
+// =========================
+function selectHousehold(id, name) {
+  AppState.household = id;
+  currentHousehold = id;
+
+  document.getElementById("householdName").innerText = name;
+
+  // reload all modules safely
+  loadFinance();
+  loadInventory();
+  loadReceipts();
+  loadChat();
+  loadTasks();
+}
+
+// patch old function name
+window.setHousehold = selectHousehold;
+
+// =========================
+// GLOBAL ERROR SAFETY LAYER
+// =========================
+window.addEventListener("error", (e) => {
+  console.log("APP ERROR:", e.message);
+});
+
+// =========================
+// AUTO START GUARANTEE
+// =========================
+sb.auth.onAuthStateChange((event, session) => {
+  if (session?.user) {
+    safeInit();
   }
 });
+
 </script>
+
+  <script>
+// =========================
+// SECURITY GUARD (RLS HELPERS)
+// =========================
+
+// vždy kontrola přístupu k domácnosti
+function requireHousehold() {
+  if (!currentHousehold) {
+    alert("Vyber domácnost");
+    throw new Error("No household selected");
+  }
+}
+
+// bezpečný wrapper pro SELECT
+async function safeSelect(table, query = "*") {
+  requireHousehold();
+
+  return await sb
+    .from(table)
+    .select(query)
+    .eq("household_id", currentHousehold);
+}
+
+// bezpečný wrapper pro INSERT
+async function safeInsert(table, data) {
+  requireHousehold();
+
+  return await sb
+    .from(table)
+    .insert({
+      ...data,
+      household_id: currentHousehold,
+      user_id: currentUser.id
+    });
+}
+
+// bezpečný wrapper pro DELETE
+async function safeDelete(table, id) {
+  requireHousehold();
+
+  return await sb
+    .from(table)
+    .delete()
+    .eq("id", id);
+}
+
+// =========================
+// GLOBAL DATA CACHE (performance fix)
+// =========================
+const Cache = {
+  finance: [],
+  inventory: [],
+  receipts: [],
+  tasks: [],
+  messages: []
+};
+
+// =========================
+// REFRESH ALL DATA (MASTER SYNC)
+// =========================
+async function refreshAll() {
+  if (!currentHousehold) return;
+
+  const [fin, inv, rec, task, msg] = await Promise.all([
+    sb.from("transactions").select("*").eq("household_id", currentHousehold),
+    sb.from("inventory").select("*").eq("household_id", currentHousehold),
+    sb.from("receipts").select("*").eq("household_id", currentHousehold),
+    sb.from("tasks").select("*").eq("household_id", currentHousehold),
+    sb.from("messages").select("*").eq("household_id", currentHousehold)
+  ]);
+
+  Cache.finance = fin.data || [];
+  Cache.inventory = inv.data || [];
+  Cache.receipts = rec.data || [];
+  Cache.tasks = task.data || [];
+  Cache.messages = msg.data || [];
+
+  console.log("SYNC DONE");
+}
+
+// =========================
+// SMART AUTO REFRESH LOOP
+// =========================
+setInterval(() => {
+  if (currentHousehold) {
+    refreshAll();
+  }
+}, 30000);
+
+</script>
+<script>
+
+// =========================
+// SIMPLE PAGE ROUTER (MOBILE APP CORE)
+// =========================
+
+const Pages = {
+  dashboard: document.getElementById("dashboard"),
+  households: document.getElementById("households"),
+  finance: document.getElementById("finance"),
+  inventory: document.getElementById("inventory"),
+  chat: document.getElementById("chat")
+};
+
+let activePage = "dashboard";
+
+// hide all pages
+function hideAllPages() {
+  Object.values(Pages).forEach(p => {
+    if (p) p.classList.add("hidden");
+  });
+}
+
+// show one page
+function showPage(page) {
+  hideAllPages();
+
+  if (Pages[page]) {
+    Pages[page].classList.remove("hidden");
+    activePage = page;
+  }
+
+  // lazy load data per page
+  if (page === "finance") loadFinance();
+  if (page === "inventory") loadInventory();
+  if (page === "chat") loadChat();
+  if (page === "households") loadHouseholds();
+}
+
+// override nav
+window.showTab = showPage;
+
+// =========================
+// MOBILE NAV ACTIVE STATE
+// =========================
+function setActiveNav(page) {
+  document.querySelectorAll(".bottom-nav-btn").forEach(btn => {
+    btn.classList.remove("text-yellow-400");
+  });
+
+  const el = document.getElementById("nav_" + page);
+  if (el) el.classList.add("text-yellow-400");
+}
+
+// wrapper
+function navigate(page) {
+  showPage(page);
+  setActiveNav(page);
+}
+
+// expose globally
+window.navigate = navigate;
+
+// =========================
+// BACK BUTTON SUPPORT (ANDROID STYLE)
+// =========================
+window.addEventListener("popstate", () => {
+  showPage("dashboard");
+});
+
+// =========================
+// INITIAL PAGE
+// =========================
+function initRouter() {
+  showPage("dashboard");
+}
+
+</script>
+
+  <script>
+
+// =========================
+// UI STATE SYSTEM (LOADING / ERROR / EMPTY)
+// =========================
+
+function setLoading(elId, state = true) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+
+  if (state) {
+    el.innerHTML = `
+      <div class="text-center p-4 text-gray-400">
+        <i class="fa fa-spinner fa-spin"></i>
+        <div class="text-xs mt-2">Načítám...</div>
+      </div>
+    `;
+  }
+}
+
+// -------------------------
+
+function showEmpty(elId, text = "Žádná data") {
+  const el = document.getElementById(elId);
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="text-center p-4 text-gray-500">
+      <i class="fa fa-inbox text-xl"></i>
+      <div class="text-xs mt-2">${text}</div>
+    </div>
+  `;
+}
+
+// -------------------------
+
+function showError(elId, message = "Chyba načítání") {
+  const el = document.getElementById(elId);
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="text-center p-4 text-red-400">
+      <i class="fa fa-triangle-exclamation"></i>
+      <div class="text-xs mt-2">${message}</div>
+    </div>
+  `;
+}
+
+// =========================
+// SAFE FETCH WRAPPER (UI FEEDBACK)
+// =========================
+
+async function safeFetch(fn, elId) {
+  try {
+    setLoading(elId, true);
+    const result = await fn();
+
+    if (!result || result.length === 0) {
+      showEmpty(elId);
+    }
+
+    return result;
+
+  } catch (e) {
+    console.error(e);
+    showError(elId, "Nepodařilo se načíst data");
+  }
+}
+
+// =========================
+// GLOBAL TOAST NOTIFICATIONS
+// =========================
+
+function toast(message, type = "info") {
+  const colors = {
+    info: "bg-blue-500",
+    success: "bg-green-500",
+    error: "bg-red-500"
+  };
+
+  const el = document.createElement("div");
+  el.className = `
+    fixed bottom-20 left-1/2 -translate-x-1/2
+    px-4 py-2 rounded-xl text-white text-sm
+    ${colors[type]}
+  `;
+
+  el.innerText = message;
+
+  document.body.appendChild(el);
+
+  setTimeout(() => el.remove(), 2500);
+}
+
+</script>
+
+  <script>
+
+// =========================
+// SUPABASE API WRAPPER LAYER
+// (ZÁSADNÍ PRO STABILITU A ROZŠÍŘENÍ)
+// =========================
+
+const API = {
+
+  // -------------------------
+  // GENERIC SELECT
+  // -------------------------
+  async get(table, filters = {}) {
+    let query = sb.from(table).select("*");
+
+    if (filters.household) {
+      query = query.eq("household_id", currentHousehold);
+    }
+
+    if (filters.user) {
+      query = query.eq("user_id", currentUser.id);
+    }
+
+    if (filters.order) {
+      query = query.order(filters.order.by, { ascending: filters.order.asc });
+    }
+
+    return await query;
+  },
+
+  // -------------------------
+  // INSERT
+  // -------------------------
+  async insert(table, data) {
+    return await sb.from(table).insert({
+      ...data,
+      household_id: currentHousehold,
+      user_id: currentUser.id
+    });
+  },
+
+  // -------------------------
+  // UPDATE
+  // -------------------------
+  async update(table, id, data) {
+    return await sb
+      .from(table)
+      .update(data)
+      .eq("id", id);
+  },
+
+  // -------------------------
+  // DELETE
+  // -------------------------
+  async remove(table, id) {
+    return await sb
+      .from(table)
+      .delete()
+      .eq("id", id);
+  },
+
+  // -------------------------
+  // SINGLE ROW
+  // -------------------------
+  async single(table, id) {
+    return await sb
+      .from(table)
+      .select("*")
+      .eq("id", id)
+      .single();
+  }
+};
+
+</script>
+
+  <script>
+
+// =========================
+// CENTRAL STATE STORE
+// =========================
+
+const Store = {
+  state: {
+    user: null,
+    household: null,
+
+    transactions: [],
+    inventory: [],
+    receipts: [],
+    tasks: [],
+    messages: []
+  },
+
+  listeners: {},
+
+  // subscribe
+  subscribe(key, fn) {
+    if (!this.listeners[key]) this.listeners[key] = [];
+    this.listeners[key].push(fn);
+  },
+
+  // set state
+  set(key, value) {
+    this.state[key] = value;
+
+    if (this.listeners[key]) {
+      this.listeners[key].forEach(fn => fn(value));
+    }
+  },
+
+  // get state
+  get(key) {
+    return this.state[key];
+  }
+};
+
+// =========================
+// STATE HELPERS
+// =========================
+
+function setTransactions(data) {
+  Store.set("transactions", data);
+}
+
+function setInventory(data) {
+  Store.set("inventory", data);
+}
+
+function setMessages(data) {
+  Store.set("messages", data);
+}
+
+function setTasks(data) {
+  Store.set("tasks", data);
+}
+
+// =========================
+// AUTO UI BINDINGS
+// =========================
+
+Store.subscribe("transactions", (data) => {
+  transactions = data;
+  updateFinanceUI();
+  runAIAdvisor();
+});
+
+Store.subscribe("inventory", (data) => {
+  inventoryItems = data;
+  renderInventory();
+});
+
+Store.subscribe("messages", (data) => {
+  messages = data;
+  renderChat();
+});
+
+Store.subscribe("tasks", (data) => {
+  tasks = data;
+  renderTasks();
+});
+
+</script>
+offline sync engine (queue + localStorage + retry)
+
+
+  <script>
+
+// =========================
+// OFFLINE SYNC ENGINE
+// =========================
+
+// queue operací při offline
+const SyncQueue = {
+  queue: JSON.parse(localStorage.getItem("sync_queue") || "[]"),
+
+  save() {
+    localStorage.setItem("sync_queue", JSON.stringify(this.queue));
+  },
+
+  add(action) {
+    this.queue.push({
+      ...action,
+      timestamp: Date.now()
+    });
+
+    this.save();
+  },
+
+  async flush() {
+    if (!navigator.onLine || !currentUser) return;
+
+    const pending = [...this.queue];
+    this.queue = [];
+    this.save();
+
+    for (let item of pending) {
+      try {
+        await this.execute(item);
+      } catch (e) {
+        console.log("SYNC FAIL:", item);
+        this.queue.push(item);
+      }
+    }
+
+    this.save();
+  },
+
+  async execute(item) {
+
+    const { table, type, data, id } = item;
+
+    if (type === "insert") {
+      return await sb.from(table).insert(data);
+    }
+
+    if (type === "update") {
+      return await sb.from(table).update(data).eq("id", id);
+    }
+
+    if (type === "delete") {
+      return await sb.from(table).delete().eq("id", id);
+    }
+  }
+};
+
+// =========================
+// OFFLINE DETECTION
+// =========================
+
+window.addEventListener("online", () => {
+  toast("Znovu online - synchronizuji data", "success");
+  SyncQueue.flush();
+});
+
+window.addEventListener("offline", () => {
+  toast("Offline režim aktivní", "error");
+});
+
+// =========================
+// SAFE DB WRAPPERS (OFFLINE READY)
+// =========================
+
+async function safeInsertOffline(table, data) {
+
+  if (!navigator.onLine) {
+    SyncQueue.add({
+      table,
+      type: "insert",
+      data
+    });
+
+    toast("Uloženo offline", "info");
+    return;
+  }
+
+  return await sb.from(table).insert(data);
+}
+
+async function safeUpdateOffline(table, id, data) {
+
+  if (!navigator.onLine) {
+    SyncQueue.add({
+      table,
+      type: "update",
+      id,
+      data
+    });
+
+    toast("Změna uložena offline", "info");
+    return;
+  }
+
+  return await sb.from(table).update(data).eq("id", id);
+}
+
+async function safeDeleteOffline(table, id) {
+
+  if (!navigator.onLine) {
+    SyncQueue.add({
+      table,
+      type: "delete",
+      id
+    });
+
+    toast("Smazání uloženo offline", "info");
+    return;
+  }
+
+  return await sb.from(table).delete().eq("id", id);
+}
+
+// =========================
+// AUTO SYNC BOOT
+// =========================
+
+function initOfflineSync() {
+  SyncQueue.flush();
+}
+
+</script>
+
+  <script>
+
+// =========================
+// NOTIFICATION CENTER
+// =========================
+
+const NotificationCenter = {
+  items: [],
+
+  async load() {
+    const { data } = await sb
+      .from("notifications")
+      .select("*")
+      .eq("user_id", currentUser.id)
+      .order("created_at", { ascending: false });
+
+    this.items = data || [];
+    this.render();
+    this.updateBadge();
+  },
+
+  async add(title) {
+    await sb.from("notifications").insert({
+      user_id: currentUser.id,
+      title,
+      is_read: false
+    });
+
+    this.load();
+  },
+
+  async markRead(id) {
+    await sb
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", id);
+
+    this.load();
+  },
+
+  render() {
+    const el = document.getElementById("notificationList");
+    if (!el) return;
+
+    el.innerHTML = "";
+
+    this.items.forEach(n => {
+      const div = document.createElement("div");
+      div.className = "glass p-2 mt-2 rounded-xl " + (n.is_read ? "opacity-50" : "");
+
+      div.innerHTML = `
+        <div class="text-sm">${n.title}</div>
+        <div class="text-xs text-gray-400">
+          ${new Date(n.created_at).toLocaleString()}
+        </div>
+        <button class="text-xs text-yellow-400" onclick="NotificationCenter.markRead('${n.id}')">
+          označit jako přečtené
+        </button>
+      `;
+
+      el.appendChild(div);
+    });
+  },
+
+  updateBadge() {
+    const unread = this.items.filter(n => !n.is_read).length;
+
+    const badge = document.getElementById("notifBadge");
+    if (!badge) return;
+
+    badge.innerText = unread;
+    badge.style.display = unread > 0 ? "inline-block" : "none";
+  }
+};
+
+// =========================
+// GLOBAL NOTIFICATION HOOK
+// =========================
+
+function notify(text) {
+  NotificationCenter.add(text);
+  toast(text, "info");
+}
+
+</script>
+
+
+
+  <script>
+
+// =========================
+// DASHBOARD CHARTS (CHART.JS)
+// =========================
+
+let financeChartInstance = null;
+let categoryChartInstance = null;
+
+// =========================
+// INIT DASHBOARD GRAPHS
+// =========================
+
+function initDashboardCharts() {
+  renderFinanceChart();
+  renderCategoryChart();
+}
+
+// =========================
+// FINANCE (INCOME VS EXPENSE)
+// =========================
+
+function renderFinanceChart() {
+  const el = document.getElementById("financeLineChart");
+  if (!el) return;
+
+  const income = transactions
+    .filter(t => t.type === "income")
+    .reduce((a, b) => a + Number(b.amount), 0);
+
+  const expense = transactions
+    .filter(t => t.type === "expense")
+    .reduce((a, b) => a + Number(b.amount), 0);
+
+  if (financeChartInstance) financeChartInstance.destroy();
+
+  financeChartInstance = new Chart(el, {
+    type: "doughnut",
+    data: {
+      labels: ["Příjmy", "Výdaje"],
+      datasets: [{
+        data: [income, expense]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: { color: "#fff" }
+        }
+      }
+    }
+  });
+}
+
+// =========================
+// CATEGORY BREAKDOWN
+// =========================
+
+function renderCategoryChart() {
+
+  const el = document.getElementById("categoryChart");
+  if (!el) return;
+
+  const map = {};
+
+  transactions.forEach(t => {
+    if (t.type !== "expense") return;
+
+    map[t.category] = (map[t.category] || 0) + Number(t.amount);
+  });
+
+  const labels = Object.keys(map);
+  const values = Object.values(map);
+
+  if (categoryChartInstance) categoryChartInstance.destroy();
+
+  categoryChartInstance = new Chart(el, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Výdaje podle kategorií",
+        data: values
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: { color: "#fff" }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: "#fff" }
+        },
+        y: {
+          ticks: { color: "#fff" }
+        }
+      }
+    }
+  });
+}
+
+// =========================
+// AUTO UPDATE HOOK
+// =========================
+
+function updateDashboard() {
+  initDashboardCharts();
+}
+
+</script>
+
+
+
+  <script>
+
+// =========================
+// SINGLE APP BOOTSTRAP (WEB VERSION)
+// =========================
+
+let APP_STARTED = false;
+
+async function startApp() {
+
+  if (APP_STARTED) return;
+  APP_STARTED = true;
+
+  try {
+    const { data } = await sb.auth.getUser();
+
+    if (!data?.user) {
+      document.getElementById("authScreen").classList.remove("hidden");
+      document.getElementById("app").classList.add("hidden");
+      return;
+    }
+
+    currentUser = data.user;
+
+    document.getElementById("authScreen").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+
+    await loadHouseholds();
+
+    // default view
+    showPage("dashboard");
+
+    // core modules
+    setupRealtimeCoreFixed();
+
+    console.log("APP STARTED");
+
+  } catch (e) {
+    console.error("BOOT ERROR", e);
+    toast("Chyba načtení aplikace", "error");
+  }
+}
+
+// auto start
+startApp();
+
+</script>
+
+
+
+  <script>
+
+// =========================
+// BRIDGE: SUPABASE → STORE
+// =========================
+
+async function syncFinance() {
+  const { data } = await sb
+    .from("transactions")
+    .select("*")
+    .eq("household_id", currentHousehold);
+
+  setTransactions(data || []);
+}
+
+async function syncInventory() {
+  const { data } = await sb
+    .from("inventory")
+    .select("*")
+    .eq("household_id", currentHousehold);
+
+  setInventory(data || []);
+}
+
+async function syncChat() {
+  const { data } = await sb
+    .from("messages")
+    .select("*")
+    .eq("household_id", currentHousehold);
+
+  setMessages(data || []);
+}
+
+async function syncTasks() {
+  const { data } = await sb
+    .from("tasks")
+    .select("*")
+    .eq("household_id", currentHousehold);
+
+  setTasks(data || []);
+}
+
+</script>
+
+  <script>
+
+// =========================
+// CLEAN FULL REFRESH
+// =========================
+
+async function refreshApp() {
+  if (!currentHousehold) return;
+
+  await Promise.all([
+    syncFinance(),
+    syncInventory(),
+    syncChat(),
+    syncTasks(),
+    loadReceipts()
+  ]);
+
+  updateFinanceUI();
+  updateDashboard();
+  renderInventory();
+  renderChat();
+  renderTasks();
+}
+
+// expose
+window.refreshApp = refreshApp;
+
+// optional manual debug
+window.forceReload = refreshApp;
+
+</script>
+
+  
+  
 </body>
 </html>
