@@ -82,6 +82,13 @@
             -webkit-tap-highlight-color: transparent;
         }
         ::-webkit-scrollbar { display: none; }
+
+        /* Custom oprava animací, které chyběly v Tailwindu */
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-scale-up { animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
     </style>
 </head>
 <body class="h-full text-slate-100 flex flex-col justify-between overflow-x-hidden selection:bg-gold-500 selection:text-dark-950">
@@ -92,7 +99,6 @@
             <div class="absolute inset-0 bg-gold-500 w-1/2 rounded animate-[loading_1.5s_infinite_ease-in-out]"></div>
         </div>
     </div>
-    <style>@keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }</style>
 
     <div id="toastContainer" class="fixed top-4 left-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -192,7 +198,7 @@
                 </div>
 
                 <div class="glass p-5 rounded-2xl space-y-4">
-                    <h3 class="text-xs uppercase font-bold tracking-widest text-gold-400">Zdat zvací kód</h3>
+                    <h3 class="text-xs uppercase font-bold tracking-widest text-gold-400">Zadat zvací kód</h3>
                     <div class="flex gap-2">
                         <input type="text" id="inviteCodeInput" placeholder="AURA-XXXX-XXXX" class="flex-1 bg-dark-900 border border-dark-700 rounded-xl px-4 py-2.5 text-sm uppercase tracking-wider focus:outline-none focus:border-gold-500">
                         <button onclick="joinHouseholdByCode()" class="bg-dark-900 border border-gold-500/40 text-gold-400 px-4 rounded-xl text-sm font-bold hover:bg-gold-500 hover:text-black transition"><i class="fa-solid fa-right-to-bracket"></i></button>
@@ -262,8 +268,7 @@
                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Nedávné transakce</h3>
                         <button onclick="toggleSection('financesView')" class="text-[11px] text-gold-400 hover:underline">Zobrazit vše</button>
                     </div>
-                    <div id="recentTransactionsList" class="space-y-2 divide-y divide-dark-700/40">
-                        </div>
+                    <div id="recentTransactionsList" class="space-y-2 divide-y divide-dark-700/40"></div>
                 </div>
             </section>
 
@@ -286,8 +291,7 @@
 
                 <div class="glass p-4 rounded-2xl space-y-3">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Historie transakcí</h3>
-                    <div id="fullTransactionsList" class="space-y-2.5">
-                        </div>
+                    <div id="fullTransactionsList" class="space-y-2.5"></div>
                 </div>
             </section>
 
@@ -305,8 +309,7 @@
                     <div class="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center border border-gold-500/20 text-gold-400"><i class="fa-solid fa-vault"></i></div>
                 </div>
 
-                <div id="inventoryList" class="grid grid-cols-1 gap-3">
-                    </div>
+                <div id="inventoryList" class="grid grid-cols-1 gap-3"></div>
             </section>
 
             <section id="receiptsView" class="hidden space-y-4 animate-fade-in">
@@ -328,8 +331,7 @@
                     </div>
                 </div>
 
-                <div id="receiptsGrid" class="grid grid-cols-2 gap-3">
-                    </div>
+                <div id="receiptsGrid" class="grid grid-cols-2 gap-3"></div>
             </section>
 
             <section id="tasksView" class="hidden space-y-4 animate-fade-in">
@@ -339,8 +341,7 @@
                 </div>
 
                 <div class="glass p-4 rounded-2xl">
-                    <div id="tasksList" class="space-y-3">
-                        </div>
+                    <div id="tasksList" class="space-y-3"></div>
                 </div>
             </section>
 
@@ -349,8 +350,7 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-gold-400"><i class="fa-solid fa-comments mr-1.5"></i> Rezidenční chat</span>
                     <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Realtime</span>
                 </div>
-                <div id="chatMessagesBox" class="flex-1 bg-dark-900/40 border-x border-dark-800 overflow-y-auto p-4 space-y-3 flex flex-col">
-                    </div>
+                <div id="chatMessagesBox" class="flex-1 bg-dark-900/40 border-x border-dark-800 overflow-y-auto p-4 space-y-3 flex flex-col"></div>
                 <form onsubmit="sendChatMessage(event)" class="glass p-2 rounded-b-2xl flex gap-2 items-center">
                     <input type="text" id="chatInput" placeholder="Napište zprávu rodině..." class="flex-1 bg-dark-950 border border-dark-700 text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:border-gold-500">
                     <button type="submit" class="w-10 h-10 rounded-xl bg-gold-500 text-black flex items-center justify-center font-bold hover:bg-gold-400 transition shrink-0"><i class="fa-solid fa-paper-plane text-xs"></i></button>
@@ -362,8 +362,7 @@
                     <h2 class="text-lg font-medium tracking-wide gold-gradient-text">Oznámení a záruky</h2>
                     <button onclick="markAllNotificationsRead()" class="text-xs text-gold-400 hover:underline">Označit vše jako přečtené</button>
                 </div>
-                <div id="notificationsList" class="space-y-2">
-                    </div>
+                <div id="notificationsList" class="space-y-2"></div>
             </section>
 
             <section id="moreView" class="hidden space-y-4 animate-fade-in">
@@ -380,8 +379,7 @@
 
                 <div class="glass p-4 rounded-2xl space-y-3">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gold-400">Historie rodinných aktivit</h3>
-                    <div id="activityLogsList" class="space-y-2 max-h-60 overflow-y-auto text-xs text-slate-300 divide-y divide-dark-700/30">
-                        </div>
+                    <div id="activityLogsList" class="space-y-2 max-h-60 overflow-y-auto text-xs text-slate-300 divide-y divide-dark-700/30"></div>
                 </div>
             </section>
 
@@ -405,8 +403,7 @@
                     </div>
                     <div>
                         <label class="text-[10px] text-slate-400 uppercase block mb-1">Kategorie</label>
-                        <select id="txCategory" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white">
-                            </select>
+                        <select id="txCategory" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white"></select>
                     </div>
                     <div>
                         <label class="text-[10px] text-slate-400 uppercase block mb-1">Poznámka</label>
@@ -470,8 +467,7 @@
                     </div>
                     <div>
                         <label class="text-[10px] text-slate-400 uppercase block mb-1">Přiřadit členovi</label>
-                        <select id="taskAssignedTo" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white">
-                            </select>
+                        <select id="taskAssignedTo" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white"></select>
                     </div>
                     <button type="submit" class="w-full gold-btn py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider">Vytvořit úkol</button>
                 </form>
@@ -503,12 +499,10 @@
     </div>
 
     <script>
-        // Supabase Initialization Secure Injection
         const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNia2lxY3RqZmF0b3pxbml4aGFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMzM2NjIsImV4cCI6MjA5NTkwOTY2Mn0.4-uDF2b7Pv2CfTL1NpwRPdtuN1u0KDUxmtHSf8QAUDM";
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Client Global Realtime Shared Reactive State Model
         let state = {
             user: null,
             profile: null,
@@ -525,7 +519,7 @@
             activeTab: 'login',
             currentSection: 'dashboardView',
             charts: {},
-            realtimeChannel: null // Ukládáme referenci kanálu pro pozdější reset
+            realtimeChannel: null
         };
 
         const TX_CATEGORIES = {
@@ -535,7 +529,6 @@
 
         const FINANCIAL_PRIORITIES = ["Nájem", "Hypotéka", "Elektřina", "Voda", "Plyn", "Splátky", "Internet", "Telefon"];
 
-        // Init System Engine
         window.addEventListener('DOMContentLoaded', async () => {
             initAuthListener();
             setupOfflineSupport();
@@ -563,7 +556,6 @@
             }, 3500);
         }
 
-        // --- AUTH SECTION ENGINE ---
         function initAuthListener() {
             sb.auth.onAuthStateChange(async (event, session) => {
                 state.user = session?.user || null;
@@ -640,16 +632,13 @@
             state.household = null;
         }
 
-        // --- CONTEXT & HOUSEHOLD MANAGEMENT ---
         async function loadUserProfileAndHouseholdContext() {
             try {
                 let { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', state.user.id).maybeSingle();
                 if (pErr) console.error("Chyba při stahování profilu:", pErr);
 
                 if (!profile) {
-                    console.log("Profil nenalezen, pokouším se o automatické založení...");
                     const fallbackName = state.user.user_metadata?.name || state.user.email.split('@')[0] || "Nový uživatel";
-                    
                     const { data: newProfile, error: insErr } = await sb.from('profiles').insert([
                         { id: state.user.id, name: fallbackName }
                     ]).select().maybeSingle();
@@ -662,7 +651,6 @@
                 }
                 
                 state.profile = profile;
-
                 document.getElementById('profileName').innerText = state.profile.name || state.user.email;
                 if (state.profile.avatar) document.getElementById('userAvatar').src = state.profile.avatar;
 
@@ -676,7 +664,6 @@
                     
                     if (household) {
                         state.household = household;
-                        
                         document.getElementById('householdCodeDisplay').innerText = household.name;
                         document.getElementById('inviteCodeShareField').value = household.invite_code;
 
@@ -719,7 +706,6 @@
             showLoading(true);
             try {
                 const inviteCode = 'AURA-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-                
                 const { data: hData, error: hErr } = await sb.from('households').insert([{ name, invite_code: inviteCode }]).select().single();
                 if (hErr) throw hErr;
 
@@ -758,12 +744,12 @@
             }
         }
 
-        // --- PIPELINE OPERATIONAL SYNCHRONIZATION ---
         async function synchronizeHouseholdOperationalData() {
+            if (!state.household) return;
             const hid = state.household.id;
 
             const { data: membersList } = await sb.from('household_members').select('user_id').eq('household_id', hid);
-            state.members = membersList.map(m => m.user_id);
+            state.members = membersList ? membersList.map(m => m.user_id) : [];
             
             if (state.members.length > 0) {
                 const { data: profs } = await sb.from('profiles').select('*').in('id', state.members);
@@ -792,11 +778,11 @@
         }
 
         async function setupRealtimeSubscriptions() {
-            // Pokud už nějaký kanál existuje, odpojíme ho, abychom předešli chybě "subscribe()"
             if (state.realtimeChannel) {
                 await sb.removeChannel(state.realtimeChannel);
             }
 
+            // OPRAVA: Opraven formát string filtru pro UUID
             state.realtimeChannel = sb.channel('realtime-household-sync')
                 .on('postgres_changes', { event: '*', schema: 'public', filter: `household_id=eq.${state.household.id}` }, () => {
                     synchronizeHouseholdOperationalData();
@@ -810,15 +796,18 @@
             await sb.from('activity_logs').insert([{ household_id: householdId, action: `${userName}: ${action}` }]);
         }
 
-        // --- VIEW VIEWPORT CONTROLLER SWITCHER ---
         function hideAllSections() {
             ['authView', 'householdSetupView', 'dashboardView', 'financesView', 'inventoryView', 'receiptsView', 'tasksView', 'chatView', 'notificationsView', 'moreView']
-            .forEach(id => document.getElementById(id).classList.add('hidden'));
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
         }
 
         function toggleSection(sectionId) {
             hideAllSections();
-            document.getElementById(sectionId).classList.remove('hidden');
+            const target = document.getElementById(sectionId);
+            if (target) target.classList.remove('hidden');
             state.currentSection = sectionId;
 
             document.querySelectorAll('.nav-link').forEach(btn => {
@@ -848,7 +837,6 @@
             runAIFinancialAdvisorEngine();
         }
 
-        // --- DASHBOARD CORE ENGINE ENGINE ---
         function updateDashboardKPIs() {
             let balance = 0;
             let incomeMonth = 0;
@@ -883,6 +871,7 @@
 
         function renderRecentTransactions() {
             const container = document.getElementById('recentTransactionsList');
+            if (!container) return;
             container.innerHTML = '';
             state.transactions.slice(0, 5).forEach(t => {
                 container.appendChild(createTransactionRowHTML(t));
@@ -913,7 +902,6 @@
             return div;
         }
 
-        // --- AI FINANCE MANAGER INTELLIGENCE ADVOCATE ---
         function runAIFinancialAdvisorEngine() {
             let balance = 0;
             let currentMonthExpenses = 0;
@@ -937,7 +925,6 @@
             const projectedEndBalance = balance - (estimatedEndExpenses - currentMonthExpenses);
 
             let message = `Vaše finanční trajektorie je stabilní. Odhadovaný konec měsíce vykazuje rezervu. `;
-            
             if (projectedEndBalance < 0) {
                 message = `⚠️ **Upozornění na riziko deficitu:** Aura AI predikuje záporný zůstatek ke konci měsíce o cca ${Math.abs(Math.round(projectedEndBalance)).toLocaleString()} Kč. `;
             }
@@ -945,10 +932,10 @@
             message += "Doporučené pořadí kritických plateb: " + FINANCIAL_PRIORITIES.slice(0, 3).join(" → ") + ". ";
             message += "Doporučujeme přednostně alokovat prostředky na krytí závazku **Nájem a Hypotéky**.";
 
-            document.getElementById('aiAdvisorOutput').innerHTML = message;
+            const el = document.getElementById('aiAdvisorOutput');
+            if (el) el.innerHTML = message;
         }
 
-        // --- FINANCES ARCHIVE CRUD ENGINE ---
         function openTransactionModal(id = null) {
             document.getElementById('txForm').reset();
             document.getElementById('txId').value = id || '';
@@ -963,6 +950,7 @@
         function adjustTxCategories() {
             const type = document.getElementById('txType').value;
             const catSelect = document.getElementById('txCategory');
+            if (!catSelect) return;
             catSelect.innerHTML = '';
             TX_CATEGORIES[type].forEach(c => {
                 catSelect.innerHTML += `<option value="${c}">${c}</option>`;
@@ -1000,6 +988,7 @@
 
         function renderFinancesList() {
             const container = document.getElementById('fullTransactionsList');
+            if (!container) return;
             container.innerHTML = '';
             state.transactions.forEach(t => {
                 const row = createTransactionRowHTML(t);
@@ -1012,7 +1001,7 @@
                 actionBtn.onclick = async () => {
                     if (confirm("Opravdu smazat transakci?")) {
                         await sb.from('transactions').delete().eq('id', t.id);
-                        triggerToast("Záznam odstrany");
+                        triggerToast("Záznam odstraněn");
                         await synchronizeHouseholdOperationalData();
                     }
                 };
@@ -1023,7 +1012,6 @@
             });
         }
 
-        // --- INVENTORY MANAGEMENT ASSET PIPELINE ENGINE ---
         function openInventoryModal() {
             document.getElementById('invForm').reset();
             document.getElementById('invPurchaseDate').valueAsDate = new Date();
@@ -1037,6 +1025,7 @@
         function triggerAutoCategorization(title) {
             const val = title.toLowerCase();
             const select = document.getElementById('invCategory');
+            if (!select) return;
             if (val.includes('lednice') || val.includes('pračka') || val.includes('mikrovlnka')) {
                 select.value = 'Spotřebiče';
             } else if (val.includes('televize') || val.includes('notebook') || val.includes('pc') || val.includes('mobil')) {
@@ -1086,6 +1075,7 @@
 
         function renderInventory() {
             const container = document.getElementById('inventoryList');
+            if (!container) return;
             container.innerHTML = '';
             let totalVal = 0;
 
@@ -1129,7 +1119,6 @@
             }
         }
 
-        // --- RECEIPTS DIGITIZATION OCR ENGINE ---
         async function handleReceiptUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1207,6 +1196,7 @@
 
         function renderReceipts() {
             const container = document.getElementById('receiptsGrid');
+            if (!container) return;
             container.innerHTML = '';
 
             state.receipts.forEach(r => {
@@ -1230,9 +1220,9 @@
             });
         }
 
-        // --- CORE TASks SYSTEM LAYOUTS ENGINE ---
         function openTaskModal() {
             const select = document.getElementById('taskAssignedTo');
+            if (!select) return;
             select.innerHTML = '<option value="">Přiřadit všem (Společný)</option>';
             Object.values(state.profilesMap).forEach(p => {
                 select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
@@ -1267,6 +1257,7 @@
 
         function renderTasks() {
             const container = document.getElementById('tasksList');
+            if (!container) return;
             container.innerHTML = '';
 
             if (state.tasks.length === 0) {
@@ -1307,7 +1298,6 @@
             await synchronizeHouseholdOperationalData();
         }
 
-        // --- REALTIME CHAT ENGINE SUB-SYSTEM ---
         async function sendChatMessage(e) {
             e.preventDefault();
             const inp = document.getElementById('chatInput');
@@ -1322,6 +1312,7 @@
 
         function renderChat() {
             const container = document.getElementById('chatMessagesBox');
+            if (!container) return;
             container.innerHTML = '';
 
             state.messages.forEach(m => {
@@ -1341,15 +1332,17 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // --- NOTIFICATIONS MANAGEMENT SYSTEM ---
         function renderNotifications() {
             const container = document.getElementById('notificationsList');
+            if (!container) return;
             container.innerHTML = '';
             
             const badge = document.getElementById('notificationBadge');
             const unread = state.notifications.filter(n => !n.is_read);
-            if (unread.length > 0) badge.classList.remove('hidden');
-            else badge.classList.add('hidden');
+            if (badge) {
+                if (unread.length > 0) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+            }
 
             if (state.notifications.length === 0) {
                 container.innerHTML = '<div class="text-center py-6 text-xs text-slate-500">Žádná nová upozornění.</div>';
@@ -1382,6 +1375,7 @@
 
         function renderActivityLogs() {
             const container = document.getElementById('activityLogsList');
+            if (!container) return;
             container.innerHTML = '';
             state.logs.forEach(l => {
                 const div = document.createElement('div');
@@ -1391,7 +1385,6 @@
             });
         }
 
-        // --- BANK OPEN BANKING MOCK CORE INTEGRATION LAYOUTS ---
         function mockConnectBank() {
             triggerToast("Spouštění bezpečného PSD2 brány GoCardless Connect...");
             setTimeout(() => {
@@ -1401,15 +1394,16 @@
 
         function copyInviteCode() {
             const field = document.getElementById('inviteCodeShareField');
+            if (!field) return;
             field.select();
             navigator.clipboard.writeText(field.value);
             triggerToast("Zvací kód zkopírován do schránky.");
         }
 
-        // --- GRAPHICS DATA INTERFACES ENGINE (CHART.JS) ---
         function renderDashboardCharts() {
             const ctx = document.getElementById('dashboardChart');
-            if (!ctx) return;
+            // Bezpečné ověření, zda je element viditelný/přístupný v DOM
+            if (!ctx || ctx.offsetParent === null) return;
 
             if (state.charts.dash) state.charts.dash.destroy();
 
@@ -1443,7 +1437,8 @@
 
         function renderFinancesCharts() {
             const ctx = document.getElementById('financesCategoryChart');
-            if (!ctx) return;
+            // Bezpečné ověření, zda je element viditelný v DOM
+            if (!ctx || ctx.offsetParent === null) return;
             if (state.charts.fin) state.charts.fin.destroy();
 
             let incTotal = 0;
@@ -1477,7 +1472,6 @@
             });
         }
 
-        // --- OFFLINE & PWA UTILITY MOCK CAPABILITIES HANDLERS ---
         function setupOfflineSupport() {
             window.addEventListener('online', () => triggerToast("Rezidence Aura opět online."));
             window.addEventListener('offline', () => triggerToast("Provoz v offline režimu. Změny budou uloženy lokálně.", true));
