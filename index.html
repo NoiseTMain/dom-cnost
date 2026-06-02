@@ -379,7 +379,7 @@
                 </div>
 
                 <div class="glass p-4 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Historie rodinných aktivit</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gold-400">Historie rodinných aktivit</h3>
                     <div id="activityLogsList" class="space-y-2 max-h-60 overflow-y-auto text-xs text-slate-300 divide-y divide-dark-700/30">
                         </div>
                 </div>
@@ -638,50 +638,77 @@
         // --- CONTEXT & HOUSEHOLD MANAGEMENT ---
         async function loadUserProfileAndHouseholdContext() {
             try {
-                // Fetch Profile
-                const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', state.user.id).single();
-                if (pErr) throw pErr;
+                // Bezpečné stažení profilu. Pokud neexistuje, maybesingle() nevyhodí fatální chybu.
+                let { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', state.user.id).maybeSingle();
+                if (pErr) console.error("Chyba při stahování profilu:", pErr);
+
+                // Samoléčebný krok: Pokud databázový trigger selhal, vytvoříme profil z frontendu
+                if (!profile) {
+                    console.log("Profil nenalezen, pokouším se o automatické založení...");
+                    const fallbackName = state.user.user_metadata?.name || state.user.email.split('@')[0] || "Nový uživatel";
+                    
+                    const { data: newProfile, error: insErr } = await sb.from('profiles').insert([
+                        { id: state.user.id, name: fallbackName }
+                    ]).select().maybeSingle();
+                    
+                    if (!insErr && newProfile) {
+                        profile = newProfile;
+                    } else {
+                        profile = { id: state.user.id, name: fallbackName, avatar: null };
+                    }
+                }
+                
                 state.profile = profile;
 
-                // Set user meta details
-                document.getElementById('profileName').innerText = profile.name || state.user.email;
-                if (profile.avatar) document.getElementById('userAvatar').src = profile.avatar;
+                // Dosazení detailů do rozhraní
+                document.getElementById('profileName').innerText = state.profile.name || state.user.email;
+                if (state.profile.avatar) document.getElementById('userAvatar').src = state.profile.avatar;
 
-                // Find Household relation mapping
+                // Vyhledání vazeb na rodinné rezidence
                 const { data: memberRows, error: mErr } = await sb.from('household_members').select('household_id').eq('user_id', state.user.id);
                 if (mErr) throw mErr;
 
                 if (memberRows && memberRows.length > 0) {
                     const householdId = memberRows[0].household_id;
-                    const { data: household, error: hErr } = await sb.from('households').select('*').eq('id', householdId).single();
+                    const { data: household, error: hErr } = await sb.from('households').select('*').eq('id', householdId).maybeSingle();
                     if (hErr) throw hErr;
-                    state.household = household;
                     
-                    document.getElementById('householdCodeDisplay').innerText = household.name;
-                    document.getElementById('inviteCodeShareField').value = household.invite_code;
+                    if (household) {
+                        state.household = household;
+                        
+                        document.getElementById('householdCodeDisplay').innerText = household.name;
+                        document.getElementById('inviteCodeShareField').value = household.invite_code;
 
-                    // Enable Core Screens
-                    document.getElementById('mainHeader').classList.remove('hidden');
-                    document.getElementById('bottomNav').classList.remove('hidden');
-                    document.getElementById('authView').classList.add('hidden');
-                    document.getElementById('householdSetupView').classList.add('hidden');
+                        // Aktivace a zobrazení hlavních prvků dashboardu
+                        document.getElementById('mainHeader').classList.remove('hidden');
+                        document.getElementById('bottomNav').classList.remove('hidden');
+                        document.getElementById('authView').classList.add('hidden');
+                        document.getElementById('householdSetupView').classList.add('hidden');
 
-                    // Fire sync pipeline data query fetching
-                    await synchronizeHouseholdOperationalData();
-                    setupRealtimeSubscriptions();
-                    toggleSection('dashboardView');
+                        // Synchronizace rodinných modulů
+                        await synchronizeHouseholdOperationalData();
+                        setupRealtimeSubscriptions();
+                        toggleSection('dashboardView');
+                    } else {
+                        showHouseholdSetup();
+                    }
                 } else {
-                    // Force setup household
-                    document.getElementById('mainHeader').classList.add('hidden');
-                    document.getElementById('bottomNav').classList.add('hidden');
-                    hideAllSections();
-                    document.getElementById('householdSetupView').classList.remove('hidden');
+                    showHouseholdSetup();
                 }
             } catch (err) {
+                console.error("Kritické selhání startu aplikace:", err);
                 triggerToast(err.message, true);
+                showHouseholdSetup();
             } finally {
                 showLoading(false);
             }
+        }
+
+        function showHouseholdSetup() {
+            document.getElementById('mainHeader').classList.add('hidden');
+            document.getElementById('bottomNav').classList.add('hidden');
+            hideAllSections();
+            document.getElementById('householdSetupView').classList.remove('hidden');
         }
 
         async function createNewHousehold() {
@@ -778,7 +805,8 @@
         }
 
         async function logActivity(householdId, action) {
-            await sb.from('activity_logs').insert([{ household_id: householdId, action: `${state.profile.name || 'Člen'}: ${action}` }]);
+            const userName = state.profile?.name || state.user?.email || 'Člen';
+            await sb.from('activity_logs').insert([{ household_id: householdId, action: `${userName}: ${action}` }]);
         }
 
         // --- VIEW VIEWPORT CONTROLLER SWITCHER ---
@@ -1220,7 +1248,7 @@
             const select = document.getElementById('taskAssignedTo');
             select.innerHTML = '<option value="">Přiřadit všem (Společný)</option>';
             Object.values(state.profilesMap).forEach(p => {
-                select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+                select.innerHTML += `<option value="${p.id}">${p.name}</option>';
             });
             document.getElementById('taskModal').style.display = 'flex';
         }
