@@ -83,7 +83,6 @@
         }
         ::-webkit-scrollbar { display: none; }
 
-        /* Custom oprava animací, které chyběly v Tailwindu */
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         .animate-scale-up { animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -198,7 +197,7 @@
                 </div>
 
                 <div class="glass p-5 rounded-2xl space-y-4">
-                    <h3 class="text-xs uppercase font-bold tracking-widest text-gold-400">Zadat zvací kód</h3>
+                    <h3 class="text-xs uppercase font-bold tracking-widest text-gold-400">Zdat zvací kód</h3>
                     <div class="flex gap-2">
                         <input type="text" id="inviteCodeInput" placeholder="AURA-XXXX-XXXX" class="flex-1 bg-dark-900 border border-dark-700 rounded-xl px-4 py-2.5 text-sm uppercase tracking-wider focus:outline-none focus:border-gold-500">
                         <button onclick="joinHouseholdByCode()" class="bg-dark-900 border border-gold-500/40 text-gold-400 px-4 rounded-xl text-sm font-bold hover:bg-gold-500 hover:text-black transition"><i class="fa-solid fa-right-to-bracket"></i></button>
@@ -640,7 +639,7 @@
                 if (!profile) {
                     const fallbackName = state.user.user_metadata?.name || state.user.email.split('@')[0] || "Nový uživatel";
                     const { data: newProfile, error: insErr } = await sb.from('profiles').insert([
-                        { id: state.user.id, name: fallbackName, created_at: new Date().toISOString() }
+                        { id: state.user.id, name: fallbackName }
                     ]).select().maybeSingle();
                     
                     if (!insErr && newProfile) {
@@ -706,18 +705,10 @@
             showLoading(true);
             try {
                 const inviteCode = 'AURA-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-                const { data: hData, error: hErr } = await sb.from('households').insert([{ 
-                    name, 
-                    invite_code: inviteCode, 
-                    created_at: new Date().toISOString() 
-                }]).select().single();
+                const { data: hData, error: hErr } = await sb.from('households').insert([{ name, invite_code: inviteCode }]).select().single();
                 if (hErr) throw hErr;
 
-                const { error: mErr } = await sb.from('household_members').insert([{ 
-                    household_id: hData.id, 
-                    user_id: state.user.id,
-                    created_at: new Date().toISOString() 
-                }]);
+                const { error: mErr } = await sb.from('household_members').insert([{ household_id: hData.id, user_id: state.user.id }]);
                 if (mErr) throw mErr;
 
                 await logActivity(hData.id, `Založil rezidenci ${name}`);
@@ -740,11 +731,7 @@
                 const { data: hData, error: hErr } = await sb.from('households').select('*').eq('invite_code', code).single();
                 if (hErr || !hData) throw new Error("Neplatný zvací kód rezidence.");
 
-                const { error: mErr } = await sb.from('household_members').insert([{ 
-                    household_id: hData.id, 
-                    user_id: state.user.id,
-                    created_at: new Date().toISOString() 
-                }]);
+                const { error: mErr } = await sb.from('household_members').insert([{ household_id: hData.id, user_id: state.user.id }]);
                 if (mErr) throw mErr;
 
                 await logActivity(hData.id, `Se připojil k rezidenci přes zvací kód`);
@@ -760,37 +747,35 @@
             if (!state.household) return;
             const hid = state.household.id;
 
-            try {
-                const { data: membersList } = await sb.from('household_members').select('user_id').eq('household_id', hid);
-                state.members = membersList ? membersList.map(m => m.user_id) : [];
-                
-                if (state.members.length > 0) {
-                    const { data: profs } = await sb.from('profiles').select('*').in('id', state.members);
-                    profs?.forEach(p => { state.profilesMap[p.id] = p; });
-                }
-
-                const [txs, inv, recs, tsk, msg, ntfs, logs] = await Promise.all([
-                    sb.from('transactions').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
-                    sb.from('inventory').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
-                    sb.from('receipts').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
-                    sb.from('tasks').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
-                    sb.from('messages').select('*').eq('household_id', hid).order('created_at', { ascending: true }),
-                    sb.from('notifications').select('*').eq('user_id', state.user.id).order('created_at', { ascending: false }),
-                    sb.from('activity_logs').select('*').eq('household_id', hid).order('created_at', { ascending: false }).limit(20)
-                ]);
-
-                state.transactions = txs.data || [];
-                state.inventory = inv.data || [];
-                state.receipts = recs.data || [];
-                state.tasks = tsk.data || [];
-                state.messages = msg.data || [];
-                state.notifications = ntfs.data || [];
-                state.logs = logs.data || [];
-
-                renderAllViews();
-            } catch(e) {
-                console.error("Chyba synchronizace dat:", e);
+            const { data: membersList } = await sb.from('household_members').select('user_id').eq('household_id', hid);
+            state.members = membersList ? membersList.map(m => m.user_id) : [];
+            
+            if (state.members.length > 0) {
+                const { data: profs } = await sb.from('profiles').select('*').in('id', state.members);
+                profs?.forEach(p => { state.profilesMap[p.id] = p; });
             }
+
+            const [txs, inv, recs, tsk, msg, ntfs, logs] = await Promise.all([
+                sb.from('transactions').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
+                sb.from('inventory').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
+                sb.from('receipts').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
+                sb.from('tasks').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
+                sb.from('messages').select('*').eq('household_id', hid).order('created_at', { ascending: true }),
+                sb.from('notifications').select('*').eq('user_id', state.user.id).order('created_at', { ascending: false }),
+                sb.from('activity_logs').select('*').eq('household_id', hid).order('created_at', { ascending: false }).limit(20)
+            ]);
+
+            if (txs.error) console.error("Chyba transakcí:", txs.error);
+
+            state.transactions = txs.data || [];
+            state.inventory = inv.data || [];
+            state.receipts = recs.data || [];
+            state.tasks = tsk.data || [];
+            state.messages = msg.data || [];
+            state.notifications = ntfs.data || [];
+            state.logs = logs.data || [];
+
+            renderAllViews();
         }
 
         async function setupRealtimeSubscriptions() {
@@ -798,8 +783,21 @@
                 await sb.removeChannel(state.realtimeChannel);
             }
 
+            // OPRAVA: Opraven formát realtime předplatného rozdělením do konkrétních tabulek s filtry
             state.realtimeChannel = sb.channel('realtime-household-sync')
-                .on('postgres_changes', { event: '*', schema: 'public', filter: `household_id=eq.${state.household.id}` }, () => {
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `household_id=eq.${state.household.id}` }, () => {
+                    synchronizeHouseholdOperationalData();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory', filter: `household_id=eq.${state.household.id}` }, () => {
+                    synchronizeHouseholdOperationalData();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts', filter: `household_id=eq.${state.household.id}` }, () => {
+                    synchronizeHouseholdOperationalData();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `household_id=eq.${state.household.id}` }, () => {
+                    synchronizeHouseholdOperationalData();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `household_id=eq.${state.household.id}` }, () => {
                     synchronizeHouseholdOperationalData();
                 });
 
@@ -807,12 +805,13 @@
         }
 
         async function logActivity(householdId, action) {
-            const userName = state.profile?.name || state.user?.email || 'Člen';
-            await sb.from('activity_logs').insert([{ 
-                household_id: householdId, 
-                action: `${userName}: ${action}`,
-                created_at: new Date().toISOString()
-            }]);
+            // OPRAVA: Ošetření chyb uvnitř logu, aby případný výpadek tabulky activity_logs neshodil celou aplikaci
+            try {
+                const userName = state.profile?.name || state.user?.email || 'Člen';
+                await sb.from('activity_logs').insert([{ household_id: householdId, action: `${userName}: ${action}` }]);
+            } catch (err) {
+                console.error("Selhání zápisu do logu:", err);
+            }
         }
 
         function hideAllSections() {
@@ -863,8 +862,8 @@
             const now = new Date();
 
             state.transactions.forEach(t => {
+                // OPRAVA: Zajištění fallbacku na 0 pro případ chybných nebo chybějících hodnot z DB
                 const amt = parseFloat(t.amount) || 0;
-                // Bezpečný fallback na aktuální datum, pokud DB nevrátila validní vytvoření
                 const tDate = t.created_at ? new Date(t.created_at) : new Date();
                 const isCurrentMonth = tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
 
@@ -903,8 +902,8 @@
             div.className = "flex justify-between items-center py-2.5 text-xs";
             const author = state.profilesMap[t.user_id]?.name || "Systém";
             const isIncome = t.type === 'income';
-            const dateStr = t.created_at ? new Date(t.created_at).toLocaleDateString('cs-CZ') : new Date().toLocaleDateString('cs-CZ');
-            const amtStr = (parseFloat(t.amount) || 0).toLocaleString('cs-CZ');
+            const amt = parseFloat(t.amount) || 0;
+            const tDate = t.created_at ? new Date(t.created_at) : new Date();
             
             div.innerHTML = `
                 <div class="flex items-center gap-2.5">
@@ -913,11 +912,11 @@
                     </div>
                     <div>
                         <div class="font-semibold text-white">${t.category || 'Bez kategorie'}</div>
-                        <div class="text-[10px] text-slate-400">${author} • ${dateStr}</div>
+                        <div class="text-[10px] text-slate-400">${author} • ${tDate.toLocaleDateString('cs-CZ')}</div>
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="font-mono font-bold ${isIncome ? 'text-emerald-400' : 'text-slate-200'}">${isIncome ? '+' : '-'}${amtStr} Kč</div>
+                    <div class="font-mono font-bold ${isIncome ? 'text-emerald-400' : 'text-slate-200'}">${isIncome ? '+' : '-'}${amt.toLocaleString('cs-CZ')} Kč</div>
                     <div class="text-[9px] text-slate-500 italic truncate max-w-[100px]">${t.note || ''}</div>
                 </div>
             `;
@@ -993,24 +992,15 @@
                     type,
                     amount: parseFloat(amt) || 0,
                     category: cat,
-                    note,
-                    created_at: new Date().toISOString()
+                    note
                 };
 
-                // OPRAVA: Přidáno explicitní .select() abychom hned získali uložená data 
-                const { data, error } = await sb.from('transactions').insert([payload]).select();
+                const { error } = await sb.from('transactions').insert([payload]);
                 if (error) throw error;
 
+                await logActivity(state.household.id, `Přidal ${type === 'income' ? 'příjem' : 'výdaj'} ${amt} Kč v kategorii ${cat}`);
                 triggerToast("Transakce bezpečně uložena");
                 closeTransactionModal();
-                
-                // OPRAVA: Optimistic UI Update pro okamžitou změnu zůstatku a zobrazení v historii
-                if (data && data.length > 0) {
-                    state.transactions.unshift(data[0]);
-                    renderAllViews();
-                }
-
-                logActivity(state.household.id, `Přidal ${type === 'income' ? 'příjem' : 'výdaj'} ${amt} Kč v kategorii ${cat}`);
                 await synchronizeHouseholdOperationalData();
             } catch (err) {
                 triggerToast(err.message, true);
@@ -1031,10 +1021,6 @@
                 actionBtn.innerHTML = `<i class="fa-regular fa-trash-can"></i>`;
                 actionBtn.onclick = async () => {
                     if (confirm("Opravdu smazat transakci?")) {
-                        // OPRAVA: Optimistické smazání v UI pro rychlou odezvu
-                        state.transactions = state.transactions.filter(tx => tx.id !== t.id);
-                        renderAllViews();
-                        
                         await sb.from('transactions').delete().eq('id', t.id);
                         triggerToast("Záznam odstraněn");
                         await synchronizeHouseholdOperationalData();
@@ -1093,22 +1079,15 @@
                     user_id: state.user.id,
                     name, category, price: price ? parseFloat(price) : 0,
                     store, warranty_months: warrantyMonths, warranty_end: wDate,
-                    purchase_date: pDate, note,
-                    created_at: new Date().toISOString()
+                    purchase_date: pDate, note
                 };
 
-                const { data, error } = await sb.from('inventory').insert([payload]).select();
+                const { error } = await sb.from('inventory').insert([payload]);
                 if (error) throw error;
 
+                await logActivity(state.household.id, `Přidal do majetku položku: ${name}`);
                 triggerToast("Majetek evidován v rodinném trezoru.");
                 closeInventoryModal();
-
-                if (data && data.length > 0) {
-                    state.inventory.unshift(data[0]);
-                    renderAllViews();
-                }
-
-                logActivity(state.household.id, `Přidal do majetku položku: ${name}`);
                 await synchronizeHouseholdOperationalData();
             } catch (err) {
                 triggerToast(err.message, true);
@@ -1155,9 +1134,6 @@
 
         async function deleteInventoryItem(id) {
             if (confirm("Odstranit tuto položku z rodinného majetku?")) {
-                state.inventory = state.inventory.filter(i => i.id !== id);
-                renderAllViews();
-
                 await sb.from('inventory').delete().eq('id', id);
                 triggerToast("Položka odepsána.");
                 await synchronizeHouseholdOperationalData();
@@ -1222,17 +1198,11 @@
                         file_url: publicUrl,
                         store: detectedStore,
                         amount: detectedAmount || 0,
-                        receipt_date: new Date().toISOString().split('T')[0],
-                        created_at: new Date().toISOString()
+                        receipt_date: new Date().toISOString().split('T')[0]
                     };
 
-                    const { data } = await sb.from('receipts').insert([payload]).select();
-                    if (data && data.length > 0) {
-                        state.receipts.unshift(data[0]);
-                        renderAllViews();
-                    }
-
-                    logActivity(state.household.id, `Naskenoval účtenku z obchodu ${detectedStore} na částku ${detectedAmount} Kč`);
+                    await sb.from('receipts').insert([payload]);
+                    await logActivity(state.household.id, `Naskenoval účtenku z obchodu ${detectedStore} na částku ${detectedAmount} Kč`);
                     triggerToast("Účtenka zpracována a zanalyzována systémem Aura AI.");
                     
                     statusBox.classList.add('hidden');
@@ -1295,18 +1265,11 @@
                     household_id: state.household.id,
                     title,
                     assigned_to: assign,
-                    completed: false,
-                    created_at: new Date().toISOString()
+                    completed: false
                 };
-                const { data } = await sb.from('tasks').insert([payload]).select();
+                await sb.from('tasks').insert([payload]);
                 triggerToast("Úkol zařazen do harmonogramu.");
                 closeTaskModal();
-                
-                if (data && data.length > 0) {
-                    state.tasks.unshift(data[0]);
-                    renderAllViews();
-                }
-
                 await synchronizeHouseholdOperationalData();
             } catch (err) {
                 triggerToast(err.message, true);
@@ -1346,23 +1309,12 @@
         }
 
         async function toggleTaskStatus(id, currentStatus) {
-            const newStatus = !currentStatus;
-            
-            const taskIndex = state.tasks.findIndex(t => t.id === id);
-            if(taskIndex > -1) {
-                state.tasks[taskIndex].completed = newStatus;
-                renderAllViews();
-            }
-
-            await sb.from('tasks').update({ completed: newStatus }).eq('id', id);
+            await sb.from('tasks').update({ completed: !currentStatus }).eq('id', id);
             triggerToast("Stav úkolu aktualizován.");
             await synchronizeHouseholdOperationalData();
         }
 
         async function deleteTask(id) {
-            state.tasks = state.tasks.filter(t => t.id !== id);
-            renderAllViews();
-            
             await sb.from('tasks').delete().eq('id', id);
             await synchronizeHouseholdOperationalData();
         }
@@ -1374,20 +1326,8 @@
             if (!msg) return;
 
             try {
-                const payload = { 
-                    household_id: state.household.id, 
-                    user_id: state.user.id, 
-                    message: msg,
-                    created_at: new Date().toISOString()
-                };
-                
+                await sb.from('messages').insert([{ household_id: state.household.id, user_id: state.user.id, message: msg }]);
                 inp.value = '';
-                const { data } = await sb.from('messages').insert([payload]).select();
-                if (data && data.length > 0) {
-                    state.messages.push(data[0]);
-                    renderChat();
-                }
-
             } catch (err) { triggerToast(err.message, true); }
         }
 
@@ -1400,14 +1340,12 @@
                 const isMe = m.user_id === state.user.id;
                 const author = state.profilesMap[m.user_id]?.name || "Člen";
                 const div = document.createElement('div');
-                const mDate = m.created_at ? new Date(m.created_at) : new Date();
-
                 div.className = `max-w-[75%] p-3 rounded-2xl text-xs space-y-1 ${isMe ? 'bg-gradient-to-br from-amber-600 to-gold-600 text-black self-end rounded-tr-none' : 'glass text-slate-100 self-start rounded-tl-none'}`;
                 
                 div.innerHTML = `
                     <div class="font-bold text-[9px] uppercase tracking-wider ${isMe ? 'text-black/70' : 'text-gold-400'}">${author}</div>
                     <div class="leading-relaxed break-words">${m.message}</div>
-                    <div class="text-[8px] text-right ${isMe ? 'text-black/50' : 'text-slate-500'} font-mono">${mDate.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'})}</div>
+                    <div class="text-[8px] text-right ${isMe ? 'text-black/50' : 'text-slate-500'} font-mono">${new Date(m.created_at).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'})}</div>
                 `;
                 container.appendChild(div);
             });
@@ -1491,7 +1429,9 @@
 
             let categoriesMap = {};
             state.transactions.filter(t => t.type === 'expense').forEach(t => {
-                categoriesMap[t.category] = (categoriesMap[t.category] || 0) + (parseFloat(t.amount) || 0);
+                const catName = t.category || 'Ostatní';
+                const amt = parseFloat(t.amount) || 0;
+                categoriesMap[catName] = (categoriesMap[catName] || 0) + amt;
             });
 
             const labels = Object.keys(categoriesMap).length > 0 ? Object.keys(categoriesMap) : ['Žádná data'];
