@@ -1,1506 +1,443 @@
 <!DOCTYPE html>
-<html lang="cs" class="h-full bg-slate-950">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AURA — Luxury Household Fintech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spital – Luxury Household Fintech</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#020617">
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Aura%20Fintech%22,%22short_name%22:%22Aura%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23020617%22,%22theme_color%22:%22%23020617%22}">
-
+    <link id="manifest-link" rel="manifest" href="">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        gold: {
-                            50: '#fdfbf7',
-                            100: '#fbf4e6',
-                            200: '#f5e3bf',
-                            300: '#eecc8c',
-                            400: '#e5ae58',
-                            500: '#d4af37',
-                            600: '#b88e28',
-                            700: '#997020',
-                            800: '#7c591c',
-                            900: '#66491a',
-                        },
-                        dark: {
-                            950: '#050505',
-                            900: '#0d0d0d',
-                            800: '#141414',
-                            700: '#1f1f1f',
-                            600: '#2d2d2d'
-                        }
-                    }
+                    colors: { gold: { DEFAULT: '#D4AF37', dark: '#AA8C2C' }, dark: { DEFAULT: '#0a0a0a', card: '#161616', border: '#2a2a2a' } }
                 }
             }
         }
     </script>
-    <style>
-        .glass {
-            background: rgba(13, 13, 13, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(212, 175, 55, 0.15);
-        }
-        .glass-premium {
-            background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(5, 5, 5, 0.9) 100%);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(212, 175, 55, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-        .gold-glow {
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-        }
-        .gold-gradient-text {
-            background: linear-gradient(135deg, #f5e3bf 0%, #d4af37 50%, #997020 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .gold-btn {
-            background: linear-gradient(135deg, #d4af37 0%, #b88e28 100%);
-            color: #050505;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .gold-btn:hover {
-            background: linear-gradient(135deg, #e5ae58 0%, #d4af37 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        ::-webkit-scrollbar { display: none; }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        .animate-scale-up { animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+    <style>
+        body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(22, 22, 22, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.15); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
+        .glass-input { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.3); color: white; transition: all 0.3s ease; }
+        .glass-input:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        .btn-gold { background: linear-gradient(135deg, #D4AF37, #AA8C2C); color: black; font-weight: bold; transition: transform 0.2s, opacity 0.2s; }
+        .btn-gold:active { transform: scale(0.96); opacity: 0.8; }
+        ::-webkit-scrollbar { display: none; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #D4AF37; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        #bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
-<body class="h-full text-slate-100 flex flex-col justify-between overflow-x-hidden selection:bg-gold-500 selection:text-dark-950">
+<body class="h-screen w-screen overflow-hidden flex flex-col relative">
 
-    <div id="loadingOverlay" class="fixed inset-0 z-50 bg-dark-950 flex flex-col items-center justify-center transition-all duration-500">
-        <div class="text-4xl font-light tracking-[0.3em] gold-gradient-text mb-4">AURA</div>
-        <div class="w-12 h-[2px] bg-gold-500/20 relative overflow-hidden rounded">
-            <div class="absolute inset-0 bg-gold-500 w-1/2 rounded animate-[loading_1.5s_infinite_ease-in-out]"></div>
+    <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-md flex flex-col gap-2 pointer-events-none"></div>
+
+    <div id="app" class="w-full h-full flex flex-col relative">
+        <div id="auth-view" class="absolute inset-0 z-50 bg-black flex flex-col justify-center items-center p-6 hidden">
+            <div class="text-center mb-10 fade-in"><i class="fa-solid fa-gem text-gold text-5xl mb-4"></i><h1 class="text-3xl font-light tracking-widest uppercase">Spital</h1></div>
+            <form id="auth-form" class="glass w-full max-w-sm p-6 rounded-2xl flex flex-col gap-4 fade-in">
+                <h2 id="auth-title" class="text-xl font-semibold mb-2">Přihlášení</h2>
+                <input type="email" id="auth-email" placeholder="E-mail" class="glass-input p-3 rounded-xl w-full" required>
+                <input type="password" id="auth-password" placeholder="Heslo" class="glass-input p-3 rounded-xl w-full" required>
+                <button type="submit" class="btn-gold p-3 rounded-xl mt-2 flex justify-center items-center">
+                    <span id="auth-btn-text">Vstoupit</span><div id="auth-loader" class="loader ml-2 hidden"></div>
+                </button>
+                <div class="flex justify-between text-sm text-gray-400 mt-2">
+                    <span id="toggle-auth" class="cursor-pointer hover:text-gold">Vytvořit účet</span>
+                </div>
+            </form>
+        </div>
+
+        <div id="household-setup-view" class="absolute inset-0 z-40 bg-black flex flex-col justify-center items-center p-6 hidden">
+            <div class="glass w-full max-w-sm p-6 rounded-2xl flex flex-col gap-6 fade-in">
+                <h2 class="text-2xl font-semibold text-center text-gold">Domácnost</h2>
+                <div class="flex flex-col gap-3"><input type="text" id="invite-code" placeholder="AURA-XXXX-XXXX" class="glass-input p-3 rounded-xl text-center uppercase"><button onclick="joinHousehold()" class="border border-gold text-gold p-3 rounded-xl hover:bg-gold hover:text-black">Připojit přes kód</button></div>
+                <div class="text-center text-gray-500 text-sm border-t border-dark-border pt-4">NEBO</div>
+                <div class="flex flex-col gap-3"><input type="text" id="new-household-name" placeholder="Název domácnosti" class="glass-input p-3 rounded-xl"><button onclick="createHousehold()" class="btn-gold p-3 rounded-xl">Založit domácnost</button></div>
+                <button onclick="logout()" class="text-gray-500 text-sm mt-2">Odhlásit se</button>
+            </div>
+        </div>
+
+        <div id="main-view" class="flex-1 flex flex-col overflow-hidden hidden bg-gradient-to-b from-dark to-black">
+            <header class="glass px-6 py-4 flex justify-between items-center z-10">
+                <div class="flex items-center gap-2"><i class="fa-solid fa-gem text-gold"></i><h1 class="font-light tracking-wider" id="header-household-name">Spital</h1></div>
+                <div class="flex gap-4 text-gray-400"><i class="fa-solid fa-gear cursor-pointer hover:text-gold"></i></div>
+            </header>
+
+            <main id="content-area" class="flex-1 overflow-y-auto p-4 pb-24 relative"></main>
+
+            <nav id="bottom-nav" class="glass absolute bottom-0 w-full flex justify-around p-3 z-20 text-gray-500 text-xs">
+                <button onclick="switchTab('dashboard')" class="nav-btn w-16 text-gold" data-target="dashboard"><i class="fa-solid fa-chart-pie text-lg block mb-1"></i>Přehled</button>
+                <button onclick="switchTab('finance')" class="nav-btn w-16 hover:text-white" data-target="finance"><i class="fa-solid fa-wallet text-lg block mb-1"></i>Finance</button>
+                <button onclick="switchTab('assets')" class="nav-btn w-16 hover:text-white" data-target="assets"><i class="fa-solid fa-box-open text-lg block mb-1"></i>Majetek</button>
+                <button onclick="switchTab('more')" class="nav-btn w-16 hover:text-white" data-target="more"><i class="fa-solid fa-bars text-lg block mb-1"></i>Více</button>
+            </nav>
         </div>
     </div>
 
-    <div id="toastContainer" class="fixed top-4 left-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-    <div class="w-full max-w-md mx-auto bg-dark-950 min-h-screen shadow-2xl flex flex-col relative pb-24 border-x border-dark-700/30">
-        
-        <header id="mainHeader" class="hidden sticky top-0 z-40 glass px-5 py-4 flex items-center justify-between border-b border-gold-500/10">
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    <img id="userAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256" class="w-9 h-9 rounded-full object-cover border border-gold-500/40" alt="Avatar">
-                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-dark-950"></div>
-                </div>
-                <div>
-                    <h4 id="userGreeting" class="text-xs text-slate-400 font-medium">Dobrý den,</h4>
-                    <h3 id="profileName" class="text-sm font-semibold tracking-wide text-white">Načítání...</h3>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <button onclick="toggleSection('notificationsView')" class="relative w-9 h-9 flex items-center justify-center rounded-full bg-dark-900 border border-dark-700 hover:border-gold-500/40 transition">
-                    <i class="fa-regular fa-bell text-slate-300 text-sm"></i>
-                    <span id="notificationBadge" class="hidden absolute top-1.5 right-1.5 w-2 h-2 bg-gold-500 rounded-full animate-pulse"></span>
-                </button>
-                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-full bg-dark-900 border border-dark-700 hover:border-rose-500/40 transition text-slate-400 hover:text-rose-400">
-                    <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
-                </button>
-            </div>
-        </header>
-
-        <main class="flex-1 px-4 py-4 overflow-y-auto">
-            
-            <section id="authView" class="hidden min-h-[80vh] flex flex-col justify-center py-6 animate-fade-in">
-                <div class="text-center mb-10">
-                    <h1 class="text-5xl font-light tracking-[0.25em] gold-gradient-text mb-2">AURA</h1>
-                    <p class="text-xs uppercase tracking-[0.4em] text-slate-500">Wealth & Household Management</p>
-                </div>
-
-                <div class="glass-premium p-6 rounded-2xl">
-                    <div class="flex border-b border-dark-700 mb-6">
-                        <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 pb-3 text-sm font-medium border-b-2 border-gold-500 text-gold-400 transition-all">Přihlášení</button>
-                        <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400 transition-all">Registrace</button>
-                    </div>
-
-                    <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
-                        <div id="authNameField" class="hidden space-y-1.5">
-                            <label class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Jméno a příjmení</label>
-                            <div class="relative">
-                                <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                                <input type="text" id="authName" class="w-full bg-dark-900/80 border border-dark-700 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-gold-500 transition">
-                            </div>
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <label class="text-xs font-semibold text-slate-400 tracking-wider uppercase">E-mail</label>
-                            <div class="relative">
-                                <i class="fa-regular fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                                <input type="email" id="authEmail" required class="w-full bg-dark-900/80 border border-dark-700 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-gold-500 transition" placeholder="name@luxury.com">
-                            </div>
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <label class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Heslo</label>
-                            <div class="relative">
-                                <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                                <input type="password" id="authPassword" required class="w-full bg-dark-900/80 border border-dark-700 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-gold-500 transition" placeholder="••••••••">
-                            </div>
-                        </div>
-
-                        <div id="authActionBox" class="pt-2">
-                            <button type="submit" id="authSubmitBtn" class="w-full gold-btn py-3.5 rounded-xl font-bold tracking-wider uppercase text-xs">Vstoupit do rezidence</button>
-                        </div>
-                    </form>
-
-                    <div class="mt-4 text-center">
-                        <button onclick="handlePasswordReset()" class="text-xs text-slate-400 hover:text-gold-400 transition">Zapomenuté heslo?</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="householdSetupView" class="hidden min-h-[70vh] flex flex-col justify-center space-y-6">
-                <div class="text-center">
-                    <i class="fa-solid fa-house-laptop text-4xl text-gold-500/80 mb-3"></i>
-                    <h2 class="text-xl font-semibold text-white">Vítejte v Aura System</h2>
-                    <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Chcete-li pokračovat, založte novou rodinnou rezidenci nebo zadejte exkluzivní zvací kód.</p>
-                </div>
-
-                <div class="glass p-5 rounded-2xl space-y-4">
-                    <h3 class="text-xs uppercase font-bold tracking-widest text-gold-400">Vytvořit novou domácnost</h3>
-                    <div class="flex gap-2">
-                        <input type="text" id="newHouseholdName" placeholder="Název domácnosti (např. Vila Novák)" class="flex-1 bg-dark-900 border border-dark-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gold-500">
-                        <button onclick="createNewHousehold()" class="gold-btn px-4 rounded-xl text-sm font-bold"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                </div>
-
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-dark-700/60"></div>
-                    <span class="flex-shrink mx-4 text-xs uppercase tracking-widest text-slate-500">Nebo</span>
-                    <div class="flex-grow border-t border-dark-700/60"></div>
-                </div>
-
-                <div class="glass p-5 rounded-2xl space-y-4">
-                    <h3 class="text-xs uppercase font-bold tracking-widest text-gold-400">Zadat zvací kód</h3>
-                    <div class="flex gap-2">
-                        <input type="text" id="inviteCodeInput" placeholder="AURA-XXXX-XXXX" class="flex-1 bg-dark-900 border border-dark-700 rounded-xl px-4 py-2.5 text-sm uppercase tracking-wider focus:outline-none focus:border-gold-500">
-                        <button onclick="joinHouseholdByCode()" class="bg-dark-900 border border-gold-500/40 text-gold-400 px-4 rounded-xl text-sm font-bold hover:bg-gold-500 hover:text-black transition"><i class="fa-solid fa-right-to-bracket"></i></button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="dashboardView" class="hidden space-y-5 animate-fade-in">
-                <div class="glass-premium p-6 rounded-3xl relative overflow-hidden bg-gradient-to-br from-neutral-900 via-dark-900 to-black">
-                    <div class="absolute -right-12 -top-12 w-32 h-32 bg-gold-500/5 rounded-full blur-2xl"></div>
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-semibold tracking-widest uppercase text-slate-400">Aktuální konsolidovaný zůstatek</span>
-                        <span class="text-[10px] bg-gold-500/10 border border-gold-500/20 text-gold-400 px-2 py-0.5 rounded-full font-mono uppercase" id="householdCodeDisplay">Rezidence</span>
-                    </div>
-                    <h1 id="dashBalance" class="text-3xl font-light tracking-wide text-white mb-6">0,00 <span class="text-lg font-normal text-gold-500">Kč</span></h1>
-                    
-                    <div class="grid grid-cols-2 gap-4 border-t border-dark-700/50 pt-4">
-                        <div>
-                            <span class="text-[10px] text-slate-400 uppercase tracking-wider block mb-0.5"><i class="fa-solid fa-arrow-trend-up text-emerald-500 mr-1"></i> Příjmy / měsíc</span>
-                            <span id="dashIncome" class="text-sm font-medium text-white">0,00 Kč</span>
-                        </div>
-                        <div>
-                            <span class="text-[10px] text-slate-400 uppercase tracking-wider block mb-0.5"><i class="fa-solid fa-arrow-trend-down text-rose-500 mr-1"></i> Výdaje / měsíc</span>
-                            <span id="dashExpense" class="text-sm font-medium text-white">0,00 Kč</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-amber-950/40 to-dark-900 border border-gold-500/20 p-4 rounded-2xl flex gap-3 items-start">
-                    <div class="w-8 h-8 rounded-xl bg-gold-500/10 flex items-center justify-center border border-gold-500/30 shrink-0 text-gold-400 mt-0.5">
-                        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                    </div>
-                    <div class="space-y-1">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-gold-400 flex items-center gap-1.5">Aura AI Advisor</h4>
-                        <p id="aiAdvisorOutput" class="text-xs text-slate-300 leading-relaxed">Analyzuji data Vašeho rodinného rozpočtu...</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="glass p-3 rounded-xl flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-dark-800 border border-dark-700 flex items-center justify-center text-gold-400"><i class="fa-solid fa-users text-xs"></i></div>
-                        <div><div class="text-[10px] text-slate-400 uppercase">Členové</div><div id="statMembers" class="text-xs font-bold text-white">0</div></div>
-                    </div>
-                    <div class="glass p-3 rounded-xl flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-dark-800 border border-dark-700 flex items-center justify-center text-gold-400"><i class="fa-solid fa-couch text-xs"></i></div>
-                        <div><div class="text-[10px] text-slate-400 uppercase">Majetek</div><div id="statInventory" class="text-xs font-bold text-white">0 položek</div></div>
-                    </div>
-                    <div class="glass p-3 rounded-xl flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-dark-800 border border-dark-700 flex items-center justify-center text-gold-400"><i class="fa-solid fa-receipt text-xs"></i></div>
-                        <div><div class="text-[10px] text-slate-400 uppercase">Účtenky</div><div id="statReceipts" class="text-xs font-bold text-white">0 ks</div></div>
-                    </div>
-                    <div class="glass p-3 rounded-xl flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-dark-800 border border-dark-700 flex items-center justify-center text-gold-400"><i class="fa-solid fa-list-check text-xs"></i></div>
-                        <div><div class="text-[10px] text-slate-400 uppercase">Úkoly</div><div id="statTasks" class="text-xs font-bold text-white">0 aktivních</div></div>
-                    </div>
-                </div>
-
-                <div class="glass p-4 rounded-2xl space-y-4">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Struktura cashflow</h3>
-                    <div class="h-48 w-full relative">
-                        <canvas id="dashboardChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="glass p-4 rounded-2xl space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Nedávné transakce</h3>
-                        <button onclick="toggleSection('financesView')" class="text-[11px] text-gold-400 hover:underline">Zobrazit vše</button>
-                    </div>
-                    <div id="recentTransactionsList" class="space-y-2 divide-y divide-dark-700/40"></div>
-                </div>
-            </section>
-
-            <section id="financesView" class="hidden space-y-4 animate-fade-in">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-medium tracking-wide gold-gradient-text">Správa financí</h2>
-                    <button onclick="openTransactionModal()" class="gold-btn px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> Nový záznam</button>
-                </div>
-
-                <div class="glass p-4 rounded-2xl">
-                    <div class="h-40 w-full"><canvas id="financesCategoryChart"></canvas></div>
-                </div>
-
-                <div class="glass border-dashed border-gold-500/30 p-4 rounded-2xl text-center space-y-3">
-                    <div class="text-xs text-slate-400">Propojte rodinné účty automaticky přes PSD2 rozhraní</div>
-                    <button onclick="mockConnectBank()" class="w-full bg-dark-900 border border-dark-700 hover:border-gold-500/50 py-2.5 rounded-xl text-xs font-semibold text-gold-400 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-building-columns"></i> Připojit bankovní účet (GoCardless)
-                    </button>
-                </div>
-
-                <div class="glass p-4 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Historie transakcí</h3>
-                    <div id="fullTransactionsList" class="space-y-2.5"></div>
-                </div>
-            </section>
-
-            <section id="inventoryView" class="hidden space-y-4 animate-fade-in">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-medium tracking-wide gold-gradient-text">Inventář & Majetek</h2>
-                    <button onclick="openInventoryModal()" class="gold-btn px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> Přidat majetek</button>
-                </div>
-
-                <div class="glass p-4 rounded-2xl bg-gradient-to-br from-dark-900 to-black flex justify-between items-center">
-                    <div>
-                        <span class="text-[10px] text-slate-400 uppercase tracking-widest block">Celková hodnota majetku</span>
-                        <span id="inventoryTotalValuation" class="text-xl font-light text-white">0,00 Kč</span>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center border border-gold-500/20 text-gold-400"><i class="fa-solid fa-vault"></i></div>
-                </div>
-
-                <div id="inventoryList" class="grid grid-cols-1 gap-3"></div>
-            </section>
-
-            <section id="receiptsView" class="hidden space-y-4 animate-fade-in">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-medium tracking-wide gold-gradient-text">Digitální Účtenky</h2>
-                    <label class="gold-btn px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer">
-                        <i class="fa-solid fa-camera text-[10px]"></i> Nahrát / Skenovat
-                        <input type="file" id="receiptFileInput" accept="image/*,application/pdf" class="hidden" onchange="handleReceiptUpload(event)">
-                    </label>
-                </div>
-
-                <div id="ocrStatusBox" class="hidden glass border-amber-500/40 p-4 rounded-2xl flex flex-col gap-2">
-                    <div class="flex justify-between text-xs">
-                        <span class="text-gold-400 font-semibold"><i class="fa-solid fa-robot animate-pulse mr-1"></i> Aura AI OCR skenování...</span>
-                        <span id="ocrProgressTxt" class="text-slate-400 font-mono">0%</span>
-                    </div>
-                    <div class="w-full bg-dark-800 h-1 rounded overflow-hidden">
-                        <div id="ocrProgressBar" class="bg-gold-500 h-full w-0 transition-all duration-300"></div>
-                    </div>
-                </div>
-
-                <div id="receiptsGrid" class="grid grid-cols-2 gap-3"></div>
-            </section>
-
-            <section id="tasksView" class="hidden space-y-4 animate-fade-in">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-medium tracking-wide gold-gradient-text">Rodinné Úkoly</h2>
-                    <button onclick="openTaskModal()" class="gold-btn px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> Nový úkol</button>
-                </div>
-
-                <div class="glass p-4 rounded-2xl">
-                    <div id="tasksList" class="space-y-3"></div>
-                </div>
-            </section>
-
-            <section id="chatView" class="hidden h-[74vh] flex flex-col animate-fade-in">
-                <div class="glass px-4 py-2.5 rounded-t-2xl border-b border-dark-700/60 flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider text-gold-400"><i class="fa-solid fa-comments mr-1.5"></i> Rezidenční chat</span>
-                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Realtime</span>
-                </div>
-                <div id="chatMessagesBox" class="flex-1 bg-dark-900/40 border-x border-dark-800 overflow-y-auto p-4 space-y-3 flex flex-col"></div>
-                <form onsubmit="sendChatMessage(event)" class="glass p-2 rounded-b-2xl flex gap-2 items-center">
-                    <input type="text" id="chatInput" placeholder="Napište zprávu rodině..." class="flex-1 bg-dark-950 border border-dark-700 text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:border-gold-500">
-                    <button type="submit" class="w-10 h-10 rounded-xl bg-gold-500 text-black flex items-center justify-center font-bold hover:bg-gold-400 transition shrink-0"><i class="fa-solid fa-paper-plane text-xs"></i></button>
-                </form>
-            </section>
-
-            <section id="notificationsView" class="hidden space-y-4 animate-fade-in">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-medium tracking-wide gold-gradient-text">Oznámení a záruky</h2>
-                    <button onclick="markAllNotificationsRead()" class="text-xs text-gold-400 hover:underline">Označit vše jako přečtené</button>
-                </div>
-                <div id="notificationsList" class="space-y-2"></div>
-            </section>
-
-            <section id="moreView" class="hidden space-y-4 animate-fade-in">
-                <h2 class="text-lg font-medium tracking-wide gold-gradient-text">Správa účtu & Historie</h2>
-                
-                <div class="glass p-4 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-gold-400">Pozvat člena do domácnosti</h3>
-                    <p class="text-xs text-slate-400">Sdílejte tento kód pro okamžitý bezpečný přístup k financím a majetku.</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="inviteCodeShareField" readonly class="flex-1 bg-dark-950 border border-dark-700 px-3 py-2 rounded-xl text-xs font-mono tracking-widest text-center text-white">
-                        <button onclick="copyInviteCode()" class="bg-dark-900 border border-dark-700 text-gold-400 px-4 rounded-xl text-xs font-bold hover:border-gold-500 transition"><i class="fa-regular fa-copy"></i></button>
-                    </div>
-                </div>
-
-                <div class="glass p-4 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-gold-400">Historie rodinných aktivit</h3>
-                    <div id="activityLogsList" class="space-y-2 max-h-60 overflow-y-auto text-xs text-slate-300 divide-y divide-dark-700/30"></div>
-                </div>
-            </section>
-
-        </main>
-
-        <div id="transactionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-            <div class="glass-premium w-full max-w-sm rounded-2xl p-5 space-y-4 animate-scale-up">
-                <div class="flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-wider text-gold-400" id="txModalTitle">Nová transakce</h3><button onclick="closeTransactionModal()" class="text-slate-400 text-lg">&times;</button></div>
-                <form id="txForm" onsubmit="saveTransaction(event)" class="space-y-3">
-                    <input type="hidden" id="txId">
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Typ</label>
-                        <select id="txType" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white" onchange="adjustTxCategories()">
-                            <option value="expense">Výdaj</option>
-                            <option value="income">Příjem</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Částka (Kč)</label>
-                        <input type="number" id="txAmount" step="0.01" required class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Kategorie</label>
-                        <select id="txCategory" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white"></select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Poznámka</label>
-                        <input type="text" id="txNote" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-                    <button type="submit" class="w-full gold-btn py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider">Uložit záznam</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="inventoryModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-            <div class="glass-premium w-full max-w-sm rounded-2xl p-5 space-y-4 animate-scale-up">
-                <div class="flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-wider text-gold-400">Přidat majetek</h3><button onclick="closeInventoryModal()" class="text-slate-400 text-lg">&times;</button></div>
-                <form id="invForm" onsubmit="saveInventoryItem(event)" class="space-y-3 text-xs">
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Název položky</label>
-                        <input type="text" id="invName" required oninput="triggerAutoCategorization(this.value)" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-white" placeholder="např. Lednice Bosch">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[10px] text-slate-400 uppercase block mb-1">Kategorie</label>
-                            <select id="invCategory" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-white">
-                                <option value="Nábytek">Nábytek</option><option value="Spotřebiče">Spotřebiče</option><option value="Elektronika">Elektronika</option><option value="Kuchyně">Kuchyně</option><option value="Koupelna">Koupelna</option><option value="Dekorace">Dekorace</option><option value="Nářadí">Nářadí</option><option value="Ostatní">Ostatní</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 uppercase block mb-1">Cena (Kč)</label>
-                            <input type="number" id="invPrice" step="0.01" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-white">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[10px] text-slate-400 uppercase block mb-1">Obchod</label>
-                            <input type="text" id="invStore" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-white">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 uppercase block mb-1">Záruka (měsíce)</label>
-                            <input type="number" id="invWarranty" value="24" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-white">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Datum nákupu</label>
-                        <input type="date" id="invPurchaseDate" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-white">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Poznámka</label>
-                        <input type="text" id="invNote" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-white">
-                    </div>
-                    <button type="submit" class="w-full gold-btn py-2.5 rounded-xl font-bold uppercase tracking-wider">Uložit majetek</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="taskModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-            <div class="glass-premium w-full max-w-sm rounded-2xl p-5 space-y-4 animate-scale-up">
-                <div class="flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-wider text-gold-400">Nový úkol</h3><button onclick="closeTaskModal()" class="text-slate-400 text-lg">&times;</button></div>
-                <form id="taskFormElement" onsubmit="saveTask(event)" class="space-y-3">
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Název úkolu</label>
-                        <input type="text" id="taskTitle" required class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase block mb-1">Přiřadit členovi</label>
-                        <select id="taskAssignedTo" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-xs text-white"></select>
-                    </div>
-                    <button type="submit" class="w-full gold-btn py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider">Vytvořit úkol</button>
-                </form>
-            </div>
-        </div>
-
-        <nav id="bottomNav" class="hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t border-gold-500/15 py-2 px-3 flex justify-between items-center z-40 rounded-t-3xl shadow-[0_-8px_24px_rgba(0,0,0,0.6)]">
-            <button onclick="toggleSection('dashboardView')" data-nav="dashboardView" class="nav-link flex flex-col items-center gap-1 text-gold-500 px-3 py-1.5 transition">
-                <i class="fa-solid fa-layer-group text-base"></i><span class="text-[9px] uppercase tracking-wider font-medium">Domů</span>
-            </button>
-            <button onclick="toggleSection('financesView')" data-nav="financesView" class="nav-link flex flex-col items-center gap-1 text-slate-400 px-3 py-1.5 transition">
-                <i class="fa-solid fa-wallet text-base"></i><span class="text-[9px] uppercase tracking-wider font-medium">Finance</span>
-            </button>
-            <button onclick="toggleSection('inventoryView')" data-nav="inventoryView" class="nav-link flex flex-col items-center gap-1 text-slate-400 px-3 py-1.5 transition">
-                <i class="fa-solid fa-box-open text-base"></i><span class="text-[9px] uppercase tracking-wider font-medium">Majetek</span>
-            </button>
-            <button onclick="toggleSection('receiptsView')" data-nav="receiptsView" class="nav-link flex flex-col items-center gap-1 text-slate-400 px-3 py-1.5 transition">
-                <i class="fa-solid fa-receipt text-base"></i><span class="text-[9px] uppercase tracking-wider font-medium">Účtenky</span>
-            </button>
-            <button onclick="toggleSection('chatView')" data-nav="chatView" class="nav-link flex flex-col items-center gap-1 text-slate-400 px-3 py-1.5 transition relative">
-                <i class="fa-solid fa-comment text-base"></i><span class="text-[9px] uppercase tracking-wider font-medium">Chat</span>
-                <span id="chatBadge" class="hidden absolute top-1 right-3 w-1.5 h-1.5 bg-gold-500 rounded-full"></span>
-            </button>
-            <button onclick="toggleSection('moreView')" data-nav="moreView" class="nav-link flex flex-col items-center gap-1 text-slate-400 px-3 py-1.5 transition">
-                <i class="fa-solid fa-ellipsis text-base"></i><span class="text-[9px] uppercase tracking-wider font-medium">Více</span>
-            </button>
-        </nav>
-
+    <div id="modal-container" class="fixed inset-0 bg-black/80 z-[60] hidden flex-col justify-end">
+        <div id="modal-content" class="glass w-full rounded-t-3xl p-6 fade-in max-h-[85vh] overflow-y-auto"></div>
     </div>
 
     <script>
+        // PWA Setup
+        const manifestData = { name: "Spital", short_name: "Spital", start_url: ".", display: "standalone", background_color: "#000", theme_color: "#D4AF37" };
+        document.getElementById('manifest-link').href = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], { type: 'application/json' }));
+
+        // SUPABASE INIT - ZDE VLOŽ SVŮJ KLÍČ
         const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNia2lxY3RqZmF0b3pxbml4aGFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMzM2NjIsImV4cCI6MjA5NTkwOTY2Mn0.4-uDF2b7Pv2CfTL1NpwRPdtuN1u0KDUxmtHSf8QAUDM";
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_ANON_KEY = "VLOŽÍM_SVŮJ_ANON_KEY"; 
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let state = {
-            user: null,
-            profile: null,
-            household: null,
-            members: [],
-            profilesMap: {},
-            transactions: [],
-            inventory: [],
-            receipts: [],
-            tasks: [],
-            messages: [],
-            notifications: [],
-            logs: [],
-            activeTab: 'login',
-            currentSection: 'dashboardView',
-            charts: {},
-            realtimeChannel: null
+        // GLOBAL STATE
+        let state = { user: null, household: null, members: [], transactions: [], inventory: [], tasks: [], chat: [], activeTab: 'dashboard', chartInstance: null };
+
+        // UTILS
+        const $ = id => document.getElementById(id);
+        const formatMoney = a => new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK' }).format(a || 0);
+        const formatDate = d => new Date(d).toLocaleDateString('cs-CZ');
+        
+        function showToast(msg, type = 'info') {
+            const t = document.createElement('div');
+            const colors = { info: 'border-gold text-gold', error: 'border-red-500 text-red-500', success: 'border-green-500 text-green-500' };
+            t.className = `glass p-3 rounded-xl border ${colors[type]} flex items-center gap-3 fade-in shadow-lg text-sm`;
+            t.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${msg}</span>`;
+            $('toast-container').appendChild(t);
+            setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
+        }
+
+        function closeModal() { $('modal-container').classList.replace('flex', 'hidden'); }
+        function openModal(html) { $('modal-content').innerHTML = html; $('modal-container').classList.replace('hidden', 'flex'); }
+
+        // AUTH
+        let isLogin = true;
+        $('toggle-auth').onclick = () => { isLogin = !isLogin; $('auth-title').innerText = isLogin ? 'Přihlášení' : 'Registrace'; $('auth-btn-text').innerText = isLogin ? 'Vstoupit' : 'Vytvořit účet'; $('toggle-auth').innerText = isLogin ? 'Vytvořit účet' : 'Mám účet'; };
+        
+        $('auth-form').onsubmit = async (e) => {
+            e.preventDefault(); $('auth-loader').classList.remove('hidden'); $('auth-btn-text').classList.add('hidden');
+            const email = $('auth-email').value, password = $('auth-password').value;
+            const res = isLogin ? await sb.auth.signInWithPassword({ email, password }) : await sb.auth.signUp({ email, password });
+            $('auth-loader').classList.add('hidden'); $('auth-btn-text').classList.remove('hidden');
+            if(res.error) showToast(res.error.message, 'error'); else if(!isLogin) showToast('Potvrďte email', 'success');
         };
 
-        const TX_CATEGORIES = {
-            expense: ["Nájem", "Hypotéka", "Elektřina", "Voda", "Plyn", "Splátky", "Internet", "Telefon", "Potraviny", "Doprava", "Domácnost", "Elektronika", "Nábytek", "Ostatní"],
-            income: ["Výplata", "Podnikání", "Investice", "Dar", "Ostatní"]
-        };
+        async function logout() { await sb.auth.signOut(); location.reload(); }
 
-        const FINANCIAL_PRIORITIES = ["Nájem", "Hypotéka", "Elektřina", "Voda", "Plyn", "Splátky", "Internet", "Telefon"];
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            initAuthListener();
-            setupOfflineSupport();
+        sb.auth.onAuthStateChange((event, session) => { 
+            if(session) { state.user = session.user; initApp(); } 
+            else { $('auth-view').classList.remove('hidden'); $('main-view').classList.add('hidden'); $('household-setup-view').classList.add('hidden'); }
         });
 
-        function showLoading(show) {
-            const loader = document.getElementById('loadingOverlay');
-            if (show) {
-                loader.classList.remove('opacity-0', 'pointer-events-none');
+        // INIT APP & HOUSEHOLD
+        async function initApp() {
+            $('auth-view').classList.add('hidden');
+            const { data: member } = await sb.from('household_members').select('household_id, role').eq('user_id', state.user.id).single();
+            if(member) {
+                const { data: house } = await sb.from('households').select('*').eq('id', member.household_id).single();
+                state.household = house;
+                $('header-household-name').innerText = house.name;
+                $('household-setup-view').classList.add('hidden'); $('main-view').classList.remove('hidden');
+                
+                // Fetch members emails via RPC or just store them (Here we fetch auth users mapped if possible, or just raw IDs)
+                const { data: mData } = await sb.from('household_members').select('user_id, role').eq('household_id', house.id);
+                state.members = mData || [];
+                
+                switchTab('dashboard');
             } else {
-                loader.classList.add('opacity-0', 'pointer-events-none');
+                $('household-setup-view').classList.remove('hidden');
             }
         }
 
-        function triggerToast(title, isError = false) {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `glass p-3 rounded-xl shadow-xl flex items-center gap-2 border text-xs font-medium tracking-wide text-white pointer-events-auto transition-all transform translate-y-2 opacity-0 duration-300 ${isError ? 'border-rose-500/40 bg-rose-950/80' : 'border-gold-500/30 bg-neutral-900/90'}`;
-            toast.innerHTML = `<i class="${isError ? 'fa-solid fa-circle-exclamation text-rose-400' : 'fa-solid fa-circle-check text-gold-400'}"></i> <span>${title}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-[-10px]');
-                setTimeout(() => { toast.remove(); }, 300);
-            }, 3500);
+        async function createHousehold() {
+            const name = $('new-household-name').value; if(!name) return;
+            const code = 'AURA-' + Math.random().toString(36).substring(2,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+            const { data: house, error } = await sb.from('households').insert([{ name, invite_code: code }]).select().single();
+            if(error) return showToast(error.message, 'error');
+            await sb.from('household_members').insert([{ household_id: house.id, user_id: state.user.id, role: 'Owner' }]);
+            initApp();
         }
 
-        function initAuthListener() {
-            sb.auth.onAuthStateChange(async (event, session) => {
-                state.user = session?.user || null;
-                if (state.user) {
-                    await loadUserProfileAndHouseholdContext();
-                } else {
-                    showLoading(false);
-                    showAuthScreen();
-                }
-            });
+        async function joinHousehold() {
+            const code = $('invite-code').value.trim();
+            const { data: house } = await sb.from('households').select('id').eq('invite_code', code).single();
+            if(!house) return showToast('Neplatný kód', 'error');
+            await sb.from('household_members').insert([{ household_id: house.id, user_id: state.user.id, role: 'Member' }]);
+            initApp();
         }
 
-        function showAuthScreen() {
-            document.getElementById('mainHeader').classList.add('hidden');
-            document.getElementById('bottomNav').classList.add('hidden');
-            hideAllSections();
-            document.getElementById('authView').classList.remove('hidden');
-        }
-
-        function switchAuthTab(tab) {
-            state.activeTab = tab;
-            const isLogin = tab === 'login';
-            document.getElementById('tabLoginBtn').className = isLogin ? "flex-1 pb-3 text-sm font-medium border-b-2 border-gold-500 text-gold-400 transition-all" : "flex-1 pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400 transition-all";
-            document.getElementById('tabRegisterBtn').className = !isLogin ? "flex-1 pb-3 text-sm font-medium border-b-2 border-gold-500 text-gold-400 transition-all" : "flex-1 pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400 transition-all";
-            document.getElementById('authNameField').className = isLogin ? "hidden space-y-1.5" : "space-y-1.5";
-            document.getElementById('authSubmitBtn').innerText = isLogin ? "Vstoupit do rezidence" : "Založit prémiový účet";
-        }
-
-        async function handleAuthSubmit(e) {
-            e.preventDefault();
-            showLoading(true);
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-
-            try {
-                if (state.activeTab === 'login') {
-                    const { error } = await sb.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    triggerToast("Přihlášení úspěšné");
-                } else {
-                    const name = document.getElementById('authName').value || "Nový uživatel";
-                    const { error } = await sb.auth.signUp({
-                        email,
-                        password,
-                        options: { data: { name } }
-                    });
-                    if (error) throw error;
-                    triggerToast("Registrace úspěšná. Vítejte.");
-                }
-            } catch (err) {
-                triggerToast(err.message, true);
-                showLoading(false);
-            }
-        }
-
-        async function handlePasswordReset() {
-            const email = document.getElementById('authEmail').value;
-            if (!email) {
-                triggerToast("Pro reset zadejte Váš e-mail do pole výše.", true);
-                return;
-            }
-            const { error } = await sb.auth.resetPasswordForEmail(email);
-            if (error) triggerToast(error.message, true);
-            else triggerToast("Instrukce k resetu odeslány na Váš e-mail.");
-        }
-
-        async function logout() {
-            showLoading(true);
-            if (state.realtimeChannel) {
-                await sb.removeChannel(state.realtimeChannel);
-                state.realtimeChannel = null;
-            }
-            await sb.auth.signOut();
-            state.household = null;
-        }
-
-        async function loadUserProfileAndHouseholdContext() {
-            try {
-                let { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', state.user.id).maybeSingle();
-                if (pErr) console.error("Chyba při stahování profilu:", pErr);
-
-                if (!profile) {
-                    const fallbackName = state.user.user_metadata?.name || state.user.email.split('@')[0] || "Nový uživatel";
-                    const { data: newProfile, error: insErr } = await sb.from('profiles').insert([
-                        { id: state.user.id, name: fallbackName }
-                    ]).select().maybeSingle();
-                    
-                    if (!insErr && newProfile) {
-                        profile = newProfile;
-                    } else {
-                        profile = { id: state.user.id, name: fallbackName, avatar: null };
-                    }
-                }
-                
-                state.profile = profile;
-                document.getElementById('profileName').innerText = state.profile.name || state.user.email;
-                if (state.profile.avatar) document.getElementById('userAvatar').src = state.profile.avatar;
-
-                const { data: memberRows, error: mErr } = await sb.from('household_members').select('household_id').eq('user_id', state.user.id);
-                if (mErr) throw mErr;
-
-                if (memberRows && memberRows.length > 0) {
-                    const householdId = memberRows[0].household_id;
-                    const { data: household, error: hErr } = await sb.from('households').select('*').eq('id', householdId).maybeSingle();
-                    if (hErr) throw hErr;
-                    
-                    if (household) {
-                        state.household = household;
-                        document.getElementById('householdCodeDisplay').innerText = household.name;
-                        document.getElementById('inviteCodeShareField').value = household.invite_code;
-
-                        document.getElementById('mainHeader').classList.remove('hidden');
-                        document.getElementById('bottomNav').classList.remove('hidden');
-                        document.getElementById('authView').classList.add('hidden');
-                        document.getElementById('householdSetupView').classList.add('hidden');
-
-                        await synchronizeHouseholdOperationalData();
-                        await setupRealtimeSubscriptions();
-                        toggleSection('dashboardView');
-                    } else {
-                        showHouseholdSetup();
-                    }
-                } else {
-                    showHouseholdSetup();
-                }
-            } catch (err) {
-                console.error("Kritické selhání startu aplikace:", err);
-                triggerToast(err.message, true);
-                showHouseholdSetup();
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function showHouseholdSetup() {
-            document.getElementById('mainHeader').classList.add('hidden');
-            document.getElementById('bottomNav').classList.add('hidden');
-            hideAllSections();
-            document.getElementById('householdSetupView').classList.remove('hidden');
-        }
-
-        async function createNewHousehold() {
-            const name = document.getElementById('newHouseholdName').value;
-            if (!name) {
-                triggerToast("Zadejte prosím exkluzivní název.", true);
-                return;
-            }
-            showLoading(true);
-            try {
-                const inviteCode = 'AURA-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-                const { data: hData, error: hErr } = await sb.from('households').insert([{ name, invite_code: inviteCode }]).select().single();
-                if (hErr) throw hErr;
-
-                const { error: mErr } = await sb.from('household_members').insert([{ household_id: hData.id, user_id: state.user.id }]);
-                if (mErr) throw mErr;
-
-                await logActivity(hData.id, `Založil rezidenci ${name}`);
-                triggerToast("Rezidenci se podařilo úspěšně vytvořit.");
-                await loadUserProfileAndHouseholdContext();
-            } catch (err) {
-                triggerToast(err.message, true);
-                showLoading(false);
-            }
-        }
-
-        async function joinHouseholdByCode() {
-            const code = document.getElementById('inviteCodeInput').value.trim().toUpperCase();
-            if (!code) {
-                triggerToast("Zadejte zvací kód.", true);
-                return;
-            }
-            showLoading(true);
-            try {
-                const { data: hData, error: hErr } = await sb.from('households').select('*').eq('invite_code', code).single();
-                if (hErr || !hData) throw new Error("Neplatný zvací kód rezidence.");
-
-                const { error: mErr } = await sb.from('household_members').insert([{ household_id: hData.id, user_id: state.user.id }]);
-                if (mErr) throw mErr;
-
-                await logActivity(hData.id, `Se připojil k rezidenci přes zvací kód`);
-                triggerToast(`Vítejte v rezidenci ${hData.name}`);
-                await loadUserProfileAndHouseholdContext();
-            } catch (err) {
-                triggerToast(err.message, true);
-                showLoading(false);
-            }
-        }
-
-        async function synchronizeHouseholdOperationalData() {
-            if (!state.household) return;
+        // ROUTER & DATA FETCH
+        async function switchTab(tabId) {
+            state.activeTab = tabId;
+            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.replace('text-gold', 'text-gray-500'); if(b.dataset.target === tabId || (['tasks','chat'].includes(tabId) && b.dataset.target==='more')) b.classList.replace('text-gray-500', 'text-gold'); });
+            $('content-area').innerHTML = `<div class="flex justify-center mt-20"><div class="loader"></div></div>`;
+            
             const hid = state.household.id;
-
-            const { data: membersList, error: memRowsErr } = await sb.from('household_members').select('user_id').eq('household_id', hid);
-            if (memRowsErr) console.error("Chyba při načítání členů:", memRowsErr);
-            state.members = membersList ? membersList.map(m => m.user_id) : [];
-            
-            if (state.members.length > 0) {
-                const { data: profs, error: profsErr } = await sb.from('profiles').select('*').in('id', state.members);
-                if (profsErr) console.error("Chyba při načítání detailů profilů:", profsErr);
-                profs?.forEach(p => { state.profilesMap[p.id] = p; });
-            }
-
-            const [txs, inv, recs, tsk, msg, ntfs, logs] = await Promise.all([
-                sb.from('transactions').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
-                sb.from('inventory').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
-                sb.from('receipts').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
-                sb.from('tasks').select('*').eq('household_id', hid).order('created_at', { ascending: false }),
-                sb.from('messages').select('*').eq('household_id', hid).order('created_at', { ascending: true }),
-                sb.from('notifications').select('*').eq('user_id', state.user.id).order('created_at', { ascending: false }),
-                sb.from('activity_logs').select('*').eq('household_id', hid).order('created_at', { ascending: false }).limit(20)
+            const [tRes, iRes, taskRes] = await Promise.all([
+                sb.from('transactions').select('*').eq('household_id', hid).order('date', {ascending: false}),
+                sb.from('inventory').select('*').eq('household_id', hid).order('created_at', {ascending: false}),
+                sb.from('tasks').select('*').eq('household_id', hid).order('due_date', {ascending: true})
             ]);
-
-            state.transactions = txs.data || [];
-            state.inventory = inv.data || [];
-            state.receipts = recs.data || [];
-            state.tasks = tsk.data || [];
-            state.messages = msg.data || [];
-            state.notifications = ntfs.data || [];
-            state.logs = logs.data || [];
-
-            renderAllViews();
-
-            const membersElement = document.getElementById('statMembers');
-            if (membersElement) {
-                membersElement.innerText = state.members.length;
-            }
-        }
-
-        async function setupRealtimeSubscriptions() {
-            if (state.realtimeChannel) {
-                await sb.removeChannel(state.realtimeChannel);
-            }
-
-            state.realtimeChannel = sb.channel('realtime-household-sync')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `household_id=eq.${state.household.id}` }, () => {
-                    synchronizeHouseholdOperationalData();
-                })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory', filter: `household_id=eq.${state.household.id}` }, () => {
-                    synchronizeHouseholdOperationalData();
-                })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts', filter: `household_id=eq.${state.household.id}` }, () => {
-                    synchronizeHouseholdOperationalData();
-                })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `household_id=eq.${state.household.id}` }, () => {
-                    synchronizeHouseholdOperationalData();
-                })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `household_id=eq.${state.household.id}` }, () => {
-                    synchronizeHouseholdOperationalData();
-                });
-
-            state.realtimeChannel.subscribe();
-        }
-
-        async function logActivity(householdId, action) {
-            try {
-                const userName = state.profile?.name || state.user?.email || 'Člen';
-                await sb.from('activity_logs').insert([{ household_id: householdId, action: `${userName}: ${action}` }]);
-            } catch (err) {
-                console.error("Selhání zápisu do logu:", err);
-            }
-        }
-
-        function hideAllSections() {
-            ['authView', 'householdSetupView', 'dashboardView', 'financesView', 'inventoryView', 'receiptsView', 'tasksView', 'chatView', 'notificationsView', 'moreView']
-            .forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
-            });
-        }
-
-        function toggleSection(sectionId) {
-            hideAllSections();
-            const target = document.getElementById(sectionId);
-            if (target) target.classList.remove('hidden');
-            state.currentSection = sectionId;
-
-            document.querySelectorAll('.nav-link').forEach(btn => {
-                if (btn.getAttribute('data-nav') === sectionId) {
-                    btn.classList.remove('text-slate-400');
-                    btn.classList.add('text-gold-500');
-                } else {
-                    btn.classList.remove('text-gold-500');
-                    btn.classList.add('text-slate-400');
-                }
-            });
-
-            if (sectionId === 'dashboardView') renderDashboardCharts();
-            if (sectionId === 'financesView') renderFinancesCharts();
-        }
-
-        function renderAllViews() {
-            updateDashboardKPIs();
-            renderRecentTransactions();
-            renderFinancesList();
-            renderInventory();
-            renderReceipts();
-            renderTasks();
-            renderChat();
-            renderNotifications();
-            renderActivityLogs();
-            runAIFinancialAdvisorEngine();
-        }
-
-        function updateDashboardKPIs() {
-            let balance = 0;
-            let incomeMonth = 0;
-            let expenseMonth = 0;
-            const now = new Date();
-
-            state.transactions.forEach(t => {
-                const amt = parseFloat(t.amount) || 0;
-                
-                // OPRAVENO: Bezpečnější parsování data. Pokud created_at chybí (čerstvě přidaný záznam), použijeme dnešek.
-                const tDate = t.created_at ? new Date(t.created_at) : new Date();
-                const isCurrentMonth = tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
-
-                if (t.type === 'income') {
-                    balance += amt;
-                    if (isCurrentMonth) incomeMonth += amt;
-                } else {
-                    balance -= amt;
-                    if (isCurrentMonth) expenseMonth += amt;
-                }
-            });
-
-            document.getElementById('dashBalance').innerHTML = `${balance.toLocaleString('cs-CZ', {minimumFractionDigits: 2})} <span class="text-sm font-normal text-gold-500">Kč</span>`;
-            document.getElementById('dashIncome').innerText = `${incomeMonth.toLocaleString('cs-CZ')} Kč`;
-            document.getElementById('dashExpense').innerText = `${expenseMonth.toLocaleString('cs-CZ')} Kč`;
-
-            document.getElementById('statInventory').innerText = `${state.inventory.length} ks`;
-            document.getElementById('statReceipts').innerText = `${state.receipts.length} ks`;
-            document.getElementById('statTasks').innerText = `${state.tasks.filter(t => !t.completed).length} aktivních`;
-
-            renderDashboardCharts();
-        }
-
-        function renderRecentTransactions() {
-            const container = document.getElementById('recentTransactionsList');
-            if (!container) return;
-            container.innerHTML = '';
-            state.transactions.slice(0, 5).forEach(t => {
-                container.appendChild(createTransactionRowHTML(t));
-            });
-        }
-
-        function createTransactionRowHTML(t) {
-            const div = document.createElement('div');
-            div.className = "flex justify-between items-center py-2.5 text-xs";
-            const author = state.profilesMap[t.user_id]?.name || "Systém";
-            const isIncome = t.type === 'income';
-            const amt = parseFloat(t.amount) || 0;
-            const tDate = t.created_at ? new Date(t.created_at) : new Date();
+            state.transactions = tRes.data || []; state.inventory = iRes.data || []; state.tasks = taskRes.data || [];
             
-            div.innerHTML = `
-                <div class="flex items-center gap-2.5">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] ${isIncome ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
-                        <i class="${isIncome ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'}"></i>
+            if(tabId === 'chat') {
+                const {data} = await sb.from('chat_messages').select('*').eq('household_id', hid).order('created_at', {ascending: true});
+                state.chat = data || [];
+            }
+
+            const views = { dashboard: renderDashboard, finance: renderFinance, assets: renderAssets, more: renderMore, tasks: renderTasks, chat: renderChat, ai: renderAI };
+            if(views[tabId]) views[tabId]();
+        }
+
+        // --- DASHBOARD (S reálným Chart.js výpočtem) ---
+        function renderDashboard() {
+            const inc = state.transactions.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
+            const exp = state.transactions.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
+            const pendingTasks = state.tasks.filter(t => !t.is_completed).length;
+
+            $('content-area').innerHTML = `
+                <div class="fade-in space-y-6">
+                    <div class="glass p-6 rounded-2xl relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-gold/20 rounded-full blur-3xl"></div>
+                        <h2 class="text-gray-400 text-sm uppercase">Zůstatek</h2>
+                        <div class="text-4xl font-light text-white mt-1">${formatMoney(inc - exp)}</div>
+                        <div class="flex gap-4 mt-4 text-sm">
+                            <span class="text-green-400"><i class="fa-solid fa-arrow-up"></i> ${formatMoney(inc)}</span>
+                            <span class="text-red-400"><i class="fa-solid fa-arrow-down"></i> ${formatMoney(exp)}</span>
+                        </div>
                     </div>
-                    <div>
-                        <div class="font-semibold text-white">${t.category || 'Bez kategorie'}</div>
-                        <div class="text-[10px] text-slate-400">${author} • ${tDate.toLocaleDateString('cs-CZ')}</div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass p-4 rounded-xl text-center"><i class="fa-solid fa-list-check text-gold mb-1 text-lg"></i><div class="text-xs text-gray-400">Aktivní úkoly</div><div class="font-bold text-lg">${pendingTasks}</div></div>
+                        <div class="glass p-4 rounded-xl text-center cursor-pointer" onclick="navigator.clipboard.writeText('${state.household.invite_code}'); showToast('Kód zkopírován','success')"><i class="fa-solid fa-user-plus text-gold mb-1 text-lg"></i><div class="text-xs text-gray-400">Invite Kód</div><div class="font-bold text-xs mt-1">${state.household.invite_code}</div></div>
                     </div>
-                </div>
-                <div class="text-right">
-                    <div class="font-mono font-bold ${isIncome ? 'text-emerald-400' : 'text-slate-200'}">${isIncome ? '+' : '-'}${amt.toLocaleString('cs-CZ')} Kč</div>
-                    <div class="text-[9px] text-slate-500 italic truncate max-w-[100px]">${t.note || ''}</div>
+
+                    <div class="glass p-4 rounded-2xl"><h3 class="text-sm text-gray-400 mb-4">Cashflow (Posledních 6 měsíců)</h3><canvas id="dashboardChart" height="200"></canvas></div>
                 </div>
             `;
-            return div;
+            initRealChart();
         }
 
-        function runAIFinancialAdvisorEngine() {
-            let balance = 0;
-            let currentMonthExpenses = 0;
-            const now = new Date();
-
-            state.transactions.forEach(t => {
-                const amt = parseFloat(t.amount) || 0;
-                const tDate = t.created_at ? new Date(t.created_at) : new Date();
-                if (t.type === 'income') {
-                    balance += amt;
-                } else {
-                    balance -= amt;
-                    if (tDate.getMonth() === now.getMonth()) currentMonthExpenses += amt;
-                }
-            });
-
-            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            const currentDay = now.getDate();
-            const dailyBurnRate = currentDay > 1 ? currentMonthExpenses / currentDay : currentMonthExpenses;
-            const estimatedEndExpenses = dailyBurnRate * daysInMonth;
-            const projectedEndBalance = balance - (estimatedEndExpenses - currentMonthExpenses);
-
-            let message = `Vaše finanční trajektorie je stabilní. Odhadovaný konec měsíce vykazuje rezervu. `;
-            if (projectedEndBalance < 0) {
-                message = `⚠️ **Upozornění na riziko deficitu:** Aura AI predikuje záporný zůstatek ke konci měsíce o cca ${Math.abs(Math.round(projectedEndBalance)).toLocaleString()} Kč. `;
-            }
-
-            message += "Doporučené pořadí kritických plateb: " + FINANCIAL_PRIORITIES.slice(0, 3).join(" → ") + ". ";
-            message += "Doporučujeme přednostně alokovat prostředky na krytí závazku **Nájem a Hypotéky**.";
-
-            const el = document.getElementById('aiAdvisorOutput');
-            if (el) el.innerHTML = message;
-        }
-
-        function openTransactionModal(id = null) {
-            document.getElementById('txForm').reset();
-            document.getElementById('txId').value = id || '';
-            adjustTxCategories();
-            document.getElementById('transactionModal').style.display = 'flex';
-        }
-
-        function closeTransactionModal() {
-            document.getElementById('transactionModal').style.display = 'none';
-        }
-
-        function adjustTxCategories() {
-            const type = document.getElementById('txType').value;
-            const catSelect = document.getElementById('txCategory');
-            if (!catSelect) return;
-            catSelect.innerHTML = '';
-            TX_CATEGORIES[type].forEach(c => {
-                catSelect.innerHTML += `<option value="${c}">${c}</option>`;
-            });
-        }
-
-        async function saveTransaction(e) {
-            e.preventDefault();
-            const amt = document.getElementById('txAmount').value;
-            const type = document.getElementById('txType').value;
-            const cat = document.getElementById('txCategory').value;
-            const note = document.getElementById('txNote').value;
-
-            try {
-                const payload = {
-                    household_id: state.household.id,
-                    user_id: state.user.id,
-                    type,
-                    amount: parseFloat(amt) || 0,
-                    category: cat,
-                    note
-                };
-
-                const { error } = await sb.from('transactions').insert([payload]);
-                if (error) throw error;
-
-                await logActivity(state.household.id, `Přidal ${type === 'income' ? 'příjem' : 'výdaj'} ${amt} Kč v kategorii ${cat}`);
-                triggerToast("Transakce bezpečně uložena");
-                closeTransactionModal();
-                await synchronizeHouseholdOperationalData();
-            } catch (err) {
-                triggerToast(err.message, true);
-            }
-        }
-
-        function renderFinancesList() {
-            const container = document.getElementById('fullTransactionsList');
-            if (!container) return;
-            container.innerHTML = '';
-            state.transactions.forEach(t => {
-                const row = createTransactionRowHTML(t);
-                const wrapper = document.createElement('div');
-                wrapper.className = "relative group flex flex-col";
-                
-                const actionBtn = document.createElement('button');
-                actionBtn.className = "absolute right-0 top-1 text-slate-600 hover:text-rose-400 text-[10px] px-1 transition duration-200 opacity-60 hover:opacity-100";
-                actionBtn.innerHTML = `<i class="fa-regular fa-trash-can"></i>`;
-                actionBtn.onclick = async () => {
-                    if (confirm("Opravdu smazat transakci?")) {
-                        await sb.from('transactions').delete().eq('id', t.id);
-                        triggerToast("Záznam odstraněn");
-                        await synchronizeHouseholdOperationalData();
-                    }
-                };
-                
-                wrapper.appendChild(row);
-                wrapper.appendChild(actionBtn);
-                container.appendChild(wrapper);
-            });
-        }
-
-        function openInventoryModal() {
-            document.getElementById('invForm').reset();
-            document.getElementById('invPurchaseDate').valueAsDate = new Date();
-            document.getElementById('inventoryModal').style.display = 'flex';
-        }
-
-        function closeInventoryModal() {
-            document.getElementById('inventoryModal').style.display = 'none';
-        }
-
-        function triggerAutoCategorization(title) {
-            const val = title.toLowerCase();
-            const select = document.getElementById('invCategory');
-            if (!select) return;
-            if (val.includes('lednice') || val.includes('pračka') || val.includes('mikrovlnka')) {
-                select.value = 'Spotřebiče';
-            } else if (val.includes('televize') || val.includes('notebook') || val.includes('pc') || val.includes('mobil')) {
-                select.value = 'Elektronika';
-            } else if (val.includes('postel') || val.includes('skříň') || val.includes('stůl') || val.includes('židle')) {
-                select.value = 'Nábytek';
-            }
-        }
-
-        async function saveInventoryItem(e) {
-            e.preventDefault();
-            const name = document.getElementById('invName').value;
-            const category = document.getElementById('invCategory').value;
-            const price = document.getElementById('invPrice').value;
-            const store = document.getElementById('invStore').value;
-            const warrantyMonths = parseInt(document.getElementById('invWarranty').value) || 24;
-            const pDate = document.getElementById('invPurchaseDate').value;
-            const note = document.getElementById('invNote').value;
-
-            let wDate = null;
-            if (pDate) {
-                let d = new Date(pDate);
-                d.setMonth(d.getMonth() + warrantyMonths);
-                wDate = d.toISOString().split('T')[0];
-            }
-
-            try {
-                const payload = {
-                    household_id: state.household.id,
-                    user_id: state.user.id,
-                    name, category, price: price ? parseFloat(price) : 0,
-                    store, warranty_months: warrantyMonths, warranty_end: wDate,
-                    purchase_date: pDate, note
-                };
-
-                const { error } = await sb.from('inventory').insert([payload]);
-                if (error) throw error;
-
-                await logActivity(state.household.id, `Přidal do majetku položku: ${name}`);
-                triggerToast("Majetek evidován v rodinném trezoru.");
-                closeInventoryModal();
-                await synchronizeHouseholdOperationalData();
-            } catch (err) {
-                triggerToast(err.message, true);
-            }
-        }
-
-        function renderInventory() {
-            const container = document.getElementById('inventoryList');
-            if (!container) return;
-            container.innerHTML = '';
-            let totalVal = 0;
-
-            state.inventory.forEach(item => {
-                totalVal += parseFloat(item.price || 0);
-                const div = document.createElement('div');
-                div.className = "glass p-3.5 rounded-xl text-xs space-y-2 relative";
-                
-                const author = state.profilesMap[item.user_id]?.name || "Člen";
-                const wEnd = item.warranty_end ? new Date(item.warranty_end).toLocaleDateString('cs-CZ') : 'Není';
-
-                div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-[9px] uppercase font-bold text-gold-500 border border-gold-500/20 px-1.5 py-0.5 rounded bg-gold-500/5">${item.category}</span>
-                            <h4 class="text-sm font-semibold text-white mt-1.5">${item.name}</h4>
-                            <p class="text-[10px] text-slate-400 mt-0.5">${item.store || 'Nespecifikovaný obchod'} • Nákup: ${item.purchase_date ? new Date(item.purchase_date).toLocaleDateString('cs-CZ') : 'Neznámé'}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="font-mono font-bold text-white text-sm">${parseFloat(item.price || 0).toLocaleString('cs-CZ')} Kč</span>
-                            <div class="text-[10px] text-slate-400 mt-1">Záruka do: <span class="text-amber-400">${wEnd}</span></div>
-                        </div>
-                    </div>
-                    <div class="text-[10px] text-slate-400 border-t border-dark-700/50 pt-2 flex justify-between items-center">
-                        <span class="italic">${item.note || 'Bez poznámek'}</span>
-                        <span class="text-[9px] text-slate-500">Zapsal: ${author}</span>
-                    </div>
-                    <button onclick="deleteInventoryItem('${item.id}')" class="absolute top-2.5 right-2.5 text-slate-600 hover:text-rose-400 transition"><i class="fa-regular fa-trash-can"></i></button>
-                `;
-                container.appendChild(div);
-            });
-
-            document.getElementById('inventoryTotalValuation').innerText = `${totalVal.toLocaleString('cs-CZ', {minimumFractionDigits: 2})} Kč`;
-        }
-
-        async function deleteInventoryItem(id) {
-            if (confirm("Odstranit tuto položku z rodinného majetku?")) {
-                await sb.from('inventory').delete().eq('id', id);
-                triggerToast("Položka odepsána.");
-                await synchronizeHouseholdOperationalData();
-            }
-        }
-
-        async function handleReceiptUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const statusBox = document.getElementById('ocrStatusBox');
-            const progBar = document.getElementById('ocrProgressBar');
-            const progTxt = document.getElementById('ocrProgressTxt');
-
-            statusBox.classList.remove('hidden');
-            progBar.style.width = '10%';
-            progTxt.innerText = '10% (Nahrávání do storage)';
-
-            try {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Math.random()}.${fileExt}`;
-                const filePath = `${state.household.id}/${fileName}`;
-
-                const { data: sData, error: sErr } = await sb.storage.from('receipts').upload(filePath, file);
-                if (sErr) throw sErr;
-
-                const { data: urlData } = sb.storage.from('receipts').getPublicUrl(filePath);
-                const publicUrl = urlData.publicUrl;
-
-                progBar.style.width = '40%';
-                progTxt.innerText = '40% (Spouštění OCR Tesseract)';
-
-                Tesseract.recognize(file, 'ces', {
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            const p = Math.round(40 + (m.progress * 50));
-                            progBar.style.width = `${p}%`;
-                            progTxt.innerText = `${p}% (Čtení dokumentu)`;
-                        }
-                    }
-                }).then(async ({ data: { text } }) => {
-                    progBar.style.width = '95%';
-                    progTxt.innerText = '95% (Extrakce entit)';
-
-                    let detectedStore = "Neznámý obchod";
-                    if (text.toLowerCase().includes('albert')) detectedStore = 'Albert';
-                    else if (text.toLowerCase().includes('lidl')) detectedStore = 'Lidl';
-                    else if (text.toLowerCase().includes('billa')) detectedStore = 'Billa';
-                    else if (text.toLowerCase().includes('tesco')) detectedStore = 'Tesco';
-                    else if (text.toLowerCase().includes('kaufland')) detectedStore = 'Kaufland';
-                    else if (text.toLowerCase().includes('dm ')) detectedStore = 'dm drogerie';
-
-                    let detectedAmount = 0;
-                    const priceMatches = text.match(/\b\d+[\s,.]\d{2}\b/g);
-                    if (priceMatches && priceMatches.length > 0) {
-                        detectedAmount = parseFloat(priceMatches[priceMatches.length - 1].replace(',', '.').replace(/\s/g, ''));
-                    }
-
-                    const payload = {
-                        household_id: state.household.id,
-                        user_id: state.user.id,
-                        file_url: publicUrl,
-                        store: detectedStore,
-                        amount: detectedAmount || 0,
-                        receipt_date: new Date().toISOString().split('T')[0]
-                    };
-
-                    await sb.from('receipts').insert([payload]);
-                    await logActivity(state.household.id, `Naskenoval účtenku z obchodu ${detectedStore} na částku ${detectedAmount} Kč`);
-                    triggerToast("Účtenka zpracována a zanalyzována systémem Aura AI.");
-                    
-                    statusBox.classList.add('hidden');
-                    await synchronizeHouseholdOperationalData();
+        function initRealChart() {
+            if(state.chartInstance) state.chartInstance.destroy();
+            
+            // Reálná agregace dat z transakcí za posledních 6 měsíců
+            const months = []; const incomes = []; const expenses = [];
+            for(let i=5; i>=0; i--) {
+                const d = new Date(); d.setMonth(d.getMonth() - i);
+                months.push(d.toLocaleString('cs-CZ', {month: 'short'}));
+                const monthTrans = state.transactions.filter(t => {
+                    const td = new Date(t.date); return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
                 });
-
-            } catch (err) {
-                triggerToast(err.message, true);
-                statusBox.classList.add('hidden');
+                incomes.push(monthTrans.filter(t => t.type==='income').reduce((s,t)=>s+t.amount,0));
+                expenses.push(monthTrans.filter(t => t.type==='expense').reduce((s,t)=>s+t.amount,0));
             }
-        }
 
-        function renderReceipts() {
-            const container = document.getElementById('receiptsGrid');
-            if (!container) return;
-            container.innerHTML = '';
-
-            state.receipts.forEach(r => {
-                const div = document.createElement('div');
-                div.className = "glass rounded-xl overflow-hidden text-xs flex flex-col justify-between border border-dark-700/60";
-                div.innerHTML = `
-                    <div class="relative bg-dark-900 h-28 flex items-center justify-center overflow-hidden border-b border-dark-800">
-                        <img src="${r.file_url}" class="w-full h-full object-cover hover:scale-105 transition duration-300" alt="Receipt">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                        <span class="absolute bottom-2 left-2 font-bold text-white tracking-wide">${r.store || 'Účtenka'}</span>
-                    </div>
-                    <div class="p-2.5 space-y-1.5 flex-1 flex flex-col justify-between">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] text-slate-400">${r.receipt_date ? new Date(r.receipt_date).toLocaleDateString('cs-CZ') : ''}</span>
-                            <span class="font-mono font-bold text-gold-400">${parseFloat(r.amount || 0).toLocaleString('cs-CZ')} Kč</span>
-                        </div>
-                        <div class="text-[9px] text-slate-500 text-right mt-1 truncate">Nahrál: ${state.profilesMap[r.user_id]?.name || 'Člen'}</div>
-                    </div>
-                `;
-                container.appendChild(div);
+            state.chartInstance = new Chart($('dashboardChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: 'Příjmy', data: incomes, backgroundColor: '#4ade80', borderRadius: 4 },
+                        { label: 'Výdaje', data: expenses, backgroundColor: '#f87171', borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
             });
         }
 
-        function openTaskModal() {
-            const select = document.getElementById('taskAssignedTo');
-            if (!select) return;
-            select.innerHTML = '<option value="">Přiřadit všem (Společný)</option>';
-            Object.values(state.profilesMap).forEach(p => {
-                select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
-            });
-            document.getElementById('taskModal').style.display = 'flex';
+        // --- FINANCE ---
+        function renderFinance() {
+            $('content-area').innerHTML = `
+                <div class="fade-in space-y-4">
+                    <button onclick="showFinanceModal()" class="btn-gold w-full p-3 rounded-xl"><i class="fa-solid fa-plus mr-2"></i>Nová transakce</button>
+                    <div class="space-y-3">
+                        ${state.transactions.map(t => `
+                            <div class="glass p-4 rounded-xl flex justify-between items-center relative">
+                                <div><div class="font-semibold">${t.category}</div><div class="text-xs text-gray-400">${formatDate(t.date)} ${t.note ? '| '+t.note : ''}</div></div>
+                                <div class="flex items-center gap-4">
+                                    <span class="font-bold text-${t.type==='income'?'green':'red'}-400">${t.type==='income'?'+':'-'}${formatMoney(t.amount)}</span>
+                                    <i class="fa-solid fa-trash text-gray-500 hover:text-red-500" onclick="del('transactions','${t.id}','finance')"></i>
+                                </div>
+                            </div>
+                        `).join('') || '<div class="text-center text-gray-500 mt-10">Žádné transakce</div>'}
+                    </div>
+                </div>
+            `;
         }
 
-        function closeTaskModal() {
-            document.getElementById('taskModal').style.display = 'none';
+        function showFinanceModal() {
+            openModal(`
+                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Přidat transakci</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
+                <form onsubmit="saveFinance(event)">
+                    <select id="f-type" class="glass-input p-3 rounded-xl w-full mb-3"><option value="expense">Výdaj</option><option value="income">Příjem</option></select>
+                    <input type="number" id="f-amount" placeholder="Částka" class="glass-input p-3 rounded-xl w-full mb-3" required>
+                    <input type="text" id="f-category" placeholder="Kategorie (např. Potraviny)" class="glass-input p-3 rounded-xl w-full mb-3" required>
+                    <input type="date" id="f-date" class="glass-input p-3 rounded-xl w-full mb-3" required>
+                    <input type="text" id="f-note" placeholder="Poznámka" class="glass-input p-3 rounded-xl w-full mb-6">
+                    <button type="submit" class="btn-gold w-full p-4 rounded-xl">Uložit do financí</button>
+                </form>
+            `);
+            $('f-date').valueAsDate = new Date();
+        }
+
+        async function saveFinance(e) {
+            e.preventDefault();
+            await sb.from('transactions').insert([{ household_id: state.household.id, type: $('f-type').value, amount: parseFloat($('f-amount').value), category: $('f-category').value, date: $('f-date').value, note: $('f-note').value }]);
+            closeModal(); switchTab('finance');
+        }
+
+        // --- MAJETEK (INVENTORY) ---
+        function renderAssets() {
+            const total = state.inventory.reduce((s,i)=>s+i.price,0);
+            $('content-area').innerHTML = `
+                <div class="fade-in space-y-4">
+                    <div class="glass p-4 rounded-xl text-center"><div class="text-gray-400 text-sm">Celková hodnota majetku</div><div class="text-2xl font-bold text-gold">${formatMoney(total)}</div></div>
+                    <button onclick="showAssetModal()" class="border border-gold text-gold w-full p-3 rounded-xl"><i class="fa-solid fa-plus mr-2"></i>Přidat položku</button>
+                    <div class="space-y-3">
+                        ${state.inventory.map(i => {
+                            const wEnd = new Date(i.warranty_end);
+                            const isExpiring = wEnd > new Date() && wEnd < new Date(Date.now() + 30*24*60*60*1000);
+                            return `
+                            <div class="glass p-4 rounded-xl">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div><div class="font-bold text-gold">${i.name}</div><div class="text-xs text-gray-400">${i.category || 'Bez kategorie'} | ${i.store || 'Neznámý obchod'}</div></div>
+                                    <div class="text-right"><div class="font-bold">${formatMoney(i.price)}</div><i class="fa-solid fa-trash text-gray-500 mt-2 hover:text-red-500" onclick="del('inventory','${i.id}','assets')"></i></div>
+                                </div>
+                                <div class="text-xs p-2 rounded bg-dark border border-dark-border flex justify-between ${isExpiring ? 'text-orange-400 border-orange-500/50' : 'text-gray-400'}">
+                                    <span>Nákup: ${formatDate(i.purchase_date)}</span>
+                                    <span>Záruka: ${formatDate(i.warranty_end)} ${isExpiring ? '<i class="fa-solid fa-triangle-exclamation"></i>' : ''}</span>
+                                </div>
+                            </div>
+                        `}).join('') || '<div class="text-center text-gray-500 mt-10">Zatím žádný majetek</div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAssetModal() {
+            openModal(`
+                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Přidat majetek</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
+                <form onsubmit="saveAsset(event)">
+                    <input type="text" id="a-name" placeholder="Název předmětu (např. MacBook Pro)" class="glass-input p-3 rounded-xl w-full mb-3" required>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <input type="number" id="a-price" placeholder="Cena (CZK)" class="glass-input p-3 rounded-xl w-full" required>
+                        <input type="text" id="a-cat" placeholder="Kategorie" class="glass-input p-3 rounded-xl w-full">
+                    </div>
+                    <input type="text" id="a-store" placeholder="Obchod" class="glass-input p-3 rounded-xl w-full mb-3">
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div><label class="text-xs text-gray-400 ml-1">Nákup</label><input type="date" id="a-buy" class="glass-input p-3 rounded-xl w-full" required></div>
+                        <div><label class="text-xs text-gray-400 ml-1">Konec záruky</label><input type="date" id="a-war" class="glass-input p-3 rounded-xl w-full" required></div>
+                    </div>
+                    <button type="submit" class="btn-gold w-full p-4 rounded-xl mt-4">Uložit majetek</button>
+                </form>
+            `);
+        }
+
+        async function saveAsset(e) {
+            e.preventDefault();
+            await sb.from('inventory').insert([{ household_id: state.household.id, name: $('a-name').value, price: parseFloat($('a-price').value), category: $('a-cat').value, store: $('a-store').value, purchase_date: $('a-buy').value, warranty_end: $('a-war').value }]);
+            closeModal(); switchTab('assets');
+        }
+
+        // --- ÚKOLY (TASKS) ---
+        function renderTasks() {
+            $('content-area').innerHTML = `
+                <div class="fade-in space-y-4">
+                    <h2 class="text-2xl font-bold text-gold mb-4">Rodinné Úkoly</h2>
+                    <button onclick="showTaskModal()" class="btn-gold w-full p-3 rounded-xl mb-4"><i class="fa-solid fa-plus mr-2"></i>Nový úkol</button>
+                    <div class="space-y-3">
+                        ${state.tasks.map(t => `
+                            <div class="glass p-4 rounded-xl flex items-center gap-4 ${t.is_completed ? 'opacity-50' : ''}">
+                                <div class="w-6 h-6 rounded border border-gold flex items-center justify-center cursor-pointer ${t.is_completed ? 'bg-gold text-black' : ''}" onclick="toggleTask('${t.id}', ${!t.is_completed})">
+                                    ${t.is_completed ? '<i class="fa-solid fa-check text-sm"></i>' : ''}
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-bold ${t.is_completed ? 'line-through' : ''}">${t.title}</div>
+                                    <div class="text-xs text-gray-400">Do: ${formatDate(t.due_date)} | Priorita: ${t.priority}</div>
+                                </div>
+                                <i class="fa-solid fa-trash text-gray-500 hover:text-red-500" onclick="del('tasks','${t.id}','tasks')"></i>
+                            </div>
+                        `).join('') || '<div class="text-center text-gray-500 mt-10">Vše hotovo!</div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showTaskModal() {
+            openModal(`
+                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Nový úkol</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
+                <form onsubmit="saveTask(event)">
+                    <input type="text" id="t-title" placeholder="Co je potřeba udělat?" class="glass-input p-3 rounded-xl w-full mb-3" required>
+                    <input type="date" id="t-due" class="glass-input p-3 rounded-xl w-full mb-3" required>
+                    <select id="t-pri" class="glass-input p-3 rounded-xl w-full mb-4">
+                        <option value="Low">Nízká priorita</option><option value="Medium" selected>Střední priorita</option><option value="High">Vysoká priorita</option>
+                    </select>
+                    <button type="submit" class="btn-gold w-full p-4 rounded-xl">Přidat úkol</button>
+                </form>
+            `);
         }
 
         async function saveTask(e) {
             e.preventDefault();
-            const title = document.getElementById('taskTitle').value;
-            const assign = document.getElementById('taskAssignedTo').value || null;
-
-            try {
-                const payload = {
-                    household_id: state.household.id,
-                    title,
-                    assigned_to: assign,
-                    completed: false
-                };
-                await sb.from('tasks').insert([payload]);
-                triggerToast("Úkol zařazen do harmonogramu.");
-                closeTaskModal();
-                await synchronizeHouseholdOperationalData();
-            } catch (err) {
-                triggerToast(err.message, true);
-            }
+            await sb.from('tasks').insert([{ household_id: state.household.id, title: $('t-title').value, due_date: $('t-due').value, priority: $('t-pri').value }]);
+            closeModal(); switchTab('tasks');
         }
 
-        function renderTasks() {
-            const container = document.getElementById('tasksList');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (state.tasks.length === 0) {
-                container.innerHTML = `<div class="text-center py-4 text-xs text-slate-500">Žádné rodinné úkoly k řešení.</div>`;
-                return;
-            }
-
-            state.tasks.forEach(t => {
-                const div = document.createElement('div');
-                div.className = `flex justify-between items-center p-2.5 rounded-xl border text-xs transition duration-200 ${t.completed ? 'bg-dark-950/40 border-dark-800 text-slate-500' : 'glass border-dark-700/60'}`;
-                
-                const assignee = t.assigned_to ? (state.profilesMap[t.assigned_to]?.name || 'Člen') : 'Všichni';
-                
-                div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <button onclick="toggleTaskStatus('${t.id}', ${t.completed})" class="w-5 h-5 rounded-md border flex items-center justify-center transition ${t.completed ? 'border-gold-500 text-gold-500 bg-gold-500/10' : 'border-dark-600 hover:border-gold-500'}" >
-                            ${t.completed ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
-                        </button>
-                        <div>
-                            <span class="${t.completed ? 'line-through' : 'text-slate-100 font-medium'}">${t.title}</span>
-                            <span class="block text-[9px] text-slate-400 mt-0.5"><i class="fa-regular fa-user mr-1 text-[8px]"></i>Řeší: ${assignee}</span>
-                        </div>
-                    </div>
-                    <button onclick="deleteTask('${t.id}')" class="text-slate-600 hover:text-rose-400 text-xs px-2 transition"><i class="fa-regular fa-trash-can"></i></button>
-                `;
-                container.appendChild(div);
-            });
+        async function toggleTask(id, isCompleted) {
+            await sb.from('tasks').update({ is_completed: isCompleted }).eq('id', id);
+            switchTab('tasks');
         }
 
-        async function toggleTaskStatus(id, currentStatus) {
-            await sb.from('tasks').update({ completed: !currentStatus }).eq('id', id);
-            triggerToast("Stav úkolu aktualizován.");
-            await synchronizeHouseholdOperationalData();
-        }
-
-        async function deleteTask(id) {
-            await sb.from('tasks').delete().eq('id', id);
-            await synchronizeHouseholdOperationalData();
-        }
-
-        async function sendChatMessage(e) {
-            e.preventDefault();
-            const inp = document.getElementById('chatInput');
-            const msg = inp.value.trim();
-            if (!msg) return;
-
-            try {
-                await sb.from('messages').insert([{ household_id: state.household.id, user_id: state.user.id, message: msg }]);
-                inp.value = '';
-            } catch (err) { triggerToast(err.message, true); }
+        // --- VÍCE & OSTATNÍ ---
+        function renderMore() {
+            $('content-area').innerHTML = `
+                <div class="grid grid-cols-2 gap-4 fade-in">
+                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('tasks')"><i class="fa-solid fa-list-check text-2xl text-gold mb-2"></i>Úkoly</div>
+                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('chat')"><i class="fa-regular fa-comments text-2xl text-gold mb-2"></i>Chat</div>
+                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('ai')"><i class="fa-solid fa-wand-magic-sparkles text-2xl text-gold mb-2"></i>Aura AI</div>
+                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-red-500" onclick="logout()"><i class="fa-solid fa-power-off text-2xl text-red-500 mb-2"></i>Odhlásit</div>
+                </div>
+            `;
         }
 
         function renderChat() {
-            const container = document.getElementById('chatMessagesBox');
-            if (!container) return;
-            container.innerHTML = '';
-
-            state.messages.forEach(m => {
-                const isMe = m.user_id === state.user.id;
-                const author = state.profilesMap[m.user_id]?.name || "Člen";
-                const div = document.createElement('div');
-                div.className = `max-w-[75%] p-3 rounded-2xl text-xs space-y-1 ${isMe ? 'bg-gradient-to-br from-amber-600 to-gold-600 text-black self-end rounded-tr-none' : 'glass text-slate-100 self-start rounded-tl-none'}`;
-                
-                div.innerHTML = `
-                    <div class="font-bold text-[9px] uppercase tracking-wider ${isMe ? 'text-black/70' : 'text-gold-400'}">${author}</div>
-                    <div class="leading-relaxed break-words">${m.message}</div>
-                    <div class="text-[8px] text-right ${isMe ? 'text-black/50' : 'text-slate-500'} font-mono">${new Date(m.created_at).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'})}</div>
-                `;
-                container.appendChild(div);
-            });
-
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function renderNotifications() {
-            const container = document.getElementById('notificationsList');
-            if (!container) return;
-            container.innerHTML = '';
-            
-            const badge = document.getElementById('notificationBadge');
-            const unread = state.notifications.filter(n => !n.is_read);
-            if (badge) {
-                if (unread.length > 0) badge.classList.remove('hidden');
-                else badge.classList.add('hidden');
-            }
-
-            if (state.notifications.length === 0) {
-                container.innerHTML = '<div class="text-center py-6 text-xs text-slate-500">Žádná nová upozornění.</div>';
-                return;
-            }
-
-            state.notifications.forEach(n => {
-                const div = document.createElement('div');
-                div.className = `glass p-3 rounded-xl text-xs flex justify-between items-start transition ${n.is_read ? 'opacity-60' : 'border-l-2 border-l-gold-500'}`;
-                div.innerHTML = `
-                    <div>
-                        <div class="font-semibold text-white">${n.title}</div>
-                        <div class="text-[10px] text-slate-400 mt-0.5">${new Date(n.created_at).toLocaleDateString('cs-CZ')}</div>
+            $('content-area').innerHTML = `
+                <div class="fade-in flex flex-col h-full">
+                    <div id="chat-box" class="flex-1 overflow-y-auto space-y-3 mb-20 pb-4">
+                        ${state.chat.map(m => `
+                            <div class="flex ${m.user_id === state.user.id ? 'justify-end' : 'justify-start'}">
+                                <div class="max-w-[80%] p-3 text-sm rounded-2xl ${m.user_id === state.user.id ? 'bg-gold text-black rounded-tr-none' : 'glass rounded-tl-none'}">${m.message}</div>
+                            </div>
+                        `).join('') || '<div class="text-center text-gray-500 mt-10">Začněte konverzaci...</div>'}
                     </div>
-                    ${!n.is_read ? `<button onclick="markNotificationRead('${n.id}')" class="text-[10px] text-gold-400 hover:underline">Čteno</button>` : ''}
-                `;
-                container.appendChild(div);
-            });
+                    <form onsubmit="sendChat(event)" class="absolute bottom-16 left-0 w-full p-4 glass flex gap-2">
+                        <input type="text" id="c-msg" class="flex-1 glass-input p-3 rounded-full" placeholder="Napsat zprávu..." required>
+                        <button type="submit" class="w-12 h-12 rounded-full btn-gold flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            `;
+            setTimeout(() => { const c = $('chat-box'); if(c) c.scrollTop = c.scrollHeight; }, 100);
         }
 
-        async function markNotificationRead(id) {
-            await sb.from('notifications').update({ is_read: true }).eq('id', id);
-            await synchronizeHouseholdOperationalData();
+        async function sendChat(e) {
+            e.preventDefault(); const m = $('c-msg').value; $('c-msg').value = '';
+            await sb.from('chat_messages').insert([{ household_id: state.household.id, user_id: state.user.id, message: m }]);
+            switchTab('chat');
         }
 
-        async function markAllNotificationsRead() {
-            await sb.from('notifications').update({ is_read: true }).eq('user_id', state.user.id);
-            await synchronizeHouseholdOperationalData();
+        function renderAI() {
+            $('content-area').innerHTML = `<div class="glass p-6 rounded-xl text-center"><i class="fa-solid fa-wand-magic-sparkles text-4xl text-gold mb-4"></i><h2 class="text-xl font-bold">Aura AI</h2><p class="text-gray-400 text-sm mt-2">Finanční analýza napojená na OpenAI vyžaduje serverless backend pro skrytí API klíče.</p></div>`;
         }
 
-        function renderActivityLogs() {
-            const container = document.getElementById('activityLogsList');
-            if (!container) return;
-            container.innerHTML = '';
-            state.logs.forEach(l => {
-                const div = document.createElement('div');
-                div.className = "py-2 flex justify-between text-[11px] text-slate-300";
-                div.innerHTML = `<span>${l.action}</span><span class="text-slate-500 font-mono text-[10px]">${new Date(l.created_at).toLocaleDateString('cs-CZ')}</span>`;
-                container.appendChild(div);
-            });
-        }
-
-        function mockConnectBank() {
-            triggerToast("Spouštění bezpečného PSD2 brány GoCardless Connect...");
-            setTimeout(() => {
-                triggerToast("Sandbox Propojení účtu v testovacím režimu úspěšné.");
-            }, 1500);
-        }
-
-        function copyInviteCode() {
-            const field = document.getElementById('inviteCodeShareField');
-            if (!field) return;
-            field.select();
-            navigator.clipboard.writeText(field.value);
-            triggerToast("Zvací kód zkopírován do schránky.");
-        }
-
-        function renderDashboardCharts() {
-            const ctx = document.getElementById('dashboardChart');
-            if (!ctx || ctx.offsetParent === null) return;
-
-            if (state.charts.dash) state.charts.dash.destroy();
-
-            let categoriesMap = {};
-            state.transactions.filter(t => t.type === 'expense').forEach(t => {
-                const catName = t.category || 'Ostatní';
-                const amt = parseFloat(t.amount) || 0;
-                categoriesMap[catName] = (categoriesMap[catName] || 0) + amt;
-            });
-
-            const labels = Object.keys(categoriesMap).length > 0 ? Object.keys(categoriesMap) : ['Žádná data'];
-            const dataValues = Object.keys(categoriesMap).length > 0 ? Object.values(categoriesMap) : [1];
-
-            state.charts.dash = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: dataValues,
-                        backgroundColor: ['#d4af37', '#b88e28', '#e5ae58', '#1f1f1f', '#2d2d2d', '#4a4a4a', '#66491a'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
-        function renderFinancesCharts() {
-            const ctx = document.getElementById('financesCategoryChart');
-            if (!ctx || ctx.offsetParent === null) return;
-            if (state.charts.fin) state.charts.fin.destroy();
-
-            let incTotal = 0;
-            let expTotal = 0;
-            state.transactions.forEach(t => {
-                const amt = parseFloat(t.amount) || 0;
-                if (t.type === 'income') incTotal += amt;
-                else expTotal += amt;
-            });
-
-            state.charts.fin = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Příjmy', 'Výdaje'],
-                    datasets: [{
-                        label: 'Objem cashflow (Kč)',
-                        data: [incTotal, expTotal],
-                        backgroundColor: ['rgba(16, 185, 129, 0.2)', 'rgba(214, 175, 55, 0.2)'],
-                        borderColor: ['#10b981', '#d4af37'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        function setupOfflineSupport() {
-            window.addEventListener('online', () => triggerToast("Rezidence Aura opět online."));
-            window.addEventListener('offline', () => triggerToast("Provoz v offline režimu. Změny budou uloženy lokálně.", true));
-        }
+        async function del(table, id, tab) { if(confirm('Opravdu smazat?')) { await sb.from(table).delete().eq('id', id); switchTab(tab); } }
     </script>
 </body>
 </html>
