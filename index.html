@@ -197,7 +197,7 @@
                 </div>
 
                 <div class="glass p-5 rounded-2xl space-y-4">
-                    <h3 class="text-xs uppercase font-bold tracking-widest text-gold-400">Zdat zvací kód</h3>
+                    <h3 class="text-xs uppercase font-bold tracking-widest text-gold-400">Zadat zvací kód</h3>
                     <div class="flex gap-2">
                         <input type="text" id="inviteCodeInput" placeholder="AURA-XXXX-XXXX" class="flex-1 bg-dark-900 border border-dark-700 rounded-xl px-4 py-2.5 text-sm uppercase tracking-wider focus:outline-none focus:border-gold-500">
                         <button onclick="joinHouseholdByCode()" class="bg-dark-900 border border-gold-500/40 text-gold-400 px-4 rounded-xl text-sm font-bold hover:bg-gold-500 hover:text-black transition"><i class="fa-solid fa-right-to-bracket"></i></button>
@@ -747,11 +747,13 @@
             if (!state.household) return;
             const hid = state.household.id;
 
-            const { data: membersList } = await sb.from('household_members').select('user_id').eq('household_id', hid);
+            const { data: membersList, error: memRowsErr } = await sb.from('household_members').select('user_id').eq('household_id', hid);
+            if (memRowsErr) console.error("Chyba při načítání členů:", memRowsErr);
             state.members = membersList ? membersList.map(m => m.user_id) : [];
             
             if (state.members.length > 0) {
-                const { data: profs } = await sb.from('profiles').select('*').in('id', state.members);
+                const { data: profs, error: profsErr } = await sb.from('profiles').select('*').in('id', state.members);
+                if (profsErr) console.error("Chyba při načítání detailů profilů:", profsErr);
                 profs?.forEach(p => { state.profilesMap[p.id] = p; });
             }
 
@@ -765,8 +767,6 @@
                 sb.from('activity_logs').select('*').eq('household_id', hid).order('created_at', { ascending: false }).limit(20)
             ]);
 
-            if (txs.error) console.error("Chyba transakcí:", txs.error);
-
             state.transactions = txs.data || [];
             state.inventory = inv.data || [];
             state.receipts = recs.data || [];
@@ -776,6 +776,11 @@
             state.logs = logs.data || [];
 
             renderAllViews();
+
+            const membersElement = document.getElementById('statMembers');
+            if (membersElement) {
+                membersElement.innerText = state.members.length;
+            }
         }
 
         async function setupRealtimeSubscriptions() {
@@ -861,6 +866,8 @@
 
             state.transactions.forEach(t => {
                 const amt = parseFloat(t.amount) || 0;
+                
+                // OPRAVENO: Bezpečnější parsování data. Pokud created_at chybí (čerstvě přidaný záznam), použijeme dnešek.
                 const tDate = t.created_at ? new Date(t.created_at) : new Date();
                 const isCurrentMonth = tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
 
@@ -877,7 +884,6 @@
             document.getElementById('dashIncome').innerText = `${incomeMonth.toLocaleString('cs-CZ')} Kč`;
             document.getElementById('dashExpense').innerText = `${expenseMonth.toLocaleString('cs-CZ')} Kč`;
 
-            document.getElementById('statMembers').innerText = state.members.length;
             document.getElementById('statInventory').innerText = `${state.inventory.length} ks`;
             document.getElementById('statReceipts').innerText = `${state.receipts.length} ks`;
             document.getElementById('statTasks').innerText = `${state.tasks.filter(t => !t.completed).length} aktivních`;
@@ -980,7 +986,7 @@
             const amt = document.getElementById('txAmount').value;
             const type = document.getElementById('txType').value;
             const cat = document.getElementById('txCategory').value;
-            const note = document.getElementById('txNote').value; // OPRAVENO: Přejmenováno z txNote na note
+            const note = document.getElementById('txNote').value;
 
             try {
                 const payload = {
