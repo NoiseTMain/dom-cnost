@@ -524,7 +524,8 @@
             logs: [],
             activeTab: 'login',
             currentSection: 'dashboardView',
-            charts: {}
+            charts: {},
+            realtimeChannel: null // Ukládáme referenci kanálu pro pozdější reset
         };
 
         const TX_CATEGORIES = {
@@ -631,6 +632,10 @@
 
         async function logout() {
             showLoading(true);
+            if (state.realtimeChannel) {
+                await sb.removeChannel(state.realtimeChannel);
+                state.realtimeChannel = null;
+            }
             await sb.auth.signOut();
             state.household = null;
         }
@@ -681,7 +686,7 @@
                         document.getElementById('householdSetupView').classList.add('hidden');
 
                         await synchronizeHouseholdOperationalData();
-                        setupRealtimeSubscriptions();
+                        await setupRealtimeSubscriptions();
                         toggleSection('dashboardView');
                     } else {
                         showHouseholdSetup();
@@ -786,12 +791,18 @@
             renderAllViews();
         }
 
-        function setupRealtimeSubscriptions() {
-            sb.channel('realtime-household-sync')
+        async function setupRealtimeSubscriptions() {
+            // Pokud už nějaký kanál existuje, odpojíme ho, abychom předešli chybě "subscribe()"
+            if (state.realtimeChannel) {
+                await sb.removeChannel(state.realtimeChannel);
+            }
+
+            state.realtimeChannel = sb.channel('realtime-household-sync')
                 .on('postgres_changes', { event: '*', schema: 'public', filter: `household_id=eq.${state.household.id}` }, () => {
                     synchronizeHouseholdOperationalData();
-                })
-                .subscribe();
+                });
+
+            state.realtimeChannel.subscribe();
         }
 
         async function logActivity(householdId, action) {
@@ -1001,7 +1012,7 @@
                 actionBtn.onclick = async () => {
                     if (confirm("Opravdu smazat transakci?")) {
                         await sb.from('transactions').delete().eq('id', t.id);
-                        triggerToast("Záznam odstraněn");
+                        triggerToast("Záznam odstrany");
                         await synchronizeHouseholdOperationalData();
                     }
                 };
@@ -1224,7 +1235,6 @@
             const select = document.getElementById('taskAssignedTo');
             select.innerHTML = '<option value="">Přiřadit všem (Společný)</option>';
             Object.values(state.profilesMap).forEach(p => {
-                // OPRAVENO: Řetězec korektně začíná i končí zpětným apostrofem
                 select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
             });
             document.getElementById('taskModal').style.display = 'flex';
