@@ -1,886 +1,1014 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spital – Luxury Household Fintech</title>
-    
-    <link id="manifest-link" rel="manifest" href="">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { gold: { DEFAULT: '#D4AF37', dark: '#AA8C2C' }, dark: { DEFAULT: '#0a0a0a', card: '#161616', border: '#2a2a2a' } }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0A0A0A">
+<title>Atollo Driver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{
+  --bg:#0A0A0A; --surface:#141414; --surface2:#1D1D1D; --border:#272727;
+  --orange:#FF6A00; --orange-soft:#FF8A3D; --text:#F5F5F5; --muted:#96968F;
+}
+*{ -webkit-tap-highlight-color: transparent; box-sizing:border-box; }
+html,body{ background:var(--bg); overscroll-behavior:none; height:100%; }
+body{ font-family:'Inter',system-ui,-apple-system,sans-serif; color:var(--text); }
+.font-display{ font-family:'Manrope',system-ui,sans-serif; }
+.safe-top{ padding-top:max(env(safe-area-inset-top),12px); }
+.safe-bottom{ padding-bottom:env(safe-area-inset-bottom); }
+::-webkit-scrollbar{ display:none; }
+*{ scrollbar-width:none; }
 
-    <style>
-        body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(22, 22, 22, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.15); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
-        .glass-input { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.3); color: white; transition: all 0.3s ease; }
-        .glass-input:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
-        .btn-gold { background: linear-gradient(135deg, #D4AF37, #AA8C2C); color: black; font-weight: bold; transition: transform 0.2s, opacity 0.2s; }
-        .btn-gold:active { transform: scale(0.96); opacity: 0.8; }
-        ::-webkit-scrollbar { display: none; }
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #D4AF37; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        #bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
-    </style>
+.card{ background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:14px; }
+.chip{ border:1px solid var(--border); border-radius:999px; padding:6px 14px; font-size:13px; font-weight:600; color:var(--muted); white-space:nowrap; }
+.chip.active{ background:var(--orange); border-color:var(--orange); color:#0A0A0A; }
+.btn-primary{ background:var(--orange); color:#0A0A0A; font-weight:700; border-radius:14px; padding:12px; font-size:14px; }
+.btn-primary:active{ transform:scale(0.97); }
+.btn-secondary{ background:var(--surface2); border:1px solid var(--border); color:var(--text); font-weight:600; border-radius:14px; padding:12px; font-size:14px; }
+.btn-secondary:active{ transform:scale(0.97); }
+.btn-icon{ background:var(--surface2); border:1px solid var(--border); border-radius:14px; width:44px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.btn-icon:active{ transform:scale(0.94); }
+.route-badge{ min-width:26px; height:26px; border-radius:8px; background:var(--orange); color:#0A0A0A; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; font-family:'Manrope',sans-serif; flex-shrink:0; }
+.timer-badge{ font-size:12px; font-weight:700; padding:4px 9px; border-radius:999px; border:1px solid; white-space:nowrap; }
+input,select,textarea{ background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:11px 13px; font-size:15px; width:100%; }
+input::placeholder,textarea::placeholder{ color:var(--muted); }
+input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--orange); }
+label.field-label{ font-size:12px; font-weight:600; color:var(--muted); margin-bottom:5px; display:block; }
+
+.gps-dot{ width:8px; height:8px; border-radius:50%; background:#22C55E; animation:gpsPulse 2s infinite; }
+.gps-dot.err{ background:#EF4444; animation:none; }
+.gps-dot.wait{ background:#EAB308; animation:gpsPulse 1s infinite; }
+@keyframes gpsPulse{ 0%{box-shadow:0 0 0 0 rgba(34,197,94,.55);} 70%{box-shadow:0 0 0 7px rgba(34,197,94,0);} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0);} }
+
+.toast{ animation:toastIn .25s ease-out; }
+@keyframes toastIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
+.modal-backdrop{ animation:fadeIn .2s ease-out; }
+@keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+.modal-sheet{ animation:sheetUp .28s cubic-bezier(.32,.72,0,1); }
+@keyframes sheetUp{ from{transform:translateY(100%);} to{transform:translateY(0);} }
+
+.order-pin{ width:30px; height:30px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.6); border:2px solid #0A0A0A; }
+.order-pin span{ transform:rotate(45deg); font-weight:800; font-size:12px; color:#0A0A0A; font-family:'Manrope',sans-serif; }
+.driver-pin{ width:18px; height:18px; border-radius:50%; background:#3B82F6; border:3px solid white; box-shadow:0 0 0 5px rgba(59,130,246,.35); }
+.leaflet-popup-content-wrapper{ background:var(--surface); color:var(--text); border-radius:14px; }
+.leaflet-popup-tip{ background:var(--surface); }
+.leaflet-popup-content{ margin:12px 14px; }
+.leaflet-container{ background:#111; }
+
+.view{ display:block; }
+.view.hidden{ display:none; }
+.nav-item.active{ color:var(--orange); }
+.nav-item{ color:var(--muted); }
+
+.spinner{ width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,.25); border-top-color:var(--orange); animation:spin .7s linear infinite; }
+@keyframes spin{ to{transform:rotate(360deg);} }
+</style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col relative">
+<body class="bg-[#0A0A0A]">
 
-    <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-md flex flex-col gap-2 pointer-events-none"></div>
+<div id="app" class="min-h-screen flex flex-col">
 
-    <div id="app" class="w-full h-full flex flex-col relative">
-        <div id="auth-view" class="absolute inset-0 z-50 bg-black flex flex-col justify-center items-center p-6 hidden">
-            <div class="text-center mb-10 fade-in"><i class="fa-solid fa-gem text-gold text-5xl mb-4"></i><h1 class="text-3xl font-light tracking-widest uppercase">Spital</h1></div>
-            <form id="auth-form" class="glass w-full max-w-sm p-6 rounded-2xl flex flex-col gap-4 fade-in">
-                <h2 id="auth-title" class="text-xl font-semibold mb-2">Přihlášení</h2>
-                <input type="email" id="auth-email" placeholder="E-mail" class="glass-input p-3 rounded-xl w-full" required>
-                <input type="password" id="auth-password" placeholder="Heslo" class="glass-input p-3 rounded-xl w-full" required>
-                <button type="submit" class="btn-gold p-3 rounded-xl mt-2 flex justify-center items-center">
-                    <span id="auth-btn-text">Vstoupit</span><div id="auth-loader" class="loader ml-2 hidden"></div>
-                </button>
-                <div class="flex justify-between text-sm text-gray-400 mt-2">
-                    <span id="toggle-auth" class="cursor-pointer hover:text-gold">Vytvořit účet</span>
-                </div>
-            </form>
-        </div>
+  <!-- TOPBAR -->
+  <header class="safe-top sticky top-0 z-30 bg-[#0A0A0A]/95 backdrop-blur border-b border-[#1c1c1c] px-4 pb-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-baseline gap-1.5">
+        <span class="font-display font-800 text-xl tracking-tight" style="font-weight:800;">ATOLLO</span>
+        <span class="text-[13px] text-[var(--muted)] font-medium">Driver</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="gps-pill" data-action="gps-info" class="flex items-center gap-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-full px-2.5 py-1.5">
+          <span id="gps-dot" class="gps-dot wait"></span>
+          <span id="gps-label" class="text-[11px] font-semibold text-[var(--muted)]">Hledám GPS…</span>
+        </button>
+        <button data-action="open-settings" class="btn-icon" style="width:38px;height:38px;border-radius:12px;">⚙️</button>
+      </div>
+    </div>
+  </header>
 
-        <div id="household-setup-view" class="absolute inset-0 z-40 bg-black flex flex-col justify-center items-center p-6 hidden">
-            <div class="glass w-full max-w-sm p-6 rounded-2xl flex flex-col gap-6 fade-in">
-                <h2 class="text-2xl font-semibold text-center text-gold">Domácnost</h2>
-                <div class="flex flex-col gap-3"><input type="text" id="invite-code" placeholder="AURA-XXXX-XXXX" class="glass-input p-3 rounded-xl text-center uppercase"><button onclick="joinHousehold()" class="border border-gold text-gold p-3 rounded-xl hover:bg-gold hover:text-black">Připojit přes kód</button></div>
-                <div class="text-center text-gray-500 text-sm border-t border-dark-border pt-4">NEBO</div>
-                <div class="flex flex-col gap-3"><input type="text" id="new-household-name" placeholder="Název domácnosti" class="glass-input p-3 rounded-xl"><button onclick="createHousehold()" class="btn-gold p-3 rounded-xl">Založit domácnost</button></div>
-                <button onclick="logout()" class="text-gray-500 text-sm mt-2">Odhlásit se</button>
-            </div>
-        </div>
+  <!-- MAIN -->
+  <main id="main-content" class="flex-1 relative">
 
-        <div id="main-view" class="flex-1 flex flex-col overflow-hidden hidden bg-gradient-to-b from-dark to-black">
-            <header class="glass px-6 py-4 flex justify-between items-center z-10">
-                <div class="flex items-center gap-2"><i class="fa-solid fa-gem text-gold"></i><h1 class="font-light tracking-wider" id="header-household-name">Spital</h1></div>
-                <div class="flex gap-4 text-gray-400"><i class="fa-solid fa-gear cursor-pointer hover:text-gold"></i></div>
-            </header>
+    <div id="view-orders" class="view px-4 pt-4 pb-32"></div>
 
-            <main id="content-area" class="flex-1 overflow-y-auto p-4 pb-24 relative"></main>
-
-            <nav id="bottom-nav" class="glass absolute bottom-0 w-full flex justify-around p-3 z-20 text-gray-500 text-xs">
-                <button onclick="switchTab('dashboard')" class="nav-btn w-16 text-gold" data-target="dashboard"><i class="fa-solid fa-chart-pie text-lg block mb-1"></i>Přehled</button>
-                <button onclick="switchTab('finance')" class="nav-btn w-16 hover:text-white" data-target="finance"><i class="fa-solid fa-wallet text-lg block mb-1"></i>Finance</button>
-                <button onclick="switchTab('assets')" class="nav-btn w-16 hover:text-white" data-target="assets"><i class="fa-solid fa-box-open text-lg block mb-1"></i>Majetek</button>
-                <button onclick="switchTab('more')" class="nav-btn w-16 hover:text-white" data-target="more"><i class="fa-solid fa-bars text-lg block mb-1"></i>Více</button>
-            </nav>
-        </div>
+    <div id="view-map" class="view hidden" style="height:calc(100vh - 132px);">
+      <div id="leaflet-map" class="w-full h-full"></div>
+      <div id="map-banner" class="absolute left-3 right-3 bottom-3 z-[500]"></div>
     </div>
 
-    <div id="modal-container" class="fixed inset-0 bg-black/80 z-[60] hidden flex-col justify-end">
-        <div id="modal-content" class="glass w-full rounded-t-3xl p-6 fade-in max-h-[85vh] overflow-y-auto"></div>
-    </div>
+    <div id="view-history" class="view hidden px-4 pt-4 pb-32"></div>
 
-    <script>
-        // PWA Setup
-        const manifestData = { name: "Spital", short_name: "Spital", start_url: ".", display: "standalone", background_color: "#000", theme_color: "#D4AF37" };
-        document.getElementById('manifest-link').href = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], { type: 'application/json' }));
+  </main>
 
-        // SUPABASE INIT - ZDE VLOŽ SVŮJ KLÍČ
-        const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
-        const SUPABASE_ANON_KEY = "<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spital – Luxury Household Fintech</title>
-    
-    <link id="manifest-link" rel="manifest" href="">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { gold: { DEFAULT: '#D4AF37', dark: '#AA8C2C' }, dark: { DEFAULT: '#0a0a0a', card: '#161616', border: '#2a2a2a' } }
-                }
-            }
+  <!-- FAB -->
+  <button id="fab-add" data-action="open-add" class="fixed right-4 z-40 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-[0_8px_24px_rgba(255,106,0,0.45)]" style="background:var(--orange); color:#0A0A0A; bottom:calc(84px + env(safe-area-inset-bottom));">+</button>
+
+  <!-- BOTTOM NAV -->
+  <nav class="safe-bottom fixed bottom-0 inset-x-0 z-30 bg-[#0A0A0A]/95 backdrop-blur border-t border-[#1c1c1c] flex">
+    <button data-action="switch-view" data-view="orders" class="nav-item active flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-semibold" data-nav="orders">
+      <span class="text-xl leading-none">📋</span>Objednávky
+    </button>
+    <button data-action="switch-view" data-view="map" class="nav-item flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-semibold" data-nav="map">
+      <span class="text-xl leading-none">🗺️</span>Mapa
+    </button>
+    <button data-action="switch-view" data-view="history" class="nav-item flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-semibold" data-nav="history">
+      <span class="text-xl leading-none">📊</span>Historie
+    </button>
+  </nav>
+
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root" class="fixed inset-x-0 z-[999] flex flex-col items-center gap-2 pointer-events-none px-4" style="top:max(env(safe-area-inset-top),12px);"></div>
+
+<script>
+/* ============================== STATE ============================== */
+const state = {
+  driver: { lat:null, lng:null, accuracy:null, watchId:null, status:'wait' },
+  orders: [],
+  history: [],
+  route: [],
+  settings: { traffic:'medium', soundEnabled:true },
+  ui: { view:'orders', filter:'all', sort:'route', lastRecompute:0, recomputing:false },
+};
+const OCR_PROMPT = `Jsi asistent řidiče rozvozu jídla. Na fotografii je účtenka nebo detail objednávky. Vytáhni z ní údaje a odpověz POUZE čistým JSON objektem, bez úvodního textu, bez vysvětlení a bez markdown bloků (bez tri backtick), přesně v tomto tvaru:
+{"customerName":"","phone":"","address":"","orderNumber":"","note":"","price":"","orderTime":""}
+Pravidla:
+- price vyplň jen jako číslo (bez "Kč" a mezer), např. "249"
+- orderTime vyplň jako čas HH:MM pokud je na účtence uveden, jinak prázdný řetězec
+- phone jen číslice a případně "+420", bez mezer pokud to jde
+- pokud nějaký údaj nenajdeš, vlož prázdný řetězec ""`;
+
+/* ============================== UTILS ============================== */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function haversine(lat1,lng1,lat2,lng2){
+  if([lat1,lng1,lat2,lng2].some(v=>v==null||isNaN(v))) return 0;
+  const R=6371, toRad=d=>d*Math.PI/180;
+  const dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1);
+  const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function trafficLabel(t){ return {light:'plynulý provoz', medium:'středně hustý provoz', heavy:'hustý provoz'}[t] || 'středně hustý provoz'; }
+function fmtMoney(v){ const n=parseFloat(v); return isNaN(n) ? (v||'0') : n.toLocaleString('cs-CZ'); }
+function fmtTime(ts){ return new Date(ts).toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}); }
+function fmtDate(ts){ return new Date(ts).toLocaleDateString('cs-CZ',{day:'numeric',month:'numeric'}); }
+function todayKey(ts){ const d=new Date(ts); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent); }
+function toast(msg, kind='info', ms=4000){
+  const root=document.getElementById('toast-root');
+  const colors={info:'border-[var(--border)] bg-[var(--surface)]', warn:'border-yellow-500/50 bg-[#241d09]', danger:'border-red-500/60 bg-[#2a0e0e]'};
+  const el=document.createElement('div');
+  el.className=`toast pointer-events-auto w-full max-w-sm border ${colors[kind]||colors.info} rounded-2xl px-4 py-3 text-sm font-medium shadow-lg`;
+  el.textContent=msg;
+  root.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, ms);
+}
+function beep(){
+  if(!state.settings.soundEnabled) return;
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='square'; o.frequency.value=880;
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.16, ctx.currentTime);
+    o.start();
+    o.frequency.setValueAtTime(660, ctx.currentTime+0.16);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4);
+    o.stop(ctx.currentTime+0.42);
+  }catch(e){}
+}
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result.split(',')[1]);
+    r.onerror=()=>reject(new Error('Nepodařilo se načíst obrázek'));
+    r.readAsDataURL(file);
+  });
+}
+
+/* ============================== STORAGE ============================== */
+async function loadState(){
+  try{ const r=await window.storage.get('orders'); state.orders = r ? JSON.parse(r.value) : []; }catch(e){ state.orders=[]; }
+  try{ const r=await window.storage.get('history'); state.history = r ? JSON.parse(r.value) : []; }catch(e){ state.history=[]; }
+  try{ const r=await window.storage.get('settings'); state.settings = r ? JSON.parse(r.value) : state.settings; }catch(e){}
+}
+async function persistOrders(){ try{ await window.storage.set('orders', JSON.stringify(state.orders)); }catch(e){ console.error('save orders failed',e); } }
+async function persistHistory(){ try{ await window.storage.set('history', JSON.stringify(state.history)); }catch(e){ console.error('save history failed',e); } }
+async function persistSettings(){ try{ await window.storage.set('settings', JSON.stringify(state.settings)); }catch(e){ console.error('save settings failed',e); } }
+
+/* ============================== GEOLOCATION ============================== */
+function setGpsStatus(status, label){
+  state.driver.status=status;
+  const dot=document.getElementById('gps-dot'), lbl=document.getElementById('gps-label');
+  if(!dot) return;
+  dot.className='gps-dot '+(status==='ok'?'':status==='err'?'err':'wait');
+  lbl.textContent = label || (status==='ok' ? 'GPS aktivní' : status==='err' ? 'GPS nedostupné' : 'Hledám GPS…');
+}
+function startGPS(){
+  if(!navigator.geolocation){ setGpsStatus('err','GPS nepodporováno'); return; }
+  if(state.driver.watchId!=null){ toast('📍 GPS už sleduje polohu'); return; }
+  navigator.geolocation.getCurrentPosition(onPos, onGeoErr, {enableHighAccuracy:true, timeout:12000});
+  state.driver.watchId = navigator.geolocation.watchPosition(onPos, onGeoErr, {enableHighAccuracy:true, maximumAge:4000, timeout:15000});
+}
+function onPos(pos){
+  const prevLat=state.driver.lat, prevLng=state.driver.lng;
+  state.driver.lat=pos.coords.latitude; state.driver.lng=pos.coords.longitude; state.driver.accuracy=pos.coords.accuracy;
+  setGpsStatus('ok');
+  updateDriverMarker();
+  const moved = prevLat!=null ? haversine(prevLat,prevLng,state.driver.lat,state.driver.lng)*1000 : Infinity;
+  if(moved>150) maybeRecompute();
+}
+function onGeoErr(err){
+  setGpsStatus('err');
+}
+async function maybeRecompute(force){
+  if(state.ui.recomputing) return;
+  const now=Date.now();
+  if(!force && now-state.ui.lastRecompute < 90000) return;
+  state.ui.lastRecompute=now; state.ui.recomputing=true;
+  try{ await computeRoute(); }
+  catch(e){ console.error('route recompute failed', e); }
+  finally{ state.ui.recomputing=false; }
+  renderCurrentView();
+  updateOrderMarkers(); updateRouteLine();
+}
+
+/* ============================== GEOCODING (Nominatim) ============================== */
+async function geocodeAddress(address){
+  try{
+    const bias = state.driver.lat!=null ? `&viewbox=${state.driver.lng-0.3},${state.driver.lat+0.3},${state.driver.lng+0.3},${state.driver.lat-0.3}&bounded=0` : '';
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=cz${bias}&q=${encodeURIComponent(address)}`;
+    const res = await fetch(url, { headers:{ 'Accept-Language':'cs' } });
+    if(!res.ok) return null;
+    const data = await res.json();
+    if(!data.length) return null;
+    return { lat:parseFloat(data[0].lat), lng:parseFloat(data[0].lon), display:data[0].display_name };
+  }catch(e){ return null; }
+}
+
+/* ============================== ROUTING (OSRM) ============================== */
+async function fetchOSRMMatrix(points){
+  try{
+    if(points.length<2) return null;
+    const coords = points.map(p=>`${p.lng},${p.lat}`).join(';');
+    const res = await fetch(`https://router.project-osrm.org/table/v1/driving/${coords}?annotations=distance,duration`);
+    if(!res.ok) return null;
+    const data = await res.json();
+    if(data.code!=='Ok') return null;
+    return { durations:data.durations, distances:data.distances };
+  }catch(e){ return null; }
+}
+async function fetchOSRMRoute(orderedPoints){
+  try{
+    if(orderedPoints.length<2) return null;
+    const coords = orderedPoints.map(p=>`${p.lng},${p.lat}`).join(';');
+    const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`);
+    if(!res.ok) return null;
+    const data = await res.json();
+    if(data.code!=='Ok') return null;
+    return data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+  }catch(e){ return null; }
+}
+function improve2opt(route, fixedLen, durMin){
+  let improved=true, guard=0;
+  while(improved && guard<300){
+    improved=false; guard++;
+    for(let i=fixedLen;i<route.length-1;i++){
+      for(let j=i+1;j<route.length;j++){
+        const a=route[i-1], b=route[i], c=route[j], d = route[j+1] ?? null;
+        const before = durMin(a,b) + (d!==null?durMin(c,d):0);
+        const after = durMin(a,c) + (d!==null?durMin(b,d):0);
+        if(after < before - 0.01){
+          const seg = route.slice(i,j+1).reverse();
+          route.splice(i, seg.length, ...seg);
+          improved=true;
         }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+      }
+    }
+  }
+}
+async function computeRoute(){
+  const pending = state.orders.filter(o=>o.status!=='delivered' && o.lat!=null && o.lng!=null);
+  if(pending.length===0){ state.route=[]; return; }
+  const driverPoint = state.driver.lat!=null ? {lat:state.driver.lat,lng:state.driver.lng} : {lat:pending[0].lat,lng:pending[0].lng};
+  const points = [driverPoint, ...pending.map(o=>({lat:o.lat,lng:o.lng}))];
+  const matrix = await fetchOSRMMatrix(points);
+  const trafficMult = {light:1.0, medium:1.3, heavy:1.65}[state.settings.traffic] || 1.3;
+  const speedFallback = {light:32, medium:22, heavy:14}[state.settings.traffic] || 22;
 
-    <style>
-        body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(22, 22, 22, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.15); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
-        .glass-input { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.3); color: white; transition: all 0.3s ease; }
-        .glass-input:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
-        .btn-gold { background: linear-gradient(135deg, #D4AF37, #AA8C2C); color: black; font-weight: bold; transition: transform 0.2s, opacity 0.2s; }
-        .btn-gold:active { transform: scale(0.96); opacity: 0.8; }
-        ::-webkit-scrollbar { display: none; }
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #D4AF37; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        #bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
-    </style>
-</head>
-<body class="h-screen w-screen overflow-hidden flex flex-col relative">
+  function durMin(i,j){
+    if(matrix && matrix.durations[i] && matrix.durations[i][j]!=null) return (matrix.durations[i][j]/60) * trafficMult;
+    const a=points[i], b=points[j];
+    const km = haversine(a.lat,a.lng,b.lat,b.lng);
+    return (km/speedFallback)*60;
+  }
+  function distKm(i,j){
+    if(matrix && matrix.distances[i] && matrix.distances[i][j]!=null) return matrix.distances[i][j]/1000;
+    const a=points[i], b=points[j];
+    return haversine(a.lat,a.lng,b.lat,b.lng);
+  }
 
-    <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-md flex flex-col gap-2 pointer-events-none"></div>
+  const now=Date.now();
+  const urgency = pending.map(o=>{
+    const elapsedMin=(now-o.createdAt)/60000;
+    if(elapsedMin>=40) return 3;
+    if(elapsedMin>=25) return 2;
+    return 1;
+  });
 
-    <div id="app" class="w-full h-full flex flex-col relative">
-        <div id="auth-view" class="absolute inset-0 z-50 bg-black flex flex-col justify-center items-center p-6 hidden">
-            <div class="text-center mb-10 fade-in"><i class="fa-solid fa-gem text-gold text-5xl mb-4"></i><h1 class="text-3xl font-light tracking-widest uppercase">Spital</h1></div>
-            <form id="auth-form" class="glass w-full max-w-sm p-6 rounded-2xl flex flex-col gap-4 fade-in">
-                <h2 id="auth-title" class="text-xl font-semibold mb-2">Přihlášení</h2>
-                <input type="email" id="auth-email" placeholder="E-mail" class="glass-input p-3 rounded-xl w-full" required>
-                <input type="password" id="auth-password" placeholder="Heslo" class="glass-input p-3 rounded-xl w-full" required>
-                <button type="submit" class="btn-gold p-3 rounded-xl mt-2 flex justify-center items-center">
-                    <span id="auth-btn-text">Vstoupit</span><div id="auth-loader" class="loader ml-2 hidden"></div>
-                </button>
-                <div class="flex justify-between text-sm text-gray-400 mt-2">
-                    <span id="toggle-auth" class="cursor-pointer hover:text-gold">Vytvořit účet</span>
-                </div>
-            </form>
+  let unrouted = pending.map((_,idx)=>idx+1);
+  let route=[0];
+
+  const critical = unrouted.filter(pi=>urgency[pi-1]===3);
+  function nearestNeighborOrder(list, startIdx){
+    const ordered=[]; let cur=startIdx; const remaining=[...list];
+    while(remaining.length){
+      let bestRi=0, bestCost=Infinity;
+      remaining.forEach((pi,ri)=>{ const c=durMin(cur,pi); if(c<bestCost){bestCost=c; bestRi=ri;} });
+      const chosen=remaining.splice(bestRi,1)[0];
+      ordered.push(chosen); cur=chosen;
+    }
+    return ordered;
+  }
+  const criticalOrdered = nearestNeighborOrder(critical, 0);
+  route = route.concat(criticalOrdered);
+
+  let remaining = unrouted.filter(pi=>urgency[pi-1]!==3);
+  while(remaining.length){
+    let best={cost:Infinity,pos:1,point:remaining[0]};
+    remaining.forEach(pi=>{
+      const w = urgency[pi-1]===2 ? 0.85 : 1.0;
+      for(let pos=1; pos<=route.length; pos++){
+        const prev=route[pos-1], next = route[pos] ?? null;
+        let insCost = next===null ? durMin(prev,pi) : (durMin(prev,pi)+durMin(pi,next)-durMin(prev,next));
+        insCost *= w;
+        if(insCost<best.cost){ best={cost:insCost,pos,point:pi}; }
+      }
+    });
+    route.splice(best.pos,0,best.point);
+    remaining = remaining.filter(pi=>pi!==best.point);
+  }
+
+  const fixedLen = 1+criticalOrdered.length;
+  improve2opt(route, fixedLen, durMin);
+
+  let t=now, cur=0;
+  const routeInfo=[];
+  for(let k=1;k<route.length;k++){
+    const pi=route[k];
+    const travel=durMin(cur,pi);
+    t += travel*60000;
+    const order=pending[pi-1];
+    routeInfo.push({ orderId:order.id, position:k, etaMin:Math.round((t-now)/60000), legDistanceKm: distKm(cur,pi) });
+    cur=pi;
+  }
+  state.route = routeInfo;
+  state.orders.forEach(o=>{
+    const info = routeInfo.find(r=>r.orderId===o.id);
+    o.routePosition = info ? info.position : null;
+    o.etaMin = info ? info.etaMin : null;
+  });
+
+  const orderedLatLng = [points[0], ...route.slice(1).map(pi=>points[pi])];
+  state.route.geometry = await fetchOSRMRoute(orderedLatLng);
+}
+
+/* ============================== AI RECOMMENDATION ============================== */
+function generateRecommendation(){
+  const pending = state.orders.filter(o=>o.status!=='delivered');
+  if(!pending.length) return null;
+  const sorted = pending.filter(o=>o.routePosition).sort((a,b)=>a.routePosition-b.routePosition);
+  if(!sorted.length) return { text:'Přidej adresu k objednávkám pro výpočet trasy.', reasons:[] };
+  const now=Date.now();
+  const first = sorted.slice(0,3).map(o=>`${o.routePosition}. ${o.customerName||'zákazník'}`).join(', ');
+  const hasCritical = pending.some(o=>(now-o.createdAt)/60000>=40);
+  const hasWarning = pending.some(o=>(now-o.createdAt)/60000>=25 && (now-o.createdAt)/60000<40);
+  const reasons=[];
+  if(hasCritical) reasons.push('objednávka již překročila limit 40 minut a má nejvyšší prioritu');
+  else if(hasWarning) reasons.push('některá objednávka se blíží 40minutovému limitu');
+  reasons.push(`nejkratší celková trasa při aktuálním nastavení – ${trafficLabel(state.settings.traffic)}`);
+  reasons.push('minimalizace zajížděk = nižší spotřeba paliva');
+  return { text:`Doruč nejdříve zastávku ${first}${sorted.length>3?', …':''}.`, reasons };
+}
+
+/* ============================== OCR (Claude Vision) ============================== */
+async function runOCR(file){
+  const base64 = await fileToBase64(file);
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:1000,
+      messages:[{
+        role:'user',
+        content:[
+          { type:'image', source:{ type:'base64', media_type: file.type || 'image/jpeg', data: base64 } },
+          { type:'text', text: OCR_PROMPT }
+        ]
+      }]
+    })
+  });
+  const data = await resp.json();
+  const textBlock = (data.content||[]).find(b=>b.type==='text');
+  if(!textBlock) throw new Error('AI nevrátila žádný text');
+  const clean = textBlock.text.replace(/```json|```/g,'').trim();
+  return JSON.parse(clean);
+}
+
+/* ============================== ORDER ACTIONS ============================== */
+async function addOrderFromForm(fields){
+  const order = {
+    id: uid(),
+    customerName: fields.customerName||'',
+    phone: fields.phone||'',
+    address: fields.address||'',
+    lat: fields.lat ?? null,
+    lng: fields.lng ?? null,
+    orderNumber: fields.orderNumber||'',
+    note: fields.note||'',
+    price: fields.price||'0',
+    createdAt: fields.createdAt || Date.now(),
+    status:'waiting',
+    deliveredAt:null,
+    notified35:false, notified40:false,
+    routePosition:null, etaMin:null,
+  };
+  if(order.lat==null && order.address){
+    const g = await geocodeAddress(order.address);
+    if(g){ order.lat=g.lat; order.lng=g.lng; }
+  }
+  state.orders.push(order);
+  await persistOrders();
+  toast('✅ Objednávka přidána');
+  await maybeRecompute(true);
+  return order;
+}
+async function updateOrderFields(id, fields){
+  const o = state.orders.find(x=>x.id===id);
+  if(!o) return;
+  const addressChanged = fields.address && fields.address!==o.address;
+  Object.assign(o, fields);
+  if(addressChanged || (o.lat==null && o.address)){
+    const g = await geocodeAddress(o.address);
+    if(g){ o.lat=g.lat; o.lng=g.lng; }
+  }
+  await persistOrders();
+  toast('✅ Objednávka upravena');
+  await maybeRecompute(true);
+}
+async function deleteOrder(id){
+  state.orders = state.orders.filter(o=>o.id!==id);
+  await persistOrders();
+  toast('🗑️ Objednávka smazána');
+  await maybeRecompute(true);
+}
+async function markDelivered(id){
+  const o = state.orders.find(x=>x.id===id);
+  if(!o) return;
+  const distKm = state.driver.lat!=null ? haversine(state.driver.lat,state.driver.lng,o.lat,o.lng) : (o.routePosition ? 2 : 0);
+  o.status='delivered'; o.deliveredAt=Date.now(); o.deliveredDistanceKm = Math.max(distKm, 0.3);
+  state.history.unshift({ ...o });
+  state.orders = state.orders.filter(x=>x.id!==id);
+  await persistOrders(); await persistHistory();
+  toast('✅ Doručeno – přesunuto do historie');
+  await maybeRecompute(true);
+}
+
+/* ============================== TIMERS / NOTIFICATIONS ============================== */
+function timerBadge(min){
+  if(min<25) return { label:`🟢 ${Math.max(0,Math.floor(min))} min`, cls:'bg-green-500/15 text-green-400 border-green-500/40' };
+  if(min<40) return { label:`🟡 ${Math.floor(min)} min`, cls:'bg-yellow-500/15 text-yellow-400 border-yellow-500/40' };
+  return { label:`🔴 ${Math.floor(min)} min`, cls:'bg-red-500/15 text-red-400 border-red-500/50 animate-pulse' };
+}
+function tickTimers(){
+  let anyCrossed40=false;
+  document.querySelectorAll('[data-timer-badge]').forEach(el=>{
+    const id = el.getAttribute('data-timer-badge');
+    const order = state.orders.find(o=>o.id===id);
+    if(!order) return;
+    const min = (Date.now()-order.createdAt)/60000;
+    const b = timerBadge(min);
+    el.textContent = b.label;
+    el.className = 'timer-badge '+b.cls;
+    if(checkNotify(order, min)) anyCrossed40=true;
+  });
+  if(anyCrossed40) maybeRecompute(true);
+}
+function checkNotify(order, min){
+  let crossed40=false;
+  if(min>=35 && !order.notified35){
+    order.notified35=true; persistOrders();
+    toast(`⚠️ ${order.customerName||'Objednávka'} čeká ${Math.floor(min)} min`, 'warn');
+  }
+  if(min>=40 && !order.notified40){
+    order.notified40=true; persistOrders();
+    toast(`🔴 KRITICKÉ: ${order.customerName||'Objednávka'} přes 40 min! Přepočítávám trasu…`, 'danger', 6000);
+    beep();
+    crossed40=true;
+  }
+  return crossed40;
+}
+
+/* ============================== RENDER: ORDERS VIEW ============================== */
+function getFilteredSortedOrders(){
+  let list = state.orders.filter(o=>o.status!=='delivered');
+  const now=Date.now();
+  if(state.ui.filter==='waiting') list=list.filter(o=>(now-o.createdAt)/60000<25);
+  if(state.ui.filter==='priority') list=list.filter(o=>(now-o.createdAt)/60000>=25);
+  if(state.ui.sort==='route') list.sort((a,b)=>(a.routePosition??999)-(b.routePosition??999));
+  if(state.ui.sort==='time') list.sort((a,b)=>a.createdAt-b.createdAt);
+  if(state.ui.sort==='distance') list.sort((a,b)=>{
+    const da = state.driver.lat!=null ? haversine(state.driver.lat,state.driver.lng,a.lat,a.lng) : 0;
+    const db = state.driver.lat!=null ? haversine(state.driver.lat,state.driver.lng,b.lat,b.lng) : 0;
+    return da-db;
+  });
+  return list;
+}
+function orderCardHtml(o){
+  const min=(Date.now()-o.createdAt)/60000;
+  const b=timerBadge(min);
+  const phoneHref = (o.phone||'').replace(/\s+/g,'');
+  return `
+  <div class="card mb-3" data-order-card="${o.id}">
+    <div class="flex items-start justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="route-badge">${o.routePosition ?? '–'}</div>
+        <div class="min-w-0">
+          <div class="font-display font-bold text-[15px] truncate" style="font-weight:700;">${escapeHtml(o.customerName)||'Bez jména'}</div>
+          <div class="text-[12px] text-[var(--muted)] truncate">${escapeHtml(o.address)||'Adresa neuvedena'}</div>
         </div>
-
-        <div id="household-setup-view" class="absolute inset-0 z-40 bg-black flex flex-col justify-center items-center p-6 hidden">
-            <div class="glass w-full max-w-sm p-6 rounded-2xl flex flex-col gap-6 fade-in">
-                <h2 class="text-2xl font-semibold text-center text-gold">Domácnost</h2>
-                <div class="flex flex-col gap-3"><input type="text" id="invite-code" placeholder="AURA-XXXX-XXXX" class="glass-input p-3 rounded-xl text-center uppercase"><button onclick="joinHousehold()" class="border border-gold text-gold p-3 rounded-xl hover:bg-gold hover:text-black">Připojit přes kód</button></div>
-                <div class="text-center text-gray-500 text-sm border-t border-dark-border pt-4">NEBO</div>
-                <div class="flex flex-col gap-3"><input type="text" id="new-household-name" placeholder="Název domácnosti" class="glass-input p-3 rounded-xl"><button onclick="createHousehold()" class="btn-gold p-3 rounded-xl">Založit domácnost</button></div>
-                <button onclick="logout()" class="text-gray-500 text-sm mt-2">Odhlásit se</button>
-            </div>
-        </div>
-
-        <div id="main-view" class="flex-1 flex flex-col overflow-hidden hidden bg-gradient-to-b from-dark to-black">
-            <header class="glass px-6 py-4 flex justify-between items-center z-10">
-                <div class="flex items-center gap-2"><i class="fa-solid fa-gem text-gold"></i><h1 class="font-light tracking-wider" id="header-household-name">Spital</h1></div>
-                <div class="flex gap-4 text-gray-400"><i class="fa-solid fa-gear cursor-pointer hover:text-gold"></i></div>
-            </header>
-
-            <main id="content-area" class="flex-1 overflow-y-auto p-4 pb-24 relative"></main>
-
-            <nav id="bottom-nav" class="glass absolute bottom-0 w-full flex justify-around p-3 z-20 text-gray-500 text-xs">
-                <button onclick="switchTab('dashboard')" class="nav-btn w-16 text-gold" data-target="dashboard"><i class="fa-solid fa-chart-pie text-lg block mb-1"></i>Přehled</button>
-                <button onclick="switchTab('finance')" class="nav-btn w-16 hover:text-white" data-target="finance"><i class="fa-solid fa-wallet text-lg block mb-1"></i>Finance</button>
-                <button onclick="switchTab('assets')" class="nav-btn w-16 hover:text-white" data-target="assets"><i class="fa-solid fa-box-open text-lg block mb-1"></i>Majetek</button>
-                <button onclick="switchTab('more')" class="nav-btn w-16 hover:text-white" data-target="more"><i class="fa-solid fa-bars text-lg block mb-1"></i>Více</button>
-            </nav>
-        </div>
+      </div>
+      <span data-timer-badge="${o.id}" class="timer-badge ${b.cls} flex-shrink-0">${b.label}</span>
     </div>
-
-    <div id="modal-container" class="fixed inset-0 bg-black/80 z-[60] hidden flex-col justify-end">
-        <div id="modal-content" class="glass w-full rounded-t-3xl p-6 fade-in max-h-[85vh] overflow-y-auto"></div>
+    <div class="mt-3 flex items-center justify-between">
+      <a href="tel:${escapeHtml(phoneHref)}" class="flex items-center gap-1.5 text-[var(--orange-soft, #FF8A3D)] font-semibold text-[14px]" style="color:var(--orange-soft);">📞 ${escapeHtml(o.phone)||'—'}</a>
+      <div class="flex items-center gap-3">
+        <span class="text-[11px] text-[var(--muted)]">${fmtTime(o.createdAt)}${o.etaMin!=null?` · ETA ${o.etaMin} min`:''}</span>
+        <span class="font-display font-800 text-[15px]" style="font-weight:800;">${fmtMoney(o.price)} Kč</span>
+      </div>
     </div>
-
-    <script>
-        // PWA Setup
-        const manifestData = { name: "Spital", short_name: "Spital", start_url: ".", display: "standalone", background_color: "#000", theme_color: "#D4AF37" };
-        document.getElementById('manifest-link').href = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], { type: 'application/json' }));
-
-        // SUPABASE INIT - ZDE VLOŽ SVŮJ KLÍČ
-        const SUPABASE_URL = "https://sbkiqctjfatozqnixhab.supabase.co";
-        const SUPABASE_ANON_KEY = "VLOŽÍM_SVŮJ_ANON_KEY"; 
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // GLOBAL STATE
-        let state = { user: null, household: null, members: [], transactions: [], inventory: [], tasks: [], chat: [], activeTab: 'dashboard', chartInstance: null };
-
-        // UTILS
-        const $ = id => document.getElementById(id);
-        const formatMoney = a => new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK' }).format(a || 0);
-        const formatDate = d => new Date(d).toLocaleDateString('cs-CZ');
-        
-        function showToast(msg, type = 'info') {
-            const t = document.createElement('div');
-            const colors = { info: 'border-gold text-gold', error: 'border-red-500 text-red-500', success: 'border-green-500 text-green-500' };
-            t.className = `glass p-3 rounded-xl border ${colors[type]} flex items-center gap-3 fade-in shadow-lg text-sm`;
-            t.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${msg}</span>`;
-            $('toast-container').appendChild(t);
-            setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
-        }
-
-        function closeModal() { $('modal-container').classList.replace('flex', 'hidden'); }
-        function openModal(html) { $('modal-content').innerHTML = html; $('modal-container').classList.replace('hidden', 'flex'); }
-
-        // AUTH
-        let isLogin = true;
-        $('toggle-auth').onclick = () => { isLogin = !isLogin; $('auth-title').innerText = isLogin ? 'Přihlášení' : 'Registrace'; $('auth-btn-text').innerText = isLogin ? 'Vstoupit' : 'Vytvořit účet'; $('toggle-auth').innerText = isLogin ? 'Vytvořit účet' : 'Mám účet'; };
-        
-        $('auth-form').onsubmit = async (e) => {
-            e.preventDefault(); $('auth-loader').classList.remove('hidden'); $('auth-btn-text').classList.add('hidden');
-            const email = $('auth-email').value, password = $('auth-password').value;
-            const res = isLogin ? await sb.auth.signInWithPassword({ email, password }) : await sb.auth.signUp({ email, password });
-            $('auth-loader').classList.add('hidden'); $('auth-btn-text').classList.remove('hidden');
-            if(res.error) showToast(res.error.message, 'error'); else if(!isLogin) showToast('Potvrďte email', 'success');
-        };
-
-        async function logout() { await sb.auth.signOut(); location.reload(); }
-
-        sb.auth.onAuthStateChange((event, session) => { 
-            if(session) { state.user = session.user; initApp(); } 
-            else { $('auth-view').classList.remove('hidden'); $('main-view').classList.add('hidden'); $('household-setup-view').classList.add('hidden'); }
-        });
-
-        // INIT APP & HOUSEHOLD
-        async function initApp() {
-            $('auth-view').classList.add('hidden');
-            const { data: member } = await sb.from('household_members').select('household_id, role').eq('user_id', state.user.id).single();
-            if(member) {
-                const { data: house } = await sb.from('households').select('*').eq('id', member.household_id).single();
-                state.household = house;
-                $('header-household-name').innerText = house.name;
-                $('household-setup-view').classList.add('hidden'); $('main-view').classList.remove('hidden');
-                
-                // Fetch members emails via RPC or just store them (Here we fetch auth users mapped if possible, or just raw IDs)
-                const { data: mData } = await sb.from('household_members').select('user_id, role').eq('household_id', house.id);
-                state.members = mData || [];
-                
-                switchTab('dashboard');
-            } else {
-                $('household-setup-view').classList.remove('hidden');
-            }
-        }
-
-        async function createHousehold() {
-            const name = $('new-household-name').value; if(!name) return;
-            const code = 'AURA-' + Math.random().toString(36).substring(2,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
-            const { data: house, error } = await sb.from('households').insert([{ name, invite_code: code }]).select().single();
-            if(error) return showToast(error.message, 'error');
-            await sb.from('household_members').insert([{ household_id: house.id, user_id: state.user.id, role: 'Owner' }]);
-            initApp();
-        }
-
-        async function joinHousehold() {
-            const code = $('invite-code').value.trim();
-            const { data: house } = await sb.from('households').select('id').eq('invite_code', code).single();
-            if(!house) return showToast('Neplatný kód', 'error');
-            await sb.from('household_members').insert([{ household_id: house.id, user_id: state.user.id, role: 'Member' }]);
-            initApp();
-        }
-
-        // ROUTER & DATA FETCH
-        async function switchTab(tabId) {
-            state.activeTab = tabId;
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.replace('text-gold', 'text-gray-500'); if(b.dataset.target === tabId || (['tasks','chat'].includes(tabId) && b.dataset.target==='more')) b.classList.replace('text-gray-500', 'text-gold'); });
-            $('content-area').innerHTML = `<div class="flex justify-center mt-20"><div class="loader"></div></div>`;
-            
-            const hid = state.household.id;
-            const [tRes, iRes, taskRes] = await Promise.all([
-                sb.from('transactions').select('*').eq('household_id', hid).order('date', {ascending: false}),
-                sb.from('inventory').select('*').eq('household_id', hid).order('created_at', {ascending: false}),
-                sb.from('tasks').select('*').eq('household_id', hid).order('due_date', {ascending: true})
-            ]);
-            state.transactions = tRes.data || []; state.inventory = iRes.data || []; state.tasks = taskRes.data || [];
-            
-            if(tabId === 'chat') {
-                const {data} = await sb.from('chat_messages').select('*').eq('household_id', hid).order('created_at', {ascending: true});
-                state.chat = data || [];
-            }
-
-            const views = { dashboard: renderDashboard, finance: renderFinance, assets: renderAssets, more: renderMore, tasks: renderTasks, chat: renderChat, ai: renderAI };
-            if(views[tabId]) views[tabId]();
-        }
-
-        // --- DASHBOARD (S reálným Chart.js výpočtem) ---
-        function renderDashboard() {
-            const inc = state.transactions.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
-            const exp = state.transactions.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
-            const pendingTasks = state.tasks.filter(t => !t.is_completed).length;
-
-            $('content-area').innerHTML = `
-                <div class="fade-in space-y-6">
-                    <div class="glass p-6 rounded-2xl relative overflow-hidden">
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-gold/20 rounded-full blur-3xl"></div>
-                        <h2 class="text-gray-400 text-sm uppercase">Zůstatek</h2>
-                        <div class="text-4xl font-light text-white mt-1">${formatMoney(inc - exp)}</div>
-                        <div class="flex gap-4 mt-4 text-sm">
-                            <span class="text-green-400"><i class="fa-solid fa-arrow-up"></i> ${formatMoney(inc)}</span>
-                            <span class="text-red-400"><i class="fa-solid fa-arrow-down"></i> ${formatMoney(exp)}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="glass p-4 rounded-xl text-center"><i class="fa-solid fa-list-check text-gold mb-1 text-lg"></i><div class="text-xs text-gray-400">Aktivní úkoly</div><div class="font-bold text-lg">${pendingTasks}</div></div>
-                        <div class="glass p-4 rounded-xl text-center cursor-pointer" onclick="navigator.clipboard.writeText('${state.household.invite_code}'); showToast('Kód zkopírován','success')"><i class="fa-solid fa-user-plus text-gold mb-1 text-lg"></i><div class="text-xs text-gray-400">Invite Kód</div><div class="font-bold text-xs mt-1">${state.household.invite_code}</div></div>
-                    </div>
-
-                    <div class="glass p-4 rounded-2xl"><h3 class="text-sm text-gray-400 mb-4">Cashflow (Posledních 6 měsíců)</h3><canvas id="dashboardChart" height="200"></canvas></div>
-                </div>
-            `;
-            initRealChart();
-        }
-
-        function initRealChart() {
-            if(state.chartInstance) state.chartInstance.destroy();
-            
-            // Reálná agregace dat z transakcí za posledních 6 měsíců
-            const months = []; const incomes = []; const expenses = [];
-            for(let i=5; i>=0; i--) {
-                const d = new Date(); d.setMonth(d.getMonth() - i);
-                months.push(d.toLocaleString('cs-CZ', {month: 'short'}));
-                const monthTrans = state.transactions.filter(t => {
-                    const td = new Date(t.date); return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
-                });
-                incomes.push(monthTrans.filter(t => t.type==='income').reduce((s,t)=>s+t.amount,0));
-                expenses.push(monthTrans.filter(t => t.type==='expense').reduce((s,t)=>s+t.amount,0));
-            }
-
-            state.chartInstance = new Chart($('dashboardChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [
-                        { label: 'Příjmy', data: incomes, backgroundColor: '#4ade80', borderRadius: 4 },
-                        { label: 'Výdaje', data: expenses, backgroundColor: '#f87171', borderRadius: 4 }
-                    ]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
-            });
-        }
-
-        // --- FINANCE ---
-        function renderFinance() {
-            $('content-area').innerHTML = `
-                <div class="fade-in space-y-4">
-                    <button onclick="showFinanceModal()" class="btn-gold w-full p-3 rounded-xl"><i class="fa-solid fa-plus mr-2"></i>Nová transakce</button>
-                    <div class="space-y-3">
-                        ${state.transactions.map(t => `
-                            <div class="glass p-4 rounded-xl flex justify-between items-center relative">
-                                <div><div class="font-semibold">${t.category}</div><div class="text-xs text-gray-400">${formatDate(t.date)} ${t.note ? '| '+t.note : ''}</div></div>
-                                <div class="flex items-center gap-4">
-                                    <span class="font-bold text-${t.type==='income'?'green':'red'}-400">${t.type==='income'?'+':'-'}${formatMoney(t.amount)}</span>
-                                    <i class="fa-solid fa-trash text-gray-500 hover:text-red-500" onclick="del('transactions','${t.id}','finance')"></i>
-                                </div>
-                            </div>
-                        `).join('') || '<div class="text-center text-gray-500 mt-10">Žádné transakce</div>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function showFinanceModal() {
-            openModal(`
-                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Přidat transakci</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
-                <form onsubmit="saveFinance(event)">
-                    <select id="f-type" class="glass-input p-3 rounded-xl w-full mb-3"><option value="expense">Výdaj</option><option value="income">Příjem</option></select>
-                    <input type="number" id="f-amount" placeholder="Částka" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <input type="text" id="f-category" placeholder="Kategorie (např. Potraviny)" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <input type="date" id="f-date" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <input type="text" id="f-note" placeholder="Poznámka" class="glass-input p-3 rounded-xl w-full mb-6">
-                    <button type="submit" class="btn-gold w-full p-4 rounded-xl">Uložit do financí</button>
-                </form>
-            `);
-            $('f-date').valueAsDate = new Date();
-        }
-
-        async function saveFinance(e) {
-            e.preventDefault();
-            await sb.from('transactions').insert([{ household_id: state.household.id, type: $('f-type').value, amount: parseFloat($('f-amount').value), category: $('f-category').value, date: $('f-date').value, note: $('f-note').value }]);
-            closeModal(); switchTab('finance');
-        }
-
-        // --- MAJETEK (INVENTORY) ---
-        function renderAssets() {
-            const total = state.inventory.reduce((s,i)=>s+i.price,0);
-            $('content-area').innerHTML = `
-                <div class="fade-in space-y-4">
-                    <div class="glass p-4 rounded-xl text-center"><div class="text-gray-400 text-sm">Celková hodnota majetku</div><div class="text-2xl font-bold text-gold">${formatMoney(total)}</div></div>
-                    <button onclick="showAssetModal()" class="border border-gold text-gold w-full p-3 rounded-xl"><i class="fa-solid fa-plus mr-2"></i>Přidat položku</button>
-                    <div class="space-y-3">
-                        ${state.inventory.map(i => {
-                            const wEnd = new Date(i.warranty_end);
-                            const isExpiring = wEnd > new Date() && wEnd < new Date(Date.now() + 30*24*60*60*1000);
-                            return `
-                            <div class="glass p-4 rounded-xl">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div><div class="font-bold text-gold">${i.name}</div><div class="text-xs text-gray-400">${i.category || 'Bez kategorie'} | ${i.store || 'Neznámý obchod'}</div></div>
-                                    <div class="text-right"><div class="font-bold">${formatMoney(i.price)}</div><i class="fa-solid fa-trash text-gray-500 mt-2 hover:text-red-500" onclick="del('inventory','${i.id}','assets')"></i></div>
-                                </div>
-                                <div class="text-xs p-2 rounded bg-dark border border-dark-border flex justify-between ${isExpiring ? 'text-orange-400 border-orange-500/50' : 'text-gray-400'}">
-                                    <span>Nákup: ${formatDate(i.purchase_date)}</span>
-                                    <span>Záruka: ${formatDate(i.warranty_end)} ${isExpiring ? '<i class="fa-solid fa-triangle-exclamation"></i>' : ''}</span>
-                                </div>
-                            </div>
-                        `}).join('') || '<div class="text-center text-gray-500 mt-10">Zatím žádný majetek</div>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function showAssetModal() {
-            openModal(`
-                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Přidat majetek</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
-                <form onsubmit="saveAsset(event)">
-                    <input type="text" id="a-name" placeholder="Název předmětu (např. MacBook Pro)" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <input type="number" id="a-price" placeholder="Cena (CZK)" class="glass-input p-3 rounded-xl w-full" required>
-                        <input type="text" id="a-cat" placeholder="Kategorie" class="glass-input p-3 rounded-xl w-full">
-                    </div>
-                    <input type="text" id="a-store" placeholder="Obchod" class="glass-input p-3 rounded-xl w-full mb-3">
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div><label class="text-xs text-gray-400 ml-1">Nákup</label><input type="date" id="a-buy" class="glass-input p-3 rounded-xl w-full" required></div>
-                        <div><label class="text-xs text-gray-400 ml-1">Konec záruky</label><input type="date" id="a-war" class="glass-input p-3 rounded-xl w-full" required></div>
-                    </div>
-                    <button type="submit" class="btn-gold w-full p-4 rounded-xl mt-4">Uložit majetek</button>
-                </form>
-            `);
-        }
-
-        async function saveAsset(e) {
-            e.preventDefault();
-            await sb.from('inventory').insert([{ household_id: state.household.id, name: $('a-name').value, price: parseFloat($('a-price').value), category: $('a-cat').value, store: $('a-store').value, purchase_date: $('a-buy').value, warranty_end: $('a-war').value }]);
-            closeModal(); switchTab('assets');
-        }
-
-        // --- ÚKOLY (TASKS) ---
-        function renderTasks() {
-            $('content-area').innerHTML = `
-                <div class="fade-in space-y-4">
-                    <h2 class="text-2xl font-bold text-gold mb-4">Rodinné Úkoly</h2>
-                    <button onclick="showTaskModal()" class="btn-gold w-full p-3 rounded-xl mb-4"><i class="fa-solid fa-plus mr-2"></i>Nový úkol</button>
-                    <div class="space-y-3">
-                        ${state.tasks.map(t => `
-                            <div class="glass p-4 rounded-xl flex items-center gap-4 ${t.is_completed ? 'opacity-50' : ''}">
-                                <div class="w-6 h-6 rounded border border-gold flex items-center justify-center cursor-pointer ${t.is_completed ? 'bg-gold text-black' : ''}" onclick="toggleTask('${t.id}', ${!t.is_completed})">
-                                    ${t.is_completed ? '<i class="fa-solid fa-check text-sm"></i>' : ''}
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-bold ${t.is_completed ? 'line-through' : ''}">${t.title}</div>
-                                    <div class="text-xs text-gray-400">Do: ${formatDate(t.due_date)} | Priorita: ${t.priority}</div>
-                                </div>
-                                <i class="fa-solid fa-trash text-gray-500 hover:text-red-500" onclick="del('tasks','${t.id}','tasks')"></i>
-                            </div>
-                        `).join('') || '<div class="text-center text-gray-500 mt-10">Vše hotovo!</div>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function showTaskModal() {
-            openModal(`
-                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Nový úkol</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
-                <form onsubmit="saveTask(event)">
-                    <input type="text" id="t-title" placeholder="Co je potřeba udělat?" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <input type="date" id="t-due" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <select id="t-pri" class="glass-input p-3 rounded-xl w-full mb-4">
-                        <option value="Low">Nízká priorita</option><option value="Medium" selected>Střední priorita</option><option value="High">Vysoká priorita</option>
-                    </select>
-                    <button type="submit" class="btn-gold w-full p-4 rounded-xl">Přidat úkol</button>
-                </form>
-            `);
-        }
-
-        async function saveTask(e) {
-            e.preventDefault();
-            await sb.from('tasks').insert([{ household_id: state.household.id, title: $('t-title').value, due_date: $('t-due').value, priority: $('t-pri').value }]);
-            closeModal(); switchTab('tasks');
-        }
-
-        async function toggleTask(id, isCompleted) {
-            await sb.from('tasks').update({ is_completed: isCompleted }).eq('id', id);
-            switchTab('tasks');
-        }
-
-        // --- VÍCE & OSTATNÍ ---
-        function renderMore() {
-            $('content-area').innerHTML = `
-                <div class="grid grid-cols-2 gap-4 fade-in">
-                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('tasks')"><i class="fa-solid fa-list-check text-2xl text-gold mb-2"></i>Úkoly</div>
-                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('chat')"><i class="fa-regular fa-comments text-2xl text-gold mb-2"></i>Chat</div>
-                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('ai')"><i class="fa-solid fa-wand-magic-sparkles text-2xl text-gold mb-2"></i>Aura AI</div>
-                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-red-500" onclick="logout()"><i class="fa-solid fa-power-off text-2xl text-red-500 mb-2"></i>Odhlásit</div>
-                </div>
-            `;
-        }
-
-        function renderChat() {
-            $('content-area').innerHTML = `
-                <div class="fade-in flex flex-col h-full">
-                    <div id="chat-box" class="flex-1 overflow-y-auto space-y-3 mb-20 pb-4">
-                        ${state.chat.map(m => `
-                            <div class="flex ${m.user_id === state.user.id ? 'justify-end' : 'justify-start'}">
-                                <div class="max-w-[80%] p-3 text-sm rounded-2xl ${m.user_id === state.user.id ? 'bg-gold text-black rounded-tr-none' : 'glass rounded-tl-none'}">${m.message}</div>
-                            </div>
-                        `).join('') || '<div class="text-center text-gray-500 mt-10">Začněte konverzaci...</div>'}
-                    </div>
-                    <form onsubmit="sendChat(event)" class="absolute bottom-16 left-0 w-full p-4 glass flex gap-2">
-                        <input type="text" id="c-msg" class="flex-1 glass-input p-3 rounded-full" placeholder="Napsat zprávu..." required>
-                        <button type="submit" class="w-12 h-12 rounded-full btn-gold flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            `;
-            setTimeout(() => { const c = $('chat-box'); if(c) c.scrollTop = c.scrollHeight; }, 100);
-        }
-
-        async function sendChat(e) {
-            e.preventDefault(); const m = $('c-msg').value; $('c-msg').value = '';
-            await sb.from('chat_messages').insert([{ household_id: state.household.id, user_id: state.user.id, message: m }]);
-            switchTab('chat');
-        }
-
-        function renderAI() {
-            $('content-area').innerHTML = `<div class="glass p-6 rounded-xl text-center"><i class="fa-solid fa-wand-magic-sparkles text-4xl text-gold mb-4"></i><h2 class="text-xl font-bold">Aura AI</h2><p class="text-gray-400 text-sm mt-2">Finanční analýza napojená na OpenAI vyžaduje serverless backend pro skrytí API klíče.</p></div>`;
-        }
-
-        async function del(table, id, tab) { if(confirm('Opravdu smazat?')) { await sb.from(table).delete().eq('id', id); switchTab(tab); } }
-    </script>
-</body>
-</html>
-"; 
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // GLOBAL STATE
-        let state = { user: null, household: null, members: [], transactions: [], inventory: [], tasks: [], chat: [], activeTab: 'dashboard', chartInstance: null };
-
-        // UTILS
-        const $ = id => document.getElementById(id);
-        const formatMoney = a => new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK' }).format(a || 0);
-        const formatDate = d => new Date(d).toLocaleDateString('cs-CZ');
-        
-        function showToast(msg, type = 'info') {
-            const t = document.createElement('div');
-            const colors = { info: 'border-gold text-gold', error: 'border-red-500 text-red-500', success: 'border-green-500 text-green-500' };
-            t.className = `glass p-3 rounded-xl border ${colors[type]} flex items-center gap-3 fade-in shadow-lg text-sm`;
-            t.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${msg}</span>`;
-            $('toast-container').appendChild(t);
-            setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
-        }
-
-        function closeModal() { $('modal-container').classList.replace('flex', 'hidden'); }
-        function openModal(html) { $('modal-content').innerHTML = html; $('modal-container').classList.replace('hidden', 'flex'); }
-
-        // AUTH
-        let isLogin = true;
-        $('toggle-auth').onclick = () => { isLogin = !isLogin; $('auth-title').innerText = isLogin ? 'Přihlášení' : 'Registrace'; $('auth-btn-text').innerText = isLogin ? 'Vstoupit' : 'Vytvořit účet'; $('toggle-auth').innerText = isLogin ? 'Vytvořit účet' : 'Mám účet'; };
-        
-        $('auth-form').onsubmit = async (e) => {
-            e.preventDefault(); $('auth-loader').classList.remove('hidden'); $('auth-btn-text').classList.add('hidden');
-            const email = $('auth-email').value, password = $('auth-password').value;
-            const res = isLogin ? await sb.auth.signInWithPassword({ email, password }) : await sb.auth.signUp({ email, password });
-            $('auth-loader').classList.add('hidden'); $('auth-btn-text').classList.remove('hidden');
-            if(res.error) showToast(res.error.message, 'error'); else if(!isLogin) showToast('Potvrďte email', 'success');
-        };
-
-        async function logout() { await sb.auth.signOut(); location.reload(); }
-
-        sb.auth.onAuthStateChange((event, session) => { 
-            if(session) { state.user = session.user; initApp(); } 
-            else { $('auth-view').classList.remove('hidden'); $('main-view').classList.add('hidden'); $('household-setup-view').classList.add('hidden'); }
-        });
-
-        // INIT APP & HOUSEHOLD
-        async function initApp() {
-            $('auth-view').classList.add('hidden');
-            const { data: member } = await sb.from('household_members').select('household_id, role').eq('user_id', state.user.id).single();
-            if(member) {
-                const { data: house } = await sb.from('households').select('*').eq('id', member.household_id).single();
-                state.household = house;
-                $('header-household-name').innerText = house.name;
-                $('household-setup-view').classList.add('hidden'); $('main-view').classList.remove('hidden');
-                
-                // Fetch members emails via RPC or just store them (Here we fetch auth users mapped if possible, or just raw IDs)
-                const { data: mData } = await sb.from('household_members').select('user_id, role').eq('household_id', house.id);
-                state.members = mData || [];
-                
-                switchTab('dashboard');
-            } else {
-                $('household-setup-view').classList.remove('hidden');
-            }
-        }
-
-        async function createHousehold() {
-            const name = $('new-household-name').value; if(!name) return;
-            const code = 'AURA-' + Math.random().toString(36).substring(2,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
-            const { data: house, error } = await sb.from('households').insert([{ name, invite_code: code }]).select().single();
-            if(error) return showToast(error.message, 'error');
-            await sb.from('household_members').insert([{ household_id: house.id, user_id: state.user.id, role: 'Owner' }]);
-            initApp();
-        }
-
-        async function joinHousehold() {
-            const code = $('invite-code').value.trim();
-            const { data: house } = await sb.from('households').select('id').eq('invite_code', code).single();
-            if(!house) return showToast('Neplatný kód', 'error');
-            await sb.from('household_members').insert([{ household_id: house.id, user_id: state.user.id, role: 'Member' }]);
-            initApp();
-        }
-
-        // ROUTER & DATA FETCH
-        async function switchTab(tabId) {
-            state.activeTab = tabId;
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.replace('text-gold', 'text-gray-500'); if(b.dataset.target === tabId || (['tasks','chat'].includes(tabId) && b.dataset.target==='more')) b.classList.replace('text-gray-500', 'text-gold'); });
-            $('content-area').innerHTML = `<div class="flex justify-center mt-20"><div class="loader"></div></div>`;
-            
-            const hid = state.household.id;
-            const [tRes, iRes, taskRes] = await Promise.all([
-                sb.from('transactions').select('*').eq('household_id', hid).order('date', {ascending: false}),
-                sb.from('inventory').select('*').eq('household_id', hid).order('created_at', {ascending: false}),
-                sb.from('tasks').select('*').eq('household_id', hid).order('due_date', {ascending: true})
-            ]);
-            state.transactions = tRes.data || []; state.inventory = iRes.data || []; state.tasks = taskRes.data || [];
-            
-            if(tabId === 'chat') {
-                const {data} = await sb.from('chat_messages').select('*').eq('household_id', hid).order('created_at', {ascending: true});
-                state.chat = data || [];
-            }
-
-            const views = { dashboard: renderDashboard, finance: renderFinance, assets: renderAssets, more: renderMore, tasks: renderTasks, chat: renderChat, ai: renderAI };
-            if(views[tabId]) views[tabId]();
-        }
-
-        // --- DASHBOARD (S reálným Chart.js výpočtem) ---
-        function renderDashboard() {
-            const inc = state.transactions.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
-            const exp = state.transactions.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
-            const pendingTasks = state.tasks.filter(t => !t.is_completed).length;
-
-            $('content-area').innerHTML = `
-                <div class="fade-in space-y-6">
-                    <div class="glass p-6 rounded-2xl relative overflow-hidden">
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-gold/20 rounded-full blur-3xl"></div>
-                        <h2 class="text-gray-400 text-sm uppercase">Zůstatek</h2>
-                        <div class="text-4xl font-light text-white mt-1">${formatMoney(inc - exp)}</div>
-                        <div class="flex gap-4 mt-4 text-sm">
-                            <span class="text-green-400"><i class="fa-solid fa-arrow-up"></i> ${formatMoney(inc)}</span>
-                            <span class="text-red-400"><i class="fa-solid fa-arrow-down"></i> ${formatMoney(exp)}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="glass p-4 rounded-xl text-center"><i class="fa-solid fa-list-check text-gold mb-1 text-lg"></i><div class="text-xs text-gray-400">Aktivní úkoly</div><div class="font-bold text-lg">${pendingTasks}</div></div>
-                        <div class="glass p-4 rounded-xl text-center cursor-pointer" onclick="navigator.clipboard.writeText('${state.household.invite_code}'); showToast('Kód zkopírován','success')"><i class="fa-solid fa-user-plus text-gold mb-1 text-lg"></i><div class="text-xs text-gray-400">Invite Kód</div><div class="font-bold text-xs mt-1">${state.household.invite_code}</div></div>
-                    </div>
-
-                    <div class="glass p-4 rounded-2xl"><h3 class="text-sm text-gray-400 mb-4">Cashflow (Posledních 6 měsíců)</h3><canvas id="dashboardChart" height="200"></canvas></div>
-                </div>
-            `;
-            initRealChart();
-        }
-
-        function initRealChart() {
-            if(state.chartInstance) state.chartInstance.destroy();
-            
-            // Reálná agregace dat z transakcí za posledních 6 měsíců
-            const months = []; const incomes = []; const expenses = [];
-            for(let i=5; i>=0; i--) {
-                const d = new Date(); d.setMonth(d.getMonth() - i);
-                months.push(d.toLocaleString('cs-CZ', {month: 'short'}));
-                const monthTrans = state.transactions.filter(t => {
-                    const td = new Date(t.date); return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
-                });
-                incomes.push(monthTrans.filter(t => t.type==='income').reduce((s,t)=>s+t.amount,0));
-                expenses.push(monthTrans.filter(t => t.type==='expense').reduce((s,t)=>s+t.amount,0));
-            }
-
-            state.chartInstance = new Chart($('dashboardChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [
-                        { label: 'Příjmy', data: incomes, backgroundColor: '#4ade80', borderRadius: 4 },
-                        { label: 'Výdaje', data: expenses, backgroundColor: '#f87171', borderRadius: 4 }
-                    ]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
-            });
-        }
-
-        // --- FINANCE ---
-        function renderFinance() {
-            $('content-area').innerHTML = `
-                <div class="fade-in space-y-4">
-                    <button onclick="showFinanceModal()" class="btn-gold w-full p-3 rounded-xl"><i class="fa-solid fa-plus mr-2"></i>Nová transakce</button>
-                    <div class="space-y-3">
-                        ${state.transactions.map(t => `
-                            <div class="glass p-4 rounded-xl flex justify-between items-center relative">
-                                <div><div class="font-semibold">${t.category}</div><div class="text-xs text-gray-400">${formatDate(t.date)} ${t.note ? '| '+t.note : ''}</div></div>
-                                <div class="flex items-center gap-4">
-                                    <span class="font-bold text-${t.type==='income'?'green':'red'}-400">${t.type==='income'?'+':'-'}${formatMoney(t.amount)}</span>
-                                    <i class="fa-solid fa-trash text-gray-500 hover:text-red-500" onclick="del('transactions','${t.id}','finance')"></i>
-                                </div>
-                            </div>
-                        `).join('') || '<div class="text-center text-gray-500 mt-10">Žádné transakce</div>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function showFinanceModal() {
-            openModal(`
-                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Přidat transakci</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
-                <form onsubmit="saveFinance(event)">
-                    <select id="f-type" class="glass-input p-3 rounded-xl w-full mb-3"><option value="expense">Výdaj</option><option value="income">Příjem</option></select>
-                    <input type="number" id="f-amount" placeholder="Částka" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <input type="text" id="f-category" placeholder="Kategorie (např. Potraviny)" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <input type="date" id="f-date" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <input type="text" id="f-note" placeholder="Poznámka" class="glass-input p-3 rounded-xl w-full mb-6">
-                    <button type="submit" class="btn-gold w-full p-4 rounded-xl">Uložit do financí</button>
-                </form>
-            `);
-            $('f-date').valueAsDate = new Date();
-        }
-
-        async function saveFinance(e) {
-            e.preventDefault();
-            await sb.from('transactions').insert([{ household_id: state.household.id, type: $('f-type').value, amount: parseFloat($('f-amount').value), category: $('f-category').value, date: $('f-date').value, note: $('f-note').value }]);
-            closeModal(); switchTab('finance');
-        }
-
-        // --- MAJETEK (INVENTORY) ---
-        function renderAssets() {
-            const total = state.inventory.reduce((s,i)=>s+i.price,0);
-            $('content-area').innerHTML = `
-                <div class="fade-in space-y-4">
-                    <div class="glass p-4 rounded-xl text-center"><div class="text-gray-400 text-sm">Celková hodnota majetku</div><div class="text-2xl font-bold text-gold">${formatMoney(total)}</div></div>
-                    <button onclick="showAssetModal()" class="border border-gold text-gold w-full p-3 rounded-xl"><i class="fa-solid fa-plus mr-2"></i>Přidat položku</button>
-                    <div class="space-y-3">
-                        ${state.inventory.map(i => {
-                            const wEnd = new Date(i.warranty_end);
-                            const isExpiring = wEnd > new Date() && wEnd < new Date(Date.now() + 30*24*60*60*1000);
-                            return `
-                            <div class="glass p-4 rounded-xl">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div><div class="font-bold text-gold">${i.name}</div><div class="text-xs text-gray-400">${i.category || 'Bez kategorie'} | ${i.store || 'Neznámý obchod'}</div></div>
-                                    <div class="text-right"><div class="font-bold">${formatMoney(i.price)}</div><i class="fa-solid fa-trash text-gray-500 mt-2 hover:text-red-500" onclick="del('inventory','${i.id}','assets')"></i></div>
-                                </div>
-                                <div class="text-xs p-2 rounded bg-dark border border-dark-border flex justify-between ${isExpiring ? 'text-orange-400 border-orange-500/50' : 'text-gray-400'}">
-                                    <span>Nákup: ${formatDate(i.purchase_date)}</span>
-                                    <span>Záruka: ${formatDate(i.warranty_end)} ${isExpiring ? '<i class="fa-solid fa-triangle-exclamation"></i>' : ''}</span>
-                                </div>
-                            </div>
-                        `}).join('') || '<div class="text-center text-gray-500 mt-10">Zatím žádný majetek</div>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function showAssetModal() {
-            openModal(`
-                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Přidat majetek</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
-                <form onsubmit="saveAsset(event)">
-                    <input type="text" id="a-name" placeholder="Název předmětu (např. MacBook Pro)" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <input type="number" id="a-price" placeholder="Cena (CZK)" class="glass-input p-3 rounded-xl w-full" required>
-                        <input type="text" id="a-cat" placeholder="Kategorie" class="glass-input p-3 rounded-xl w-full">
-                    </div>
-                    <input type="text" id="a-store" placeholder="Obchod" class="glass-input p-3 rounded-xl w-full mb-3">
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div><label class="text-xs text-gray-400 ml-1">Nákup</label><input type="date" id="a-buy" class="glass-input p-3 rounded-xl w-full" required></div>
-                        <div><label class="text-xs text-gray-400 ml-1">Konec záruky</label><input type="date" id="a-war" class="glass-input p-3 rounded-xl w-full" required></div>
-                    </div>
-                    <button type="submit" class="btn-gold w-full p-4 rounded-xl mt-4">Uložit majetek</button>
-                </form>
-            `);
-        }
-
-        async function saveAsset(e) {
-            e.preventDefault();
-            await sb.from('inventory').insert([{ household_id: state.household.id, name: $('a-name').value, price: parseFloat($('a-price').value), category: $('a-cat').value, store: $('a-store').value, purchase_date: $('a-buy').value, warranty_end: $('a-war').value }]);
-            closeModal(); switchTab('assets');
-        }
-
-        // --- ÚKOLY (TASKS) ---
-        function renderTasks() {
-            $('content-area').innerHTML = `
-                <div class="fade-in space-y-4">
-                    <h2 class="text-2xl font-bold text-gold mb-4">Rodinné Úkoly</h2>
-                    <button onclick="showTaskModal()" class="btn-gold w-full p-3 rounded-xl mb-4"><i class="fa-solid fa-plus mr-2"></i>Nový úkol</button>
-                    <div class="space-y-3">
-                        ${state.tasks.map(t => `
-                            <div class="glass p-4 rounded-xl flex items-center gap-4 ${t.is_completed ? 'opacity-50' : ''}">
-                                <div class="w-6 h-6 rounded border border-gold flex items-center justify-center cursor-pointer ${t.is_completed ? 'bg-gold text-black' : ''}" onclick="toggleTask('${t.id}', ${!t.is_completed})">
-                                    ${t.is_completed ? '<i class="fa-solid fa-check text-sm"></i>' : ''}
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-bold ${t.is_completed ? 'line-through' : ''}">${t.title}</div>
-                                    <div class="text-xs text-gray-400">Do: ${formatDate(t.due_date)} | Priorita: ${t.priority}</div>
-                                </div>
-                                <i class="fa-solid fa-trash text-gray-500 hover:text-red-500" onclick="del('tasks','${t.id}','tasks')"></i>
-                            </div>
-                        `).join('') || '<div class="text-center text-gray-500 mt-10">Vše hotovo!</div>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function showTaskModal() {
-            openModal(`
-                <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-gold">Nový úkol</h2><i class="fa-solid fa-times text-xl" onclick="closeModal()"></i></div>
-                <form onsubmit="saveTask(event)">
-                    <input type="text" id="t-title" placeholder="Co je potřeba udělat?" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <input type="date" id="t-due" class="glass-input p-3 rounded-xl w-full mb-3" required>
-                    <select id="t-pri" class="glass-input p-3 rounded-xl w-full mb-4">
-                        <option value="Low">Nízká priorita</option><option value="Medium" selected>Střední priorita</option><option value="High">Vysoká priorita</option>
-                    </select>
-                    <button type="submit" class="btn-gold w-full p-4 rounded-xl">Přidat úkol</button>
-                </form>
-            `);
-        }
-
-        async function saveTask(e) {
-            e.preventDefault();
-            await sb.from('tasks').insert([{ household_id: state.household.id, title: $('t-title').value, due_date: $('t-due').value, priority: $('t-pri').value }]);
-            closeModal(); switchTab('tasks');
-        }
-
-        async function toggleTask(id, isCompleted) {
-            await sb.from('tasks').update({ is_completed: isCompleted }).eq('id', id);
-            switchTab('tasks');
-        }
-
-        // --- VÍCE & OSTATNÍ ---
-        function renderMore() {
-            $('content-area').innerHTML = `
-                <div class="grid grid-cols-2 gap-4 fade-in">
-                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('tasks')"><i class="fa-solid fa-list-check text-2xl text-gold mb-2"></i>Úkoly</div>
-                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('chat')"><i class="fa-regular fa-comments text-2xl text-gold mb-2"></i>Chat</div>
-                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-gold" onclick="switchTab('ai')"><i class="fa-solid fa-wand-magic-sparkles text-2xl text-gold mb-2"></i>Aura AI</div>
-                    <div class="glass p-6 rounded-2xl flex flex-col items-center cursor-pointer hover:border-red-500" onclick="logout()"><i class="fa-solid fa-power-off text-2xl text-red-500 mb-2"></i>Odhlásit</div>
-                </div>
-            `;
-        }
-
-        function renderChat() {
-            $('content-area').innerHTML = `
-                <div class="fade-in flex flex-col h-full">
-                    <div id="chat-box" class="flex-1 overflow-y-auto space-y-3 mb-20 pb-4">
-                        ${state.chat.map(m => `
-                            <div class="flex ${m.user_id === state.user.id ? 'justify-end' : 'justify-start'}">
-                                <div class="max-w-[80%] p-3 text-sm rounded-2xl ${m.user_id === state.user.id ? 'bg-gold text-black rounded-tr-none' : 'glass rounded-tl-none'}">${m.message}</div>
-                            </div>
-                        `).join('') || '<div class="text-center text-gray-500 mt-10">Začněte konverzaci...</div>'}
-                    </div>
-                    <form onsubmit="sendChat(event)" class="absolute bottom-16 left-0 w-full p-4 glass flex gap-2">
-                        <input type="text" id="c-msg" class="flex-1 glass-input p-3 rounded-full" placeholder="Napsat zprávu..." required>
-                        <button type="submit" class="w-12 h-12 rounded-full btn-gold flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            `;
-            setTimeout(() => { const c = $('chat-box'); if(c) c.scrollTop = c.scrollHeight; }, 100);
-        }
-
-        async function sendChat(e) {
-            e.preventDefault(); const m = $('c-msg').value; $('c-msg').value = '';
-            await sb.from('chat_messages').insert([{ household_id: state.household.id, user_id: state.user.id, message: m }]);
-            switchTab('chat');
-        }
-
-        function renderAI() {
-            $('content-area').innerHTML = `<div class="glass p-6 rounded-xl text-center"><i class="fa-solid fa-wand-magic-sparkles text-4xl text-gold mb-4"></i><h2 class="text-xl font-bold">Aura AI</h2><p class="text-gray-400 text-sm mt-2">Finanční analýza napojená na OpenAI vyžaduje serverless backend pro skrytí API klíče.</p></div>`;
-        }
-
-        async function del(table, id, tab) { if(confirm('Opravdu smazat?')) { await sb.from(table).delete().eq('id', id); switchTab(tab); } }
-    </script>
+    ${o.orderNumber ? `<div class="text-[11px] text-[var(--muted)] mt-1">Obj. č. ${escapeHtml(o.orderNumber)}</div>`:''}
+    ${o.note ? `<div class="mt-2 text-[12px] text-[var(--muted)] italic">„${escapeHtml(o.note)}"</div>`:''}
+    <div class="mt-3 flex gap-2">
+      <button data-action="navigate" data-id="${o.id}" class="btn-secondary flex-1">🧭 Navigovat</button>
+      <button data-action="deliver" data-id="${o.id}" class="btn-primary flex-1">✅ Doručeno</button>
+      <button data-action="edit" data-id="${o.id}" class="btn-icon">✏️</button>
+      <button data-action="delete" data-id="${o.id}" class="btn-icon">🗑️</button>
+    </div>
+  </div>`;
+}
+function renderOrdersView(){
+  const el = document.getElementById('view-orders');
+  const rec = generateRecommendation();
+  const list = getFilteredSortedOrders();
+  const filters = [['all','Vše'],['waiting','Čeká'],['priority','Priorita']];
+  const sorts = [['route','Trasa'],['time','Čas'],['distance','Vzdálenost']];
+
+  let html = '';
+  if(rec){
+    html += `
+    <div class="rounded-2xl p-4 mb-4" style="background:linear-gradient(135deg, rgba(255,106,0,.16), rgba(255,106,0,.02)); border:1px solid rgba(255,106,0,.35);">
+      <div class="flex items-center gap-2 mb-1.5">
+        <span class="text-base">🤖</span><span class="font-display font-800 text-[13px]" style="font-weight:800;">AI doporučení trasy</span>
+      </div>
+      <div class="text-[14px] mb-2 leading-snug">${escapeHtml(rec.text)}</div>
+      ${rec.reasons.length ? `<ul class="text-[11px] text-[var(--muted)] space-y-0.5">${rec.reasons.map(r=>`<li>• ${escapeHtml(r)}</li>`).join('')}</ul>` : ''}
+    </div>`;
+  }
+
+  html += `<div class="flex items-center gap-2 mb-4 overflow-x-auto" style="scrollbar-width:none;">
+    ${filters.map(([k,l])=>`<button data-action="set-filter" data-val="${k}" class="chip ${state.ui.filter===k?'active':''}">${l}</button>`).join('')}
+    <span class="w-px h-4 bg-[var(--border)] mx-1 flex-shrink-0"></span>
+    ${sorts.map(([k,l])=>`<button data-action="set-sort" data-val="${k}" class="chip ${state.ui.sort===k?'active':''}">↕ ${l}</button>`).join('')}
+    <button data-action="switch-view" data-view="history" class="chip flex-shrink-0">Doručeno →</button>
+  </div>`;
+
+  if(!list.length){
+    html += `<div class="text-center py-16">
+      <div class="text-5xl mb-3">📭</div>
+      <div class="font-display font-700 text-[15px] mb-1" style="font-weight:700;">Zatím žádné objednávky</div>
+      <div class="text-[13px] text-[var(--muted)]">Přidej první přes tlačítko ➕ vpravo dole.</div>
+    </div>`;
+  } else {
+    html += list.map(orderCardHtml).join('');
+  }
+  el.innerHTML = html;
+}
+
+/* ============================== RENDER: MAP VIEW ============================== */
+let leafletMap=null, driverMarker=null, orderMarkers=[], routeLine=null, mapInitDone=false;
+function initMapIfNeeded(){
+  if(leafletMap) return;
+  leafletMap = L.map('leaflet-map', { zoomControl:false }).setView([49.6855,14.0], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(leafletMap);
+  L.control.zoom({ position:'bottomright' }).addTo(leafletMap);
+}
+function updateDriverMarker(){
+  if(!leafletMap || state.driver.lat==null) return;
+  const icon = L.divIcon({ className:'', html:'<div class="driver-pin"></div>', iconSize:[18,18] });
+  if(!driverMarker){
+    driverMarker = L.marker([state.driver.lat,state.driver.lng], { icon, zIndexOffset:1000 }).addTo(leafletMap);
+    if(!mapInitDone){ leafletMap.setView([state.driver.lat,state.driver.lng], 14); mapInitDone=true; }
+  } else {
+    driverMarker.setLatLng([state.driver.lat,state.driver.lng]);
+  }
+}
+function updateOrderMarkers(){
+  if(!leafletMap) return;
+  orderMarkers.forEach(m=>leafletMap.removeLayer(m));
+  orderMarkers = [];
+  const pending = state.orders.filter(o=>o.status!=='delivered' && o.lat!=null);
+  pending.forEach(o=>{
+    const min=(Date.now()-o.createdAt)/60000;
+    const color = min>=40 ? '#EF4444' : min>=25 ? '#EAB308' : '#FF6A00';
+    const icon = L.divIcon({ className:'', html:`<div class="order-pin" style="background:${color};"><span>${o.routePosition??'?'}</span></div>`, iconSize:[30,30], iconAnchor:[15,28] });
+    const m = L.marker([o.lat,o.lng], { icon }).addTo(leafletMap);
+    m.bindPopup(`
+      <div class="font-display font-bold text-[14px] mb-1" style="font-weight:700;">${escapeHtml(o.customerName)||'Zákazník'}</div>
+      <div class="text-[12px] text-[var(--muted)] mb-2">${escapeHtml(o.address)||''}</div>
+      <div class="text-[12px] mb-2">${fmtMoney(o.price)} Kč ${o.etaMin!=null?` · ETA ${o.etaMin} min`:''}</div>
+      <button data-action="navigate" data-id="${o.id}" style="background:var(--orange);color:#0A0A0A;font-weight:700;border-radius:10px;padding:8px 12px;font-size:13px;width:100%;">🧭 Navigovat</button>
+    `);
+    orderMarkers.push(m);
+  });
+}
+function updateRouteLine(){
+  if(!leafletMap) return;
+  if(routeLine){ leafletMap.removeLayer(routeLine); routeLine=null; }
+  const geom = state.route && state.route.geometry;
+  let latlngs = null;
+  if(geom && geom.length){ latlngs = geom; }
+  else if(state.route && state.route.length && state.driver.lat!=null){
+    const pending = state.orders.filter(o=>o.status!=='delivered' && o.lat!=null);
+    const sorted = [...state.route].sort((a,b)=>a.position-b.position);
+    latlngs = [[state.driver.lat,state.driver.lng], ...sorted.map(r=>{
+      const o = pending.find(x=>x.id===r.orderId); return o ? [o.lat,o.lng] : null;
+    }).filter(Boolean)];
+  }
+  if(latlngs && latlngs.length>1){
+    routeLine = L.polyline(latlngs, { color:'#FF6A00', weight:4, opacity:0.85 }).addTo(leafletMap);
+  }
+}
+function renderMapBanner(){
+  const el = document.getElementById('map-banner');
+  const rec = generateRecommendation();
+  if(!rec || !state.orders.filter(o=>o.status!=='delivered').length){ el.innerHTML=''; return; }
+  el.innerHTML = `
+    <div class="card" style="background:rgba(20,20,20,.95); backdrop-filter:blur(6px);">
+      <div class="flex items-center gap-2 mb-1">
+        <span>🤖</span><span class="font-display font-800 text-[12px]" style="font-weight:800;">AI doporučení</span>
+        <button data-action="recompute" class="ml-auto text-[11px] text-[var(--orange-soft)]" style="color:var(--orange-soft);">↻ Přepočítat</button>
+      </div>
+      <div class="text-[13px]">${escapeHtml(rec.text)}</div>
+    </div>`;
+}
+function renderMapView(){
+  initMapIfNeeded();
+  updateDriverMarker();
+  updateOrderMarkers();
+  updateRouteLine();
+  renderMapBanner();
+  setTimeout(()=>{ if(leafletMap) leafletMap.invalidateSize(); }, 50);
+}
+
+/* ============================== RENDER: HISTORY VIEW ============================== */
+function renderHistoryView(){
+  const el = document.getElementById('view-history');
+  const h = state.history;
+  const today = todayKey(Date.now());
+  const todays = h.filter(o=>todayKey(o.deliveredAt)===today);
+  const sum = arr=>arr.reduce((a,b)=>a+b,0);
+  const todayKm = sum(todays.map(o=>o.deliveredDistanceKm||0));
+  const todayDurations = todays.map(o=>(o.deliveredAt-o.createdAt)/60000);
+  const avgTime = todayDurations.length ? Math.round(sum(todayDurations)/todayDurations.length) : 0;
+  const totalTimeMin = Math.round(sum(todayDurations));
+
+  const days = [];
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const key=todayKey(d.getTime());
+    const count = h.filter(o=>todayKey(o.deliveredAt)===key).length;
+    days.push({ label:d.toLocaleDateString('cs-CZ',{weekday:'short'}).slice(0,2), count });
+  }
+  const maxCount = Math.max(1, ...days.map(d=>d.count));
+
+  const byDate = {};
+  h.forEach(o=>{ const k=todayKey(o.deliveredAt); (byDate[k]=byDate[k]||[]).push(o); });
+  const dateKeys = Object.keys(byDate).sort((a,b)=>byDate[b][0].deliveredAt-byDate[a][0].deliveredAt);
+
+  let html = `
+  <div class="grid grid-cols-2 gap-3 mb-4">
+    <div class="card"><div class="text-[11px] text-[var(--muted)] mb-1">Rozvozy dnes</div><div class="font-display font-800 text-2xl" style="font-weight:800;">${todays.length}</div></div>
+    <div class="card"><div class="text-[11px] text-[var(--muted)] mb-1">Ujeté km dnes</div><div class="font-display font-800 text-2xl" style="font-weight:800;">${todayKm.toFixed(1)}</div></div>
+    <div class="card"><div class="text-[11px] text-[var(--muted)] mb-1">Čas rozvozu celkem</div><div class="font-display font-800 text-2xl" style="font-weight:800;">${totalTimeMin} min</div></div>
+    <div class="card"><div class="text-[11px] text-[var(--muted)] mb-1">Ø čas doručení</div><div class="font-display font-800 text-2xl" style="font-weight:800;">${avgTime} min</div></div>
+  </div>
+  <div class="card mb-4">
+    <div class="text-[12px] text-[var(--muted)] mb-2">Posledních 7 dní</div>
+    <div class="flex items-end gap-2" style="height:70px;">
+      ${days.map(d=>`<div class="flex-1 flex flex-col items-center gap-1">
+        <div style="height:${Math.max(4,(d.count/maxCount)*50)}px; width:100%; background:var(--orange); border-radius:6px 6px 0 0; opacity:${d.count?1:0.25};"></div>
+        <div class="text-[10px] text-[var(--muted)]">${d.label}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+
+  if(!dateKeys.length){
+    html += `<div class="text-center py-14"><div class="text-5xl mb-3">📊</div><div class="font-display font-700 text-[15px]" style="font-weight:700;">Zatím žádná historie</div><div class="text-[13px] text-[var(--muted)] mt-1">Doručené objednávky se zobrazí zde.</div></div>`;
+  } else {
+    dateKeys.forEach(k=>{
+      const orders = byDate[k];
+      html += `<div class="mb-2 mt-3 text-[12px] font-semibold text-[var(--muted)] px-1">${fmtDate(orders[0].deliveredAt)} · ${orders.length} rozvozů</div>`;
+      orders.forEach(o=>{
+        const dur = Math.round((o.deliveredAt-o.createdAt)/60000);
+        html += `<div class="card mb-2 flex items-center justify-between">
+          <div class="min-w-0">
+            <div class="font-semibold text-[14px] truncate">${escapeHtml(o.customerName)||'Zákazník'}</div>
+            <div class="text-[11px] text-[var(--muted)]">${fmtTime(o.deliveredAt)} · doba doručení ${dur} min</div>
+          </div>
+          <div class="font-display font-700 text-[14px]" style="font-weight:700;">${fmtMoney(o.price)} Kč</div>
+        </div>`;
+      });
+    });
+  }
+  el.innerHTML = html;
+}
+
+/* ============================== VIEW SWITCH / MASTER RENDER ============================== */
+function renderCurrentView(){
+  if(state.ui.view==='orders') renderOrdersView();
+  else if(state.ui.view==='map') renderMapView();
+  else if(state.ui.view==='history') renderHistoryView();
+}
+function switchView(v){
+  state.ui.view=v;
+  ['orders','map','history'].forEach(name=>{
+    document.getElementById('view-'+name).classList.toggle('hidden', name!==v);
+    const nav = document.querySelector(`[data-nav="${name}"]`);
+    if(nav) nav.classList.toggle('active', name===v);
+  });
+  document.getElementById('fab-add').style.display = v==='history' ? 'none' : 'flex';
+  renderCurrentView();
+}
+
+/* ============================== MODALS ============================== */
+function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
+function modalShell(innerHtml){
+  return `
+  <div class="modal-backdrop fixed inset-0 z-[600] bg-black/70 flex items-end" data-action="backdrop-close">
+    <div class="modal-sheet w-full bg-[#0A0A0A] rounded-t-3xl border-t border-[var(--border)] max-h-[90vh] overflow-y-auto safe-bottom" data-stop>
+      ${innerHtml}
+    </div>
+  </div>`;
+}
+
+function openAddOrderModal(){
+  const html = modalShell(`
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-display font-800 text-lg" style="font-weight:800;">Nová objednávka</div>
+        <button data-action="close-modal" class="btn-icon" style="width:36px;height:36px;">✕</button>
+      </div>
+      <div id="add-step-picker" class="grid grid-cols-1 gap-3">
+        <button data-action="add-manual" class="btn-secondary text-left flex items-center gap-3" style="padding:16px;">
+          <span class="text-2xl">✍️</span><div><div class="font-semibold">Zadat ručně</div><div class="text-[12px] text-[var(--muted)]">Vyplním údaje sám</div></div>
+        </button>
+        <button data-action="add-photo" data-mode="capture" class="btn-secondary text-left flex items-center gap-3" style="padding:16px;">
+          <span class="text-2xl">📷</span><div><div class="font-semibold">Vyfotit účtenku</div><div class="text-[12px] text-[var(--muted)]">AI rozpozná údaje z fotky</div></div>
+        </button>
+        <button data-action="add-photo" data-mode="upload" class="btn-secondary text-left flex items-center gap-3" style="padding:16px;">
+          <span class="text-2xl">🖼️</span><div><div class="font-semibold">Nahrát fotografii</div><div class="text-[12px] text-[var(--muted)]">Vyberu obrázek z galerie</div></div>
+        </button>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" class="hidden">
+    </div>
+  `);
+  document.getElementById('modal-root').innerHTML = html;
+  wireModalBase();
+  document.querySelector('[data-action="add-manual"]').addEventListener('click', ()=>renderOrderForm({}));
+  document.querySelectorAll('[data-action="add-photo"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const input = document.getElementById('photo-input');
+      if(btn.dataset.mode==='capture') input.setAttribute('capture','environment'); else input.removeAttribute('capture');
+      input.onchange = async (e)=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        await renderPhotoOCR(file);
+      };
+      input.click();
+    });
+  });
+}
+
+async function renderPhotoOCR(file){
+  const previewUrl = URL.createObjectURL(file);
+  document.getElementById('modal-root').querySelector('.modal-sheet').innerHTML = `
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-display font-800 text-lg" style="font-weight:800;">Rozpoznávám účtenku</div>
+        <button data-action="close-modal" class="btn-icon" style="width:36px;height:36px;">✕</button>
+      </div>
+      <img src="${previewUrl}" class="w-full rounded-2xl mb-4 max-h-64 object-cover border border-[var(--border)]">
+      <div class="flex items-center gap-2 justify-center text-[13px] text-[var(--muted)] py-4">
+        <span class="spinner"></span> AI čte účtenku…
+      </div>
+    </div>`;
+  wireModalBase();
+  try{
+    const data = await runOCR(file);
+    renderOrderForm({
+      customerName:data.customerName||'', phone:data.phone||'', address:data.address||'',
+      orderNumber:data.orderNumber||'', note:data.note||'', price:data.price||'',
+      createdAt: data.orderTime ? parseTimeToday(data.orderTime) : Date.now(),
+    }, true);
+  }catch(e){
+    toast('⚠️ AI se nepodařilo přečíst účtenku, zkontroluj a doplň ručně', 'warn');
+    renderOrderForm({});
+  }
+}
+function parseTimeToday(hhmm){
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim());
+  if(!m) return Date.now();
+  const d = new Date();
+  d.setHours(parseInt(m[1]), parseInt(m[2]), 0, 0);
+  return d.getTime() <= Date.now() ? d.getTime() : Date.now();
+}
+
+function renderOrderForm(initial, wasOcr, editingId){
+  const isEdit = !!editingId;
+  const html = `
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-display font-800 text-lg" style="font-weight:800;">${isEdit?'Upravit objednávku':'Nová objednávka'}</div>
+        <button data-action="close-modal" class="btn-icon" style="width:36px;height:36px;">✕</button>
+      </div>
+      ${wasOcr ? `<div class="text-[12px] text-[var(--orange-soft)] mb-3" style="color:var(--orange-soft);">✨ Vyplněno AI z fotky — zkontroluj prosím údaje</div>` : ''}
+      <form id="order-form" class="space-y-3">
+        <div><label class="field-label">Jméno zákazníka</label><input name="customerName" value="${escapeHtml(initial.customerName||'')}" placeholder="Jana Nováková" required></div>
+        <div><label class="field-label">Telefon</label><input name="phone" type="tel" value="${escapeHtml(initial.phone||'')}" placeholder="+420 601 234 567"></div>
+        <div><label class="field-label">Adresa</label><input name="address" value="${escapeHtml(initial.address||'')}" placeholder="Náměstí 1, Příbram" required></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="field-label">Číslo objednávky</label><input name="orderNumber" value="${escapeHtml(initial.orderNumber||'')}" placeholder="#4521"></div>
+          <div><label class="field-label">Cena (Kč)</label><input name="price" type="number" inputmode="decimal" value="${escapeHtml(initial.price||'')}" placeholder="249"></div>
+        </div>
+        <div><label class="field-label">Poznámka</label><input name="note" value="${escapeHtml(initial.note||'')}" placeholder="bez cibule, zvonit 2×"></div>
+        <button type="submit" class="btn-primary w-full mt-2">${isEdit?'Uložit změny':'Přidat objednávku'}</button>
+        ${isEdit ? `<button type="button" data-action="delete-from-form" data-id="${editingId}" class="btn-secondary w-full" style="color:#EF4444;">🗑️ Smazat objednávku</button>` : ''}
+      </form>
+    </div>`;
+  document.getElementById('modal-root').querySelector('.modal-sheet').innerHTML = html;
+  wireModalBase();
+  const form = document.getElementById('order-form');
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(form);
+    const fields = Object.fromEntries(fd.entries());
+    if(isEdit){ await updateOrderFields(editingId, fields); }
+    else { fields.createdAt = initial.createdAt || Date.now(); await addOrderFromForm(fields); }
+    closeModal();
+  });
+  const delBtn = form.querySelector('[data-action="delete-from-form"]');
+  if(delBtn) delBtn.addEventListener('click', async ()=>{ await deleteOrder(editingId); closeModal(); });
+}
+
+function openEditOrderModal(id){
+  const o = state.orders.find(x=>x.id===id);
+  if(!o) return;
+  document.getElementById('modal-root').innerHTML = modalShell('');
+  wireModalBase();
+  renderOrderForm(o, false, id);
+}
+
+function openSettingsModal(){
+  const html = modalShell(`
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-display font-800 text-lg" style="font-weight:800;">Nastavení</div>
+        <button data-action="close-modal" class="btn-icon" style="width:36px;height:36px;">✕</button>
+      </div>
+      <label class="field-label">Aktuální provoz (ovlivňuje optimalizaci trasy)</label>
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        ${[['light','🟢 Plynulý'],['medium','🟡 Střední'],['heavy','🔴 Hustý']].map(([k,l])=>`
+          <button data-action="set-traffic" data-val="${k}" class="chip ${state.settings.traffic===k?'active':''}" style="text-align:center;justify-content:center;">${l}</button>
+        `).join('')}
+      </div>
+      <div class="flex items-center justify-between card mb-3">
+        <div><div class="font-semibold text-[14px]">Zvuková upozornění</div><div class="text-[12px] text-[var(--muted)]">Pípnutí při 40+ min</div></div>
+        <button data-action="toggle-sound" class="btn-icon" style="width:44px;">${state.settings.soundEnabled?'🔔':'🔕'}</button>
+      </div>
+      <button data-action="open-manual-location" class="btn-secondary w-full">📍 Zadat mou polohu ručně</button>
+    </div>
+  `);
+  document.getElementById('modal-root').innerHTML = html;
+  wireModalBase();
+  document.querySelectorAll('[data-action="set-traffic"]').forEach(b=>b.addEventListener('click', async ()=>{
+    state.settings.traffic=b.dataset.val; await persistSettings(); await maybeRecompute(true); openSettingsModal();
+  }));
+  document.querySelector('[data-action="toggle-sound"]').addEventListener('click', async ()=>{
+    state.settings.soundEnabled=!state.settings.soundEnabled; await persistSettings(); openSettingsModal();
+  });
+  document.querySelector('[data-action="open-manual-location"]').addEventListener('click', openManualLocationModal);
+}
+
+function openManualLocationModal(){
+  const html = modalShell(`
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-display font-800 text-lg" style="font-weight:800;">Zadat polohu ručně</div>
+        <button data-action="close-modal" class="btn-icon" style="width:36px;height:36px;">✕</button>
+      </div>
+      <p class="text-[13px] text-[var(--muted)] mb-3">Použij pokud GPS není dostupné. Zadej svou aktuální adresu.</p>
+      <form id="manual-loc-form" class="space-y-3">
+        <input name="address" placeholder="Ulice a číslo, město" required>
+        <button type="submit" class="btn-primary w-full">Nastavit polohu</button>
+      </form>
+    </div>
+  `);
+  document.getElementById('modal-root').innerHTML = html;
+  wireModalBase();
+  document.getElementById('manual-loc-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const addr = new FormData(e.target).get('address');
+    const g = await geocodeAddress(addr);
+    if(g){
+      state.driver.lat=g.lat; state.driver.lng=g.lng;
+      setGpsStatus('ok','Poloha nastavena ručně');
+      updateDriverMarker();
+      await maybeRecompute(true);
+      toast('📍 Poloha nastavena');
+      closeModal();
+    } else {
+      toast('⚠️ Adresu se nepodařilo najít, zkus přesnější tvar', 'warn');
+    }
+  });
+}
+
+function wireModalBase(){
+  const root = document.getElementById('modal-root');
+  root.querySelectorAll('[data-action="close-modal"]').forEach(b=>b.addEventListener('click', closeModal));
+  const backdrop = root.querySelector('[data-action="backdrop-close"]');
+  if(backdrop) backdrop.addEventListener('click', (e)=>{ if(e.target===backdrop) closeModal(); });
+}
+
+/* ============================== NAVIGATION LINK ============================== */
+function openNavigation(order){
+  if(order.lat==null){ toast('⚠️ Objednávka nemá zjištěnou polohu'); return; }
+  const url = isIOS()
+    ? `https://maps.apple.com/?daddr=${order.lat},${order.lng}&dirflg=d`
+    : `https://www.google.com/maps/dir/?api=1&destination=${order.lat},${order.lng}&travelmode=driving`;
+  window.open(url, '_blank');
+}
+
+/* ============================== EVENT DELEGATION ============================== */
+document.getElementById('app').addEventListener('click', async (e)=>{
+  const t = e.target.closest('[data-action]');
+  if(!t) return;
+  const action = t.dataset.action;
+  if(action==='switch-view') switchView(t.dataset.view);
+  else if(action==='set-filter'){ state.ui.filter=t.dataset.val; renderOrdersView(); }
+  else if(action==='set-sort'){ state.ui.sort=t.dataset.val; renderOrdersView(); }
+  else if(action==='open-add') openAddOrderModal();
+  else if(action==='open-settings') openSettingsModal();
+  else if(action==='gps-info'){ if(state.driver.status==='err') openManualLocationModal(); else if(state.driver.watchId==null) startGPS(); else toast('📍 GPS aktivní, poloha se aktualizuje automaticky'); }
+  else if(action==='navigate'){
+    const o = state.orders.find(x=>x.id===t.dataset.id);
+    if(o) openNavigation(o);
+  }
+  else if(action==='deliver') await markDelivered(t.dataset.id);
+  else if(action==='edit') openEditOrderModal(t.dataset.id);
+  else if(action==='delete') await deleteOrder(t.dataset.id);
+  else if(action==='recompute'){ toast('↻ Přepočítávám trasu…'); await maybeRecompute(true); }
+});
+document.getElementById('modal-root').addEventListener('click', async (e)=>{
+  const t = e.target.closest('[data-action]');
+  if(!t) return;
+  if(t.dataset.action==='navigate'){
+    const o = state.orders.find(x=>x.id===t.dataset.id);
+    if(o) openNavigation(o);
+  }
+});
+
+/* ============================== INIT ============================== */
+async function init(){
+  await loadState();
+  switchView('orders');
+  startGPS();
+  await computeRoute();
+  renderCurrentView();
+  updateOrderMarkers();
+  setInterval(tickTimers, 10000);
+  setInterval(()=>{ if(state.orders.filter(o=>o.status!=='delivered').length) maybeRecompute(); }, 150000);
+  tickTimers();
+}
+init();
+</script>
 </body>
 </html>
